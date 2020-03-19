@@ -32,13 +32,13 @@
 
 % \thanks{Supported by organization x.}
 \title{Fase 3 - Requisitos, Casos de Uso e Arquitetura}
-\author{First Author \and
-Second Author
+\author{Pedro Carrega \and
+Vasco Ferreira \and Ye Yang
 }
 %\authorrunning{F. Author et al.}
 
 \institute{Departamento de Informática da Faculdade de Ciências da Universidade de Lisboa
-\email{\{fc49480,fc49470,fc\}@alunos.fc.ul.pt}}
+\email{\{fc49480,fc49470,fc49521\}@alunos.fc.ul.pt}}
 
 \maketitle
 
@@ -69,6 +69,9 @@ Second Author
 			\textbf{\textit{Portabilidade}} & \textbf{\textit{Implementação de servidor em NodeJS e cliente em JAVA de modo a facilitar o processo de mudança de plataforma do serviço}} \\ \hline
 			\textbf{\textit{Legibilidade}} & \textbf{\textit{A separação clara entre as camadas de apresentação, lógica de negócio e acesso à base de dados irá tornar o fluxo do sistema mais legível para os desenvolvedores}} \\ \hline
 			\textbf{\textit{Estabilidade}} & \textbf{\textit{A distribuição do sistema por diversas máquinas virtuais, que poderão estar distribuídas por diferentes fornecedores cloud e em diferentes Data Centers permitem obter um sistema estável}} \\ \hline
+			\textbf{\textit{Elasticidade}} & \textbf{\textit{O sistema deverá ser capaz de se adaptar à carga de trabalho através do provisionamento e desprovisionamento dos recursos de forma autónoma. Idealmente, de forma que em qualquer ponto do tempo, o sistema apenas utilize o número de máquinas necessárias de forma a corresponder à carga atual}} \\ \hline
+			\textbf{\textit{Escalabilidade}} & \textbf{\textit{Capacidade do sistema lidar com o crescimento de carga de trabalho. Pode-se associar à capacidade de elasticidade do sistema}} \\ \hline
+			\textbf{\textit{Confiabilidade}} & \textbf{\textit{Visto o sistema estar implementado na núvem, conseguimos garantir alta confiabilidade nos sistema, pois se um servidor no datacenter falhar, conseguimos facilmente migrar a VM para outro servidor funcional}} \\ \hline
 	\end{tabular}
 	\label{tab1}
 	\end{center}
