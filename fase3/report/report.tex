@@ -1,5 +1,4 @@
 \documentclass[runningheads]{llncs}
-
 %encoding
 %--------------------------------------
 \usepackage[T1]{fontenc}
@@ -26,6 +25,7 @@
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{adjustbox}
+\usepackage{float}
 
 
 \begin{document}
@@ -41,42 +41,62 @@ Vasco Ferreira \and Ye Yang
 \maketitle
 
 \section{Requisitos}
-
-\begin{table}[htbp]
-	\caption{Details of the hardware used in the experiments}
+\begin{table}
+	\caption{Requisitos Funcionais}
 	\begin{center}
 		\begin{tabular}{|p{4cm}|p{8cm}|}
 		\hline
-			\textbf{\textit{Requisitos Funcionais}} & \textbf{\textit{Descrição}}\\ \hline
-			\textbf{\textit{Categorias Disponiveis}} & \textbf{\textit{Serviço que fornece aos clientes todas as categorias}} \\ \hline
-			\textbf{\textit{Popularidade das\newline Marcas}} & \textbf{\textit{Serviço que fornece cada marca associada com a sua popularidade}} \\ \hline
-			\textbf{\textit{Número de Vendas\newline Individuais}} & \textbf{\textit{Fornece o numero total de vendas de cada marca}} \\ \hline
-			\textbf{\textit{Preço Médio de Venda}} & \textbf{\textit{Fornece o preço médio dos produtos vendidos de uma determinada marca}} \\ \hline
-			\textbf{\textit{Rácio de Tipo\newline de Eventos}} & \textbf{\textit{Fornece a percentagem de cada tipo de evento}} \\ \hline
+			\textbf{Requisitos Funcionais} & \textbf{Descrição}\\ \hline
+			Categorias Disponiveis & Serviço que fornece aos clientes todas as categorias \\ \hline
+			Popularidade das\newline Marcas & Serviço que fornece cada marca associada com a sua popularidade\\ \hline
+			Número de Vendas\newline Individuais & Fornece o numero total de vendas de cada marca\\ \hline
+			Preço Médio de Venda & Fornece o preço médio dos produtos vendidos de uma determinada marca \\ \hline
+			Rácio de Tipo\newline de Eventos & Fornece a percentagem de cada tipo de evento \\ \hline
 	\end{tabular}
 	\label{tab1}
 	\end{center}
 \end{table}
 
-\begin{table}[htbp]
-	\caption{Details of the hardware used in the experiments}
+\begin{table}[H]
+	\caption{Requisitos não funcionais}
 	\begin{center}
 		\begin{tabular}{|p{3.5cm}|p{9.5cm}|}
 		\hline
-			\textbf{\textit{Requisitos\newline Não Funcionais}} & \textbf{\textit{Descrição}}\\ \hline
-			\textbf{\textit{Portabilidade}} & \textbf{\textit{Implementação de servidor em NodeJS e cliente em JAVA de modo a facilitar o processo de mudança de plataforma do serviço}} \\ \hline
-			\textbf{\textit{Legibilidade}} & \textbf{\textit{A separação clara entre as camadas de apresentação, lógica de negócio e acesso à base de dados irá tornar o fluxo do sistema mais legível para os desenvolvedores}} \\ \hline
-			\textbf{\textit{Estabilidade}} & \textbf{\textit{A distribuição do sistema por diversas máquinas virtuais, que poderão estar distribuídas por diferentes fornecedores cloud e em diferentes Data Centers permitem obter um sistema estável}} \\ \hline
-			\textbf{\textit{Elasticidade}} & \textbf{\textit{O sistema deverá ser capaz de se adaptar à carga de trabalho através do provisionamento e desprovisionamento dos recursos de forma autónoma. Idealmente, de forma que em qualquer ponto do tempo, o sistema apenas utilize o número de máquinas necessárias de forma a corresponder à carga atual}} \\ \hline
-			\textbf{\textit{Escalabilidade}} & \textbf{\textit{Capacidade do sistema lidar com o crescimento de carga de trabalho. Pode-se associar à capacidade de elasticidade do sistema}} \\ \hline
-			\textbf{\textit{Confiabilidade}} & \textbf{\textit{Visto o sistema estar implementado na núvem, conseguimos garantir alta confiabilidade nos sistema, pois se um servidor no datacenter falhar, conseguimos facilmente migrar a VM para outro servidor funcional}} \\ \hline
+			\textbf{Requisitos\newline Não Funcionais} & \textbf{Descrição}\\ \hline
+			Portabilidade & Implementação de servidor em NodeJS e cliente em JAVA de modo a facilitar o processo de mudança de plataforma do serviço \\ \hline
+			Legibilidade & A separação clara entre as camadas de apresentação, lógica de negócio e acesso à base de dados irá tornar o fluxo do sistema mais legível para os desenvolvedores \\ \hline
+			Estabilidade & A distribuição do sistema por diversas máquinas virtuais, que poderão estar distribuídas por diferentes fornecedores cloud e em diferentes Data Centers permitem obter um sistema estável \\ \hline
+			Elasticidade & O sistema deverá ser capaz de se adaptar à carga de trabalho através do provisionamento e desprovisionamento dos recursos de forma autónoma. Idealmente, de forma que em qualquer ponto do tempo, o sistema apenas utilize o número de máquinas necessárias de forma a corresponder à carga atual \\ \hline
+			Escalabilidade & Capacidade do sistema lidar com o crescimento de carga de trabalho. Pode-se associar à capacidade de elasticidade do sistema \\ \hline
+			Confiabilidade & Visto o sistema estar implementado na núvem, conseguimos garantir alta confiabilidade nos sistema, pois se um servidor no datacenter falhar, conseguimos facilmente migrar a VM para outro servidor funcional \\ \hline
 	\end{tabular}
 	\label{tab1}
 	\end{center}
 \end{table}
-\section{Casos de Uso}
 
 
+\section{Diagrama de Casos de Uso}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.5]{Use_Cases.png}
+  \caption{Diagrama de casos de uso}
+\end{figure}
 
+\section{Arquitetura da aplicação}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.6]{App_arc.png}
+  \caption{Arquitetura da aplicação}
+\end{figure}
+
+Após a definição da API com o Swagger na fase anterior, possibilitou a opção de exportar do API definido um Cliente (em Java) e um Servidor NodeJS.
+\subsection{Cliente API}
+O cliente API terá na sua disposição as 5 funcionalidades anteriormente definidas, cada um deles será um pedido HTTP GET, que serão enviados para o servidor. Após envio dos pedidos recebe também a resposta que poderá ser visualizada pelo cliente.
+
+\subsection{Servidor NodeJS}
+O servidor exportado do Swagger irá receber os pedidos por parte do cliente, e processá-los de acordo com a funcionalidade pretendida. A lógica de negócio é aqui tratada, realizando as queries necessárias para a base de dados. Ao receber os dados, processa-os de acordo com a funcionalidade, e encaminha o resultado para o cliente.
+
+\subsection{Base de dados}
+A base de dados irá conter os ficheiros .csv do nosso data set, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente.
 
 \end{document}
