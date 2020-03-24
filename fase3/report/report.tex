@@ -109,4 +109,11 @@ O servidor exportado do Swagger irá receber os pedidos a partir da API Gateway,
 \subsection{Base de dados}
 A base de dados irá conter o conteúodo dos ficheiros .csv do nosso data set, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente. 
 
+\section{Arquitetura técnica}
+Para garantir os requisitos não funcionais mencionados a cima devemos ter em atenção os serviços da cloud escolhidos, pois estão relacionados com os requisitos.
+\newline
+O facto de ser usada a cloud acaba por conseguir garantir alguns dos requisitos, como por exemplo a Elasticidade, devido ao facto de a cloud nos permitir expandir ou reduzir a capacidade do sistema. A mesma lógica se pode aplicar de forma a garantir a Escalabilidade de sistema. A capacidade de expansão referida anteriormente permite numa outra perspetiva garantir a Confiabilidade, já que permite uma fácil migração de uma máquina virtual em falha para uma outra máquina virtual funcional. 
+\newline
+Já a Estabilidade é garantida devido a ter a Lógica de negócio distribuída por várias máquinas virtuais que cumprem a função de servidores.
+
 \end{document}
