@@ -43,22 +43,6 @@ Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 
 \section{Requisitos}
 
-\begin{table}
-	\begin{center}
-		\begin{tabular}{|p{3.8cm}|p{8.2cm}|}
-		\hline
-			\textbf{Requisitos\newline Funcionais} & \textbf{Descrição}\\ \hline
-			Categorias Disponiveis & Serviço que fornece aos clientes todas as categorias \\ \hline
-			Popularidade das\newline Marcas & Serviço que fornece cada marca associada com a sua popularidade\\ \hline
-			Número de Vendas\newline Individuais & Fornece o numero total de vendas de cada marca\\ \hline
-			Preço Médio de Venda & Fornece o preço médio dos produtos vendidos de uma determinada marca \\ \hline
-			Rácio de Tipo\newline de Eventos & Fornece a percentagem de cada tipo de evento \\ \hline
-	\end{tabular}
-	\label{tab1}
-	\end{center}
-	\caption{Requisitos Funcionais}
-\end{table}
-
 \begin{table}[H]
 	\begin{center}
 		\begin{tabular}{|p{3.5cm}|p{9.5cm}|}
@@ -73,9 +57,25 @@ Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 	\end{tabular}
 	\label{tab1}
 	\end{center}
-	\caption{Requisitos não funcionais}
+	\caption{Requisitos Não Funcionais}
 \end{table}
 
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{|p{3.8cm}|p{8.2cm}|}
+		\hline
+			\textbf{Requisitos\newline Funcionais} & \textbf{Descrição}\\ \hline
+			Categorias Disponiveis & Serviço que fornece aos clientes todas as categorias \\ \hline
+			Popularidade das\newline Marcas & Serviço que fornece cada marca associada com a sua popularidade\\ \hline
+			Número de Vendas\newline Individuais & Fornece o numero total de vendas de cada marca\\ \hline
+			Preço Médio de Venda & Fornece o preço médio dos produtos vendidos de uma determinada marca \\ \hline
+			Rácio de Tipo\newline de Eventos & Fornece a percentagem de cada tipo de evento \\ \hline
+	\end{tabular}
+	\label{tab2}
+	\end{center}
+	\caption{Requisitos Funcionais}
+\end{table}
+\paragraph{}
 
 \section{Diagrama de Casos de Uso}
 \begin{figure}[H]
@@ -92,12 +92,13 @@ Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 \end{figure}
 
 Após a definição da API com o Swagger na fase anterior, possibilitou a opção de exportar do API definido um Cliente (em Java) e um Servidor NodeJS.
+\newline %removam isto se nao gostarem do espaço k adiciona
 \subsection{Cliente API}
 O cliente API terá na sua disposição as 5 funcionalidades anteriormente definidas, cada um deles será um pedido HTTP GET, que serão enviados para o servidor. Após envio dos pedidos recebe também a resposta que poderá ser visualizada pelo cliente.
-
+\newline %removam isto se nao gostarem do espaço k adiciona
 \subsection{Servidor NodeJS}
 O servidor exportado do Swagger irá receber os pedidos por parte do cliente, e processá-los de acordo com a funcionalidade pretendida. A lógica de negócio é aqui tratada, realizando as queries necessárias para a base de dados. Ao receber os dados, processa-os de acordo com a funcionalidade, e encaminha o resultado para o cliente.
-
+\newline %removam isto se nao gostarem do espaço k adiciona
 \subsection{Base de dados}
 A base de dados irá conter os ficheiros .csv do nosso data set, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente.
 
