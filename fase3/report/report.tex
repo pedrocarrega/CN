@@ -65,7 +65,7 @@ Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 		\begin{tabular}{|p{3.8cm}|p{8.2cm}|}
 		\hline
 			\textbf{Requisitos\newline Funcionais} & \textbf{Descrição}\\ \hline
-			Listar\newline Categorias Disponiveis & Serviço que fornece aos clientes todas as categorias \\ \hline
+			Listar\newline Categorias Disponíveis & Serviço que fornece aos clientes todas as categorias \\ \hline
 			Visualizar\newline Popularidade das\newline Marcas & Serviço que fornece cada marca associada com a sua popularidade\\ \hline
 			Visualizar\newline Número de Vendas\newline Individuais & Fornece o numero total de vendas de cada marca\\ \hline
 			Visualizar\newline Preço Médio de Venda & Fornece o preço médio dos produtos vendidos de uma determinada marca \\ \hline
@@ -107,9 +107,12 @@ O servidor exportado do Swagger irá receber os pedidos a partir da API Gateway,
 \newline %removam isto se nao gostarem do espaço k adiciona
 
 \subsection{Base de dados}
-A base de dados irá conter o conteúodo dos ficheiros .csv do nosso data set, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente. 
+A base de dados irá conter o conteúdo dos ficheiros .csv do nosso data set, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente. 
 
 \section{Arquitetura técnica}
+%Digam-me o que acham
+
+%Não sei o que dizer da Portabilidade
 Para garantir os requisitos não funcionais mencionados a cima devemos ter em atenção os serviços da cloud escolhidos, pois estão relacionados com os requisitos.
 \newline
 O facto de ser usada a cloud acaba por conseguir garantir alguns dos requisitos, como por exemplo a Elasticidade, devido ao facto de a cloud nos permitir expandir ou reduzir a capacidade do sistema. A mesma lógica se pode aplicar de forma a garantir a Escalabilidade de sistema. A capacidade de expansão referida anteriormente permite numa outra perspetiva garantir a Confiabilidade, já que permite uma fácil migração de uma máquina virtual em falha para uma outra máquina virtual funcional. 
