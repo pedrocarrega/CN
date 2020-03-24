@@ -48,7 +48,7 @@ Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 		\begin{tabular}{|p{3.5cm}|p{9.5cm}|}
 		\hline
 			\textbf{Requisitos\newline Não Funcionais} & \textbf{Descrição}\\ \hline
-			Portabilidade & Implementação de servidor em NodeJS e cliente em JAVA de modo a facilitar o processo de mudança de plataforma do serviço \\ \hline
+			Portabilidade & Implementação de servidor em NodeJS e cliente em HTML de modo a facilitar o processo de mudança de plataforma do serviço \\ \hline
 			Legibilidade & A separação clara entre as camadas de apresentação, lógica de negócio e acesso à base de dados irá tornar o fluxo do sistema mais legível para os desenvolvedores \\ \hline
 			Estabilidade & A distribuição do sistema por diversas máquinas virtuais, que poderão estar distribuídas por diferentes fornecedores cloud e em diferentes Data Centers permitem obter um sistema estável \\ \hline
 			Elasticidade & O sistema deverá ser capaz de se adaptar à carga de trabalho através do provisionamento e desprovisionamento dos recursos de forma autónoma. Idealmente, de forma que em qualquer ponto do tempo, o sistema apenas utilize o número de máquinas necessárias de forma a corresponder à carga atual \\ \hline
@@ -80,7 +80,7 @@ Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 \section{Diagrama de Casos de Uso}
 \begin{figure}[H]
   \centering
-  \includegraphics[scale=0.42]{Use_Cases.png}
+	\includegraphics[scale=0.42]{Use_Cases.png}
   \caption{Diagrama de casos de uso}
 \end{figure}
 
@@ -113,10 +113,21 @@ A base de dados irá conter o conteúdo dos ficheiros .csv do nosso data set, qu
 %Digam-me o que acham
 
 %Não sei o que dizer da Portabilidade
-Para garantir os requisitos não funcionais mencionados a cima devemos ter em atenção os serviços da cloud escolhidos, pois estão relacionados com os requisitos.
+Para garantir os requisitos não funcionais mencionados a cima devemos ter em atenção os serviços da cloud escolhidos, pois proporcionam vários aspetos fundamentais dos requisitos.
 \newline
-O facto de ser usada a cloud acaba por conseguir garantir alguns dos requisitos, como por exemplo a Elasticidade, devido ao facto de a cloud nos permitir expandir ou reduzir a capacidade do sistema. A mesma lógica se pode aplicar de forma a garantir a Escalabilidade de sistema. A capacidade de expansão referida anteriormente permite numa outra perspetiva garantir a Confiabilidade, já que permite uma fácil migração de uma máquina virtual em falha para uma outra máquina virtual funcional. 
+
+A utilização dos serviços disponibilizados pela AWS permite cumprir alguns dos requisitos não funcionais mencionados, nomeadamente a Escalabilidade e a Elasticidade. A implementação da API através da API Gateway permite que este serviço da cloud trate automaticamente da carga de pedidos HTTP recebida, não sendo necessário a criação de scripts especializados para distribuição de carga. A base de dados a ser implementada na Amazon DynamoDB também permite escalabilidade e também eficácia na resolução de queries, tratando da carga de queries automaticamente tal como os restantes serviços da cloud.
 \newline
+
+A Confiabilidade do sistema também é melhorada com a instalação em serviços na cloud, visto estas terem deteções automáticas de falhas de servidores, possibilitando a migração do sistema virtualizado para outro servidor funcional.
+\newline
+
+A Estabilidade é garantida nas várias ferramentas usadas na instalação do sistema. O API Gateway da AWS tratará automaticamente da carga de pedidos HTTP recebida, não sendo necessário a criação de scripts para mitigação de carga.
+\newline
+
 Já a Estabilidade é garantida devido a ter a Lógica de negócio distribuída por várias máquinas virtuais que cumprem a função de servidores.
+\newline
+
+Dado que o API é definido em Swagger, a implementação do cliente e servidor são facilmente traduzidos para uma outra linguagem exportável, garantindo a Portabilidade. Visto que a lógica de negócio vai ser implementada num servidor NodeJS, a maior parte do código desenvolvido poderá ser instalado noutra plataforma Cloud sem grandes mudanças, sendo as principais diferenças o acesso à base de dados da nova plataforma e a comunicação com a API Gateway. A camada de apresentação também não sofraria de mudanças de grau elevado, sendo que apenas a comunicação para a API Gateway mudaria.
 
 \end{document}
