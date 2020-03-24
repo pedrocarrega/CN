@@ -85,18 +85,22 @@ Vasco Ferreira \and Ye Yang
 \section{Arquitetura da aplicação}
 \begin{figure}[H]
   \centering
-  \includegraphics[scale=0.6]{App_arc.png}
+  \includegraphics[scale=0.4]{App_arc.png}
   \caption{Arquitetura da aplicação}
 \end{figure}
 
 Após a definição da API com o Swagger na fase anterior, possibilitou a opção de exportar do API definido um Cliente (em Java) e um Servidor NodeJS.
-\subsection{Cliente API}
-O cliente API terá na sua disposição as 5 funcionalidades anteriormente definidas, cada um deles será um pedido HTTP GET, que serão enviados para o servidor. Após envio dos pedidos recebe também a resposta que poderá ser visualizada pelo cliente.
+
+\subsection{System Frontend}
+O frontend irá dispor as funcionalidades anteriormente definidas. Pode ser extraído do ficheiro Swagger em formato HTML.
+
+\subsection{API Gateway}
+Este gateway irá ser encarregado de receber pedidos HTTP vindos do frontend e reencaminhá-los para o servidor NodeJS que tratará da lógica de negócio. Também irá encaminhar as respostas vindas do servidor para o frontend de modo disponibilizar os dados pretendidos.
 
 \subsection{Servidor NodeJS}
-O servidor exportado do Swagger irá receber os pedidos por parte do cliente, e processá-los de acordo com a funcionalidade pretendida. A lógica de negócio é aqui tratada, realizando as queries necessárias para a base de dados. Ao receber os dados, processa-os de acordo com a funcionalidade, e encaminha o resultado para o cliente.
+O servidor exportado do Swagger irá receber os pedidos a partir da API Gateway, e processá-los de acordo com a funcionalidade pretendida. A lógica de negócio é aqui tratada, realizando as queries necessárias para a base de dados. Ao receber os dados, processa-os de acordo com a funcionalidade, e encaminha o resultado para a gateway.
 
 \subsection{Base de dados}
-A base de dados irá conter os ficheiros .csv do nosso data set, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente.
+A base de dados irá conter o conteúodo dos ficheiros .csv do nosso data set, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente. 
 
 \end{document}
