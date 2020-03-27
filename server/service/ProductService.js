@@ -1,6 +1,8 @@
 'use strict';
 const db = require('./db.json'); //to remove later
-
+//list categories
+var non_null = db.entries.filter((evt) => evt.category_code != "");
+var uniques = [...new Set(non_null.map(item => item.category_code))];
 
 /**
  * Lists all product categories made available in the dataset
@@ -8,19 +10,8 @@ const db = require('./db.json'); //to remove later
  * returns List
  **/
 exports.listCategories = function() {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "name" : "name"
-}, {
-  "name" : "name"
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
+  var non_null = db.entries.filter((evt) => evt.category_code != "");
+  var uniques = [...new Set(non_null.map(item => item.category_code))];
 }
 
 
