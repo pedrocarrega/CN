@@ -50,7 +50,7 @@ exports.mostPopularBrands = function() {
 
 
 /**
- * Gets the average sale price by brand
+ * Gets the average sale price of a brand
  *
  * brand String Brand name
  * returns List
