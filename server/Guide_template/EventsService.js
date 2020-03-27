@@ -11,10 +11,10 @@ app.use(function *(next){
 });
 
 router.get('/api/events/ratio', function *(next) {
-	const vals = db.entries;
+	const vals = db.entries.filter((entries) => (entries.event_type == "cart" || entries.event_type == "view" || entries.event_type == "purchase"));
 	var count = [0,0,0]
 	var total = 0;
-	for(var i =0; i < vals.length; i++) {
+	for(var i = 0; i < vals.length; i++) {
 		if(vals[i] == "view"){
 			count[0]++;
 		}else if(vals[i] == "cart"){
