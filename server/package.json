@@ -1,0 +1,20 @@
+{
+  "name": "e-commerce-data-viewer",
+  "version": "1.0.0",
+  "description": "This API defines operations that allow the viewing of various statistics regarding an online e-Commerce retailer data from October of 2019. Due to the nature of the data, singular POST/PUT operations will not be implemented, as the main purpose of the API is to view historic data of the activity given a certain time frame. However it may be possible to insert an entirely new dataset regarding another time period.",
+  "main": "index.js",
+  "scripts": {
+	"prestart": "npm install",
+	"start": "node index.js"
+  },
+  "keywords": [
+    "swagger"
+  ],
+  "license": "Unlicense",
+  "private": true,
+  "dependencies": {
+    "connect": "^3.2.0",
+    "js-yaml": "^3.3.0",
+    "swagger-tools": "0.10.1"
+  }
+}
