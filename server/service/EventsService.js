@@ -1,5 +1,5 @@
 'use strict';
-
+const db = require('./db.json'); //to remove later
 
 /**
  * Shows the ratio of all 3 event types: view, cart and purchase
