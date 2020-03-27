@@ -72,26 +72,6 @@ exports.salePrice = function(brand) {
  * returns List
  **/
 exports.salesByBrand = function() {
-  return new Promise(function(resolve, reject) {
-
-
-
-
-    var examples = {};
-    examples['application/json'] = [ {
-  "brandName" : "brandName",
-  "popularity" : 0.8008281904610115,
-  "sales" : 6.02745618307040320615897144307382404804229736328125
-}, {
-  "brandName" : "brandName",
-  "popularity" : 0.8008281904610115,
-  "sales" : 6.02745618307040320615897144307382404804229736328125
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
+  var sales = db.entries.filter((entry) => entry.event_type == "purchase");
 }
 
