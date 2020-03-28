@@ -58,35 +58,28 @@ router.get('/api/products/mostPopularBrands', function *(next) {
  * returns List
  **/
 router.get('/api/products/salePrice', function *(next) {
-  const entries = db.entries.filter((entries) => entries.brand == brand);
+  const entries = db.entries.filter((entries) => entries.brand == brand && entries.event_type == "purchase");
     
-    if (Object.keys(entries).length > 0) {
+  if (Object.keys(entries).length > 0) {
 
-      let result = [...new Set(entries.filter((object,index) => index === entries.findIndex(obj => JSON.stringify(obj.product_id) === JSON.stringify(object.product_id))).map(item => item.price))];
+    let result = [...new Set(entries.filter((object,index) => index === entries.findIndex(obj => JSON.stringify(obj.product_id) === JSON.stringify(object.product_id))).map(item => item.price))];
 
-      resolve(Math.round(((result.reduce(function(total, num){
-        return parseFloat(total) + parseFloat(num);
-      })/result.length) + Number.EPSILON) * 100) / 100);
-});
-/*
-exports.salePrice = function(brand) {
-  return new Promise(function(resolve, reject) {
-    
-    const entries = db.entries.filter((entries) => entries.brand == brand);
-    
-    if (Object.keys(entries).length > 0) {
-
-      let result = [...new Set(entries.filter((object,index) => index === entries.findIndex(obj => JSON.stringify(obj.product_id) === JSON.stringify(object.product_id))).map(item => item.price))];
-
-      resolve(Math.round(((result.reduce(function(total, num){
-        return parseFloat(total) + parseFloat(num);
-    })/result.length) + Number.EPSILON) * 100) / 100);
-    } else {
-      resolve(-1);
+    var media = Math.round(((result.reduce(function(total, num){
+                  return parseFloat(total) + parseFloat(num);
+                })/result.length) + Number.EPSILON) * 100) / 100;
+    this.body = {
+      "brand": {
+        "brandName": brand,
+        "popularity": 0,
+        "sales": 0
+      },
+      "price": media,
+      "category": {
+        "name": ""
+      }
     }
-  });
-}*/
-
+  }
+});
 
 /**
  * Lists all sales made by each brand
