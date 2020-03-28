@@ -1,6 +1,8 @@
 'use strict';
 const db = require('./db.json'); //to remove later
-
+//list categories
+var non_null = db.entries.filter((evt) => evt.category_code != "");
+var uniques = [...new Set(non_null.map(item => item.category_code))];
 
 /**
  * Lists all product categories made available in the dataset
@@ -8,19 +10,8 @@ const db = require('./db.json'); //to remove later
  * returns List
  **/
 exports.listCategories = function() {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "name" : "name"
-}, {
-  "name" : "name"
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
+  var non_null = db.entries.filter((evt) => evt.category_code != "");
+  var uniques = [...new Set(non_null.map(item => item.category_code))];
 }
 
 
@@ -30,23 +21,26 @@ exports.listCategories = function() {
  * returns List
  **/
 exports.mostPopularBrands = function() {
-  return new Promise(function(resolve, reject) {
-    var examples = {};
-    examples['application/json'] = [ {
-  "brandName" : "brandName",
-  "popularity" : 0.8008281904610115,
-  "sales" : 6.02745618307040320615897144307382404804229736328125
-}, {
-  "brandName" : "brandName",
-  "popularity" : 0.8008281904610115,
-  "sales" : 6.02745618307040320615897144307382404804229736328125
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
+  var sales = db.entries.filter((entry) => entry.brand != "").map(a => a.brand);
+  sales.sort();
+
+  var result = foo(sales);
+
+  function foo(arr) {
+    var prev;
+    var conjunto = [];
+      
+      arr.sort();
+      for ( var i = 0; i < arr.length; i++ ) {
+          if ( arr[i] !== prev ) {
+            conjunto.push({'brand': arr[i], 'count': 1});
+          } else {
+            conjunto[conjunto.length-1].count++;
+          }
+          prev = arr[i];
+      }
+      return conjunto;
+  }
 }
 
 
@@ -81,26 +75,6 @@ exports.salePrice = function(brand) {
  * returns List
  **/
 exports.salesByBrand = function() {
-  return new Promise(function(resolve, reject) {
-
-
-
-
-    var examples = {};
-    examples['application/json'] = [ {
-  "brandName" : "brandName",
-  "popularity" : 0.8008281904610115,
-  "sales" : 6.02745618307040320615897144307382404804229736328125
-}, {
-  "brandName" : "brandName",
-  "popularity" : 0.8008281904610115,
-  "sales" : 6.02745618307040320615897144307382404804229736328125
-} ];
-    if (Object.keys(examples).length > 0) {
-      resolve(examples[Object.keys(examples)[0]]);
-    } else {
-      resolve();
-    }
-  });
+  var sales = db.entries.filter((entry) => entry.event_type == "purchase");
 }
 
