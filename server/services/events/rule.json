@@ -1,0 +1,19 @@
+{
+    "ListenerArn": "placeholder",
+    "Conditions": [
+      {
+        "Field": "path-pattern",
+        "Values": [
+          "/api/events*"
+        ]
+      }
+    ],
+    "Priority": 2,
+    "Actions": [
+      {
+        "Type": "forward",
+        "TargetGroupArn": "placeholder"
+      }
+    ]
+  }
+  

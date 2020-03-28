@@ -1,0 +1,19 @@
+{
+    "ListenerArn": "placeholder",
+    "Conditions": [
+      {
+        "Field": "path-pattern",
+        "Values": [
+          "/api/products*"
+        ]
+      }
+    ],
+    "Priority": 1,
+    "Actions": [
+      {
+        "Type": "forward",
+        "TargetGroupArn": "placeholder"
+      }
+    ]
+  }
+  
