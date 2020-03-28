@@ -18,7 +18,7 @@ app.use(function *(next){
 
 router.get('/api/products/listCategories', function *(next) {
   var non_null = db.entries.filter((evt) => evt.category_code != "");
-  this.body = [...new Set(non_null.map(item => item.category_code))];
+  this.body = [...new Set(non_null.map(item => (item.category_code)))];
 });
 
 /**
@@ -26,9 +26,8 @@ router.get('/api/products/listCategories', function *(next) {
  *
  * returns List
  **/
-router.get('/api/products/mostPopularBrands', function *(next) {
+router.get('/api/products/popularBrands', function *(next) {
   var sales = db.entries.filter((entry) => entry.brand != "").map(a => a.brand);
-  sales.sort();
 
   this.body = foo(sales);
 
@@ -39,9 +38,9 @@ router.get('/api/products/mostPopularBrands', function *(next) {
       arr.sort();
       for ( var i = 0; i < arr.length; i++ ) {
           if ( arr[i] !== prev ) {
-            conjunto.push({'brand': arr[i], 'count': 1});
+            conjunto.push({'brand': arr[i], 'popularity': 1, "sales": 0});
           } else {
-            conjunto[conjunto.length-1].count++;
+            conjunto[conjunto.length-1].popularity++;
           }
           prev = arr[i];
       }
@@ -82,12 +81,30 @@ router.get('/api/products/salePrice', function *(next) {
 });
 
 /**
- * Lists all sales made by each brand
+ * Lists number of sales made by each brand
  *
  * returns List
  **/
 router.get('/api/products/salesByBrand', function *(next) {
-  this.body = db.entries.filter((entry) => entry.event_type == "purchase");
+  var sales = db.entries.filter((entry) => entry.brand != "" && entry.event_type == "purchase").map(a => a.brand);
+
+  this.body = foo(sales);
+
+  function foo(arr) {
+    var prev;
+    var conjunto = [];
+      
+      arr.sort();
+      for ( var i = 0; i < arr.length; i++ ) {
+          if ( arr[i] !== prev ) {
+            conjunto.push({'brand': arr[i], 'popularity': 0, "sales": 1});
+          } else {
+            conjunto[conjunto.length-1].sales++;
+          }
+          prev = arr[i];
+      }
+      return conjunto;
+  }
 });
 
 app.use(router.routes());

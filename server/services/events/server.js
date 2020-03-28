@@ -26,7 +26,26 @@ router.get('/api/events/ratio', function *(next) {
 	}
 	var ratios = [count[0]/total, count[1]/total, count[2]/total];
 	console.log(ratios);
-	this.body = ratios;
+	this.body = [
+		{
+		  "eventType": "view",
+		  "eventTime": "",
+		  "ratio": count[0]/total,
+		  "count": count[0]
+		},
+		{
+			"eventType": "cart",
+			"eventTime": "",
+			"ratio": count[1]/total,
+			"count": count[1]
+		},
+		{
+			"eventType": "purchase",
+			"eventTime": "",
+			"ratio": count[2]/total,
+			"count": count[2]
+		}
+	];
 });
 
 app.use(router.routes());
