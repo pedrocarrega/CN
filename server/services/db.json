@@ -725,6 +725,39 @@
         "price": "37.98",
         "user_id": "555217733",
         "user_session": "74d40a28-41f9-4325-bbae-b179bd2c0a38"
+    },
+    {
+        "event_time": "2019-10-01 00:12:14 UTC",
+        "event_type": "purchase",
+        "product_id": "4802036",
+        "category_id": "2053013554658804075",
+        "category_code": "electronics.audio.headphone",
+        "brand": "apple",
+        "price": "171.56",
+        "user_id": "533624186",
+        "user_session": "e5ac3caa-e6d5-4d6b-ae06-2c18cd9ca683" 
+    },
+    {
+        "event_time": "2019-10-01 00:14:14 UTC",
+        "event_type": "purchase",
+        "product_id": "1004932",
+        "category_id": "2053013555631882655",
+        "category_code": "electronics.smartphone",
+        "brand": "vivo",
+        "price": "463.31",
+        "user_id": "555083442",
+        "user_session": "83d12d1a-5452-4fa0-abbb-d9f492f8b562" 
+    },
+    {
+        "event_time": "2019-10-01 02:17:59 UTC",
+        "event_type": "cart",
+        "product_id": "1004833",
+        "category_id": "2053013555631882655",
+        "category_code": "electronics.smartphone",
+        "brand": "samsung",
+        "price": "174.76",
+        "user_id": "536415846",
+        "user_session": "685b5b42-f597-4a69-ab4c-ef96a30bc454" 
     }
 ]
 }
