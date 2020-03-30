@@ -10,7 +10,7 @@ PRIMARY='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Fetch the stack metadata for use later
-printf "${PRIMARY}* Fetching current stack state${NC}\n";
+printf "${PRIMARY}* Fetching current stack state${NC} - ${STACK_NAME}\n";
 
 QUERY=$(cat <<-EOF
 [
@@ -68,13 +68,13 @@ do
 
 	# Build the container, and assign a tag to it for versioning
 	(cd services/$SERVICE_NAME && npm install);
-	docker build -t $SERVICE_NAME ./services/$SERVICE_NAME
-	docker tag $SERVICE_NAME:latest $REPO:$TAG
+	sudo docker build -t $SERVICE_NAME ./services/$SERVICE_NAME
+	sudo docker tag $SERVICE_NAME:latest $REPO:$TAG
 
 	# Push the tag up so we can make a task definition for deploying it
 	printf "${PRIMARY}* Pushing \`${SERVICE_NAME}\`${NC}\n";
 
-	docker push $REPO:$TAG
+	sudo docker push $REPO:$TAG
 
 	printf "${PRIMARY}* Creating new task definition for \`${SERVICE_NAME}\`${NC}\n";
 
