@@ -27,7 +27,7 @@ public class parser{
             	break;
             }
             StringBuilder sb = new StringBuilder();
-            sb.append("{\"event_id\":{\"n\":\"" + (counter++) + "\"},\"event_time\":{\"s\":\"" + line_splitted[0] + "\"},\"event_type\":{\"s\":\"" + 
+            sb.append("{\"pk_id\":{\"n\":\"0\"},\"event_id\":{\"n\":\"" + (counter++) + "\"},\"event_time\":{\"s\":\"" + line_splitted[0] + "\"},\"event_type\":{\"s\":\"" + 
                     line_splitted[1] + "\"},\"product_id\":{\"n\":\"" + line_splitted[2] + "\"},\"category_id\":{\"n\":\"" + line_splitted[3] + "\"},\"category_code\":{\"s\":\"");
             if(line_splitted[4].isEmpty()) {
             	sb.append("-" + "\"},\"brand\":{\"s\":\"");
