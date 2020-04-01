@@ -251,6 +251,7 @@ router.get('/api/products/salesByBrand', function *(next) {
 
   var params = {
     TableName: "cn_database",
+    KeyConditionExpression: "pk_id = :v",
     ProjectionExpression: "brand",
     FilterExpression: "#et = :evt_t and #b != :b", //posso fazer isto?
     ExpressionAttributeNames: {
@@ -259,24 +260,16 @@ router.get('/api/products/salesByBrand', function *(next) {
     },
     ExpressionAttributeValues: { 
         ":evt_t": { S: 'purchase' }, //é assim que filtro so vendas?
-        ":b": {"S": '-'}
+        ":b": {"S": '-'},
+        ":v": {"N": '0'}
     }    
   }
 
-  docClient.query (params, function (err, data) {
-    if (err) {
-        console.log("products::popularBrands::error - " + JSON.stringify(err, null, 2));1
-    }
-    else {
-        console.log("products::popularBrands::success - " + JSON.stringify(data, null, 2));
-    }
-  })
-
   var results = [];
 
-  var sales = doQuery().map(a => a.brand);
-
-  this.body = foo(sales);
+  doQuery(params,function(results){
+    this.body = foo(results);
+  });
 
   function foo(arr) {
     var prev;
@@ -292,7 +285,7 @@ router.get('/api/products/salesByBrand', function *(next) {
           prev = arr[i];
       }
       return conjunto;
-    }
+  }
 
     function doQuery(params, _callback) {
         docClient.query(params, function (err, data) {
