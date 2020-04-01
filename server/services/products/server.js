@@ -33,21 +33,23 @@ app.use(function *(next){
 router.get('/api/products/listCategories', function *(next) {
 
   var params = {
-    TableName: "DBTest",
+    TableName: "cn_database",
+    KeyConditionExpression: "pk_id = :v",
     ProjectionExpression: "category_code",
     FilterExpression: "#cc <> :empty_code", //not sure, nao quero strings vazias
     ExpressionAttributeNames: {
       "#cc": "category_code"
     },
     ExpressionAttributeValues: {
-      ":empty_code" : {S: "-"}
+      ":empty_code" : {S: "-"},
+      ":v" : {N: "0"}
     }
     /*Falta ainda selecionar os valores distinct
     Uma solucao seria fazer aqui a selecao de distinct values, 
     mas era melhor ver se a bd tem capacidade para o fazer*/
   }
 
-  var results;
+  var results = [];
 
   function queryCategories(params, _callback){
     docClient.query (params, function scanUntilDone(err, data) {
@@ -58,12 +60,12 @@ router.get('/api/products/listCategories', function *(next) {
     else {
       if(data.LastEvaluatedKey){
         params.ExclusiveStartKey = data.LastEvaluatedKey;
-        results = results.concat(data.items);
+        results = results.concat(data.Items);
         //docClient.query(params, scanUntilDone); // does this work? I want to join the results recursively
         queryCategories(params,_callback);
       }else{
         //means all the results are queried
-        results = results.concat(data.items);
+        results = results.concat(data.Items);
         _callback(results);
       }
     }
@@ -71,7 +73,7 @@ router.get('/api/products/listCategories', function *(next) {
   }
 
   queryCategories(params, function(results){
-    this.body = [...new Set(results.map(item => (item.category_code)))];
+    this.body = [...new Set(results.map(item => (item.S)))];
   });
   //var non_null = db.entries.filter((evt) => evt.category_code);
   
@@ -85,18 +87,20 @@ router.get('/api/products/listCategories', function *(next) {
 router.get('/api/products/popularBrands', function *(next) {
 
   var params = {
-    TableName: "DBTest",
+    TableName: "cn_database",
+    KeyConditionExpression: "pk_id = :v",
     ProjectionExpression: "brand",
     FilterExpression: "#b != :empty_code", //not sure, nao quero strings vazias
     ExpressionAttributeNames: {
       "#b": "brand",
     },
     ExpressionAttributeValues: {
-      ":empty_code" : {S: "-"}
+      ":empty_code" : {S: "-"},
+      ":v" : {N: "0"}
     }
   }
 
-  var results;
+  var results = [];
 
   function queryPopular(params, _callback){
     docClient.query (params, function (err, data) {
@@ -106,12 +110,12 @@ router.get('/api/products/popularBrands', function *(next) {
       else {
           if(data.LastEvaluatedKey){
             params.ExclusiveStartKey = data.LastEvaluatedKey;
-            results = results.concat(data.items);
+            results = results.concat(data.Items);
             //docClient.query(params, scanUntilDone); // does this work? I want to join the results recursively
             queryPopular(params,_callback);
           }else{
             //means all the results are queried
-            results = results.concat(data.items);
+            results = results.concat(data.Items);
             _callback(results);
           }
       }
@@ -129,7 +133,7 @@ router.get('/api/products/popularBrands', function *(next) {
         arr.sort();
         for ( var i = 0; i < arr.length; i++ ) {
             if ( arr[i] !== prev ) {
-              conjunto.push({'brand': arr[i], 'popularity': 1, "sales": 0});
+              conjunto.push({'brand': arr[i].S, 'popularity': 1, "sales": 0});
             } else {
               conjunto[conjunto.length-1].popularity++;
             }
@@ -153,8 +157,9 @@ router.get('/api/products/salePrice/:brand', function *(next) {
   var brand = this.params.brand;
 
   var params = {
-    TableName: "DBTest",
+    TableName: "cn_database",
     ProjectionExpression: "price",
+    KeyConditionExpression: "pk_id = :v",
     FilterExpression: "#b = :b_name and #t = :evt_t",
     ExpressionAttributeNames: {
         "#b": "brand",
@@ -162,12 +167,13 @@ router.get('/api/products/salePrice/:brand', function *(next) {
     },
     ExpressionAttributeValues: { 
         ":b_name": brand,//aqui é que se dá filter à brand que vem como param?
-        ":evt_t": {S: "purchase"}
+        ":evt_t": {S: "purchase"},
+        ":v": {N: "0"}
     }    
   }
 
   var average = 0;
-  var results;
+  var results = [];
 
   function querySalePrice(params, _callback){
     docClient.query (params, function (err, data) {
@@ -176,11 +182,11 @@ router.get('/api/products/salePrice/:brand', function *(next) {
       } else {
         if(data.LastEvaluatedKey){
           params.ExclusiveStartKey = data.LastEvaluatedKey;
-          results = results.concat(data.items);
+          results = results.concat(data.Items);
           querySalePrice(params, _callback)
         }else{
           //means all the results are queried
-          results = results.concat(data.items);
+          results = results.concat(data.Items);
           _callback(results);
         }
       }
@@ -191,7 +197,7 @@ router.get('/api/products/salePrice/:brand', function *(next) {
     var prices = results;
     var sum = 0;
     for(var i = 0; i < prices.length; i++){
-      sum += prices[i];
+      sum += prices[i].N;//MAROSCA
     }
     average = sum/prices.length;
 
@@ -244,7 +250,7 @@ router.get('/api/products/salePrice/:brand', function *(next) {
 router.get('/api/products/salesByBrand', function *(next) {
 
   var params = {
-    TableName: "DBTest",
+    TableName: "cn_database",
     ProjectionExpression: "brand",
     FilterExpression: "#et = :evt_t and #b != :''", //posso fazer isto?
     ExpressionAttributeNames: {
