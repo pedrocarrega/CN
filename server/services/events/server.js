@@ -24,81 +24,43 @@ app.use(function *(next){
 
 router.get('/api/events/ratio', function* (next) {
 
-	var result = [0, 0, 0];
+	var events = [0, 0, 0];
 
-	result[0] = function (callback) {
+	var params = {
+	TableName : "cn_database",
+	KeyConditionExpression: "pk_id = :v",
+	ExpressionAttributeValues: {
+	    ":v": {N: '0'}
+	}
+	};
 
-		const qParams = {
-			TableName: "cn_database",
-			KeyConditionExpression: "event_type = :event",
-			ExpressionAttributeValues: {
-				":event": { "S": "view" },
+	doQueryCount(params, events, 0, function(total, result){
+
+		const ratios = [result[0]/total, result[1]/total, result[2]/total]
+		console.log("Ended with: " + total + " values.")
+		console.log(ratios);
+		this.body = [
+			{
+			  "eventType": "view",
+				"eventTime": "",
+				"ratio": ratios[0],
+				"count": result[0]
+			},
+			{
+				"eventType": "cart",
+				"eventTime": "",
+				"ratio": ratios[1],
+				"count": result[1]
+			},
+			{
+				"eventType": "purchase",
+				"eventTime": "",
+				"ratio": ratios[2],
+				"count": result[2]
 			}
-		}
-		callback(doQueryCount(qParams, 0));
-	}
-
-	result[1] = function (callback) {
-
-		const qParams = {
-			TableName: "cn_database",
-			KeyConditionExpression: "event_type = :event",
-			ExpressionAttributeValues: {
-				":event": { "S": "purchase" },
-			}
-		}
-		callback(doQueryCount(qParams, 0));
-	}
-
-	result[2] = function (callback) {
-
-		const qParams = {
-			TableName: "cn_database",
-			KeyConditionExpression: "event_type = :event",
-			ExpressionAttributeValues: {
-				":event": { "S": "cart" },
-			}
-		}
-		callback(doQueryCount(qParams, 0));
-	}
-
-
-	/*
-	var total = 0;
-	for(var i = 0; i < vals.length; i++) {
-		if(vals[i] == "view"){
-			count[0]++;
-		}else if(vals[i] == "cart"){
-			count[1]++;
-		}else if(vals[i] == "purchase"){
-			count[2]++;
-		}
-		total++;
-	}
-	*/
-
-	const ratios = [result[0]/total, result[1]/total, result[2]/total];
-	console.log(ratios);
-	this.body = [
-		{
-		  "eventType": "view",
-			"eventTime": "",
-			"ratio": ratios[0],
-			"count": result[0]
-		},
-		{
-			"eventType": "cart",
-			"eventTime": "",
-			"ratio": ratios[1],
-			"count": result[1]
-		},
-		{
-			"eventType": "purchase",
-			"eventTime": "",
-			"ratio": ratios[2],
-			"count": result[2]
-		}
 	];
+	console.log(this.body);
+	});
 });
 
 app.use(router.routes());
@@ -108,7 +70,7 @@ app.listen(3000);
 
 console.log('Worker started');
 
-function doQueryCount(qParams, count, callback) {
+function doQueryCount(qParams, events, count, callback) {
 
 	docClient.query(qParams, function (err, data) {
 		if (err) {
@@ -118,14 +80,33 @@ function doQueryCount(qParams, count, callback) {
 			// console.log("users::fetchOneByKey::success - " + JSON.stringify(data, null, 2));
 			console.log("Success");
 			if (!data.hasOwnProperty('LastEvaluatedKey')) {
-				count += data.Count;
-				console.log("Acabou com: " + count + " entradas.");
-				callback(count);
+                count += data.Count;
+                for(i = 0; i < data.Items.length; i++){
+                    console.log(data.Items[i].event_type.S)
+					if(data.Items[i].event_type.S == 'view'){
+						events[0]++
+					}else if(data.Items[i].event_type.S == 'cart'){
+						events[1]++
+					}else if(data.Items[i].event_type.S == 'purchase'){
+						events[2]++
+					}
+				}
+				callback(count,events);
 			} else {
 				count += data.Count;
-				console.log("Passou para o next " + count);
+                console.log("Passou para o next " + count);
+				for(i = 0; i < data.Items[i].S; i++){
+                    console.log(data.Items[i].event_type.S)
+					if(data.Items[i].event_type.S == 'view'){
+						events[0]++
+					}else if(data.Items[i].event_type.S == 'cart'){
+						events[1]++
+					}else if(data.Items[i].event_type.S == 'purchase'){
+						events[2]++
+					}
+				}
 				params.ExclusiveStartKey = data.LastEvaluatedKey;
-				doQueryCount(params, count, callback);
+				doQueryCount(params,events,count,callback);
 			}
 		}
 	})

@@ -252,26 +252,29 @@ router.get('/api/products/salesByBrand', function *(next) {
   var params = {
     TableName: "cn_database",
     ProjectionExpression: "brand",
-    FilterExpression: "#et = :evt_t and #b != :''", //posso fazer isto?
+    FilterExpression: "#et = :evt_t and #b != :b", //posso fazer isto?
     ExpressionAttributeNames: {
         "#et": "event_type",
         "#b": "brand"
     },
     ExpressionAttributeValues: { 
-        ":evt_t": {S: 'purchase'} //é assim que filtro so vendas?
+        ":evt_t": { S: 'purchase' }, //é assim que filtro so vendas?
+        ":b": {"S": '-'}
     }    
   }
 
   docClient.query (params, function (err, data) {
     if (err) {
-        console.log("products::popularBrands::error - " + JSON.stringify(err, null, 2));
+        console.log("products::popularBrands::error - " + JSON.stringify(err, null, 2));1
     }
     else {
         console.log("products::popularBrands::success - " + JSON.stringify(data, null, 2));
     }
   })
 
-  var sales = db.entries.filter((entry) => entry.brand != "" && entry.event_type == "purchase").map(a => a.brand);
+  var results = [];
+
+  var sales = doQuery().map(a => a.brand);
 
   this.body = foo(sales);
 
@@ -289,7 +292,25 @@ router.get('/api/products/salesByBrand', function *(next) {
           prev = arr[i];
       }
       return conjunto;
-  }
+    }
+
+    function doQuery(params, _callback) {
+        docClient.query(params, function (err, data) {
+            if (err) {
+                //idk? What should we do in case of an error?
+            } else {
+                if (data.LastEvaluatedKey) {
+                    params.ExclusiveStartKey = data.LastEvaluatedKey;
+                    results = results.concat(data.Items);
+                    querySalePrice(params, _callback)
+                } else {
+                    //means all the results are queried
+                    results = results.concat(data.Items);
+                    _callback(results);
+                }
+            }
+        });
+    }
 });
 
 app.use(router.routes());
