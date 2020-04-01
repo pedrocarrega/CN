@@ -35,35 +35,46 @@ router.get('/api/products/listCategories', function *(next) {
   var params = {
     TableName: "DBTest",
     ProjectionExpression: "category_code",
-    FilterExpression: "#cc != :''", //not sure, nao quero strings vazias
+    FilterExpression: "#cc <> :empty_code", //not sure, nao quero strings vazias
     ExpressionAttributeNames: {
-      "#cc": "category_code",
+      "#cc": "category_code"
+    },
+    ExpressionAttributeValues: {
+      ":empty_code" : {S: "-"}
     }
     /*Falta ainda selecionar os valores distinct
     Uma solucao seria fazer aqui a selecao de distinct values, 
     mas era melhor ver se a bd tem capacidade para o fazer*/
   }
 
-  docClient.query (params, function scanUntilDone(err, data) {
+  var results;
+
+  function queryCategories(params, _callback){
+    docClient.query (params, function scanUntilDone(err, data) {
    
     if (err) {
       //idk? What should we do in case of an error?
     }
     else {
-
-        if(data.LastEvaluatedKey){
-          params.ExclusiveStartKey = data.LastEvaluatedKey;
-          return [...data,...docClient.query(params, scanUntilDone)]; // does this work? I want to join the results recursively
-        }else{
-          //means all the results are queried
-          return data;
-        }
+      if(data.LastEvaluatedKey){
+        params.ExclusiveStartKey = data.LastEvaluatedKey;
+        results = results.concat(data.items);
+        //docClient.query(params, scanUntilDone); // does this work? I want to join the results recursively
+        queryCategories(params,_callback);
+      }else{
+        //means all the results are queried
+        results = results.concat(data.items);
+        _callback(results);
+      }
     }
-  })
+    })
+  }
 
-
-  var non_null = db.entries.filter((evt) => evt.category_code != "");
-  this.body = [...new Set(non_null.map(item => (item.category_code)))];
+  queryCategories(params, function(results){
+    this.body = [...new Set(results.map(item => (item.category_code)))];
+  });
+  //var non_null = db.entries.filter((evt) => evt.category_code);
+  
 });
 
 /**
@@ -76,40 +87,57 @@ router.get('/api/products/popularBrands', function *(next) {
   var params = {
     TableName: "DBTest",
     ProjectionExpression: "brand",
-    FilterExpression: "#b != :''", //not sure, nao quero strings vazias
+    FilterExpression: "#b != :empty_code", //not sure, nao quero strings vazias
     ExpressionAttributeNames: {
       "#b": "brand",
+    },
+    ExpressionAttributeValues: {
+      ":empty_code" : {S: "-"}
     }
   }
 
-  docClient.query (params, function (err, data) {
-    if (err) {
-        console.log("products::popularBrands::error - " + JSON.stringify(err, null, 2));
-    }
-    else {
-        console.log("products::popularBrands::success - " + JSON.stringify(data, null, 2));
-    }
-  })
+  var results;
 
-  var sales = db.entries.filter((entry) => entry.brand != "").map(a => a.brand);
-
-  this.body = foo(sales);
-
-  function foo(arr) {
-    var prev;
-    var conjunto = [];
-      
-      arr.sort();
-      for ( var i = 0; i < arr.length; i++ ) {
-          if ( arr[i] !== prev ) {
-            conjunto.push({'brand': arr[i], 'popularity': 1, "sales": 0});
-          } else {
-            conjunto[conjunto.length-1].popularity++;
-          }
-          prev = arr[i];
+  function queryPopular(params, _callback){
+    docClient.query (params, function (err, data) {
+      if (err) {
+        //idk? What should we do in case of an error?
       }
-      return conjunto;
+      else {
+          if(data.LastEvaluatedKey){
+            params.ExclusiveStartKey = data.LastEvaluatedKey;
+            results = results.concat(data.items);
+            //docClient.query(params, scanUntilDone); // does this work? I want to join the results recursively
+            queryPopular(params,_callback);
+          }else{
+            //means all the results are queried
+            results = results.concat(data.items);
+            _callback(results);
+          }
+      }
+    });
   }
+
+  queryPopular(params, function(results){
+    var sales = results;
+    this.body = foo(sales);
+
+    function foo(arr) {
+      var prev;
+      var conjunto = [];
+        
+        arr.sort();
+        for ( var i = 0; i < arr.length; i++ ) {
+            if ( arr[i] !== prev ) {
+              conjunto.push({'brand': arr[i], 'popularity': 1, "sales": 0});
+            } else {
+              conjunto[conjunto.length-1].popularity++;
+            }
+            prev = arr[i];
+        }
+        return conjunto;
+    }
+  });  
 });
 
 
@@ -120,33 +148,73 @@ router.get('/api/products/popularBrands', function *(next) {
  * brand String Brand name
  * returns List
  **/
-router.get('/api/products/salePrice', function *(next) {
+router.get('/api/products/salePrice/:brand', function *(next) {
+
+  var brand = this.params.brand;
 
   var params = {
     TableName: "DBTest",
     ProjectionExpression: "price",
-    FilterExpression: "#b = :b_name",
+    FilterExpression: "#b = :b_name and #t = :evt_t",
     ExpressionAttributeNames: {
         "#b": "brand",
+        "#t": "event_type"
     },
     ExpressionAttributeValues: { 
-        ":b_name": {S: 'bq'}//aqui é que se dá filter à brand que vem como param?
+        ":b_name": brand,//aqui é que se dá filter à brand que vem como param?
+        ":evt_t": "purchase"
     }    
-}
+  }
 
-  docClient.query (params, function (err, data) {
-    if (err) {
-        console.log("products::popularBrands::error - " + JSON.stringify(err, null, 2));
+  var average = 0;
+  var results;
+
+  function querySalePrice(params, _callback){
+    docClient.query (params, function (err, data) {
+      if (err) {
+        //idk? What should we do in case of an error?
+      } else {
+        if(data.LastEvaluatedKey){
+          params.ExclusiveStartKey = data.LastEvaluatedKey;
+          results = results.concat(data.items);
+          querySalePrice(params, _callback)
+        }else{
+          //means all the results are queried
+          results = results.concat(data.items);
+          _callback(results);
+        }
+      }
+    }); 
+  }
+
+  querySalePrice(params, function(results){
+    var prices = results;
+    var sum = 0;
+    for(var i = 0; i < prices.length; i++){
+      sum += prices[i];
     }
-    else {
-        console.log("products::popularBrands::success - " + JSON.stringify(data, null, 2));
+    average = sum/prices.length;
+
+    this.body = {
+      "brand": {
+        "brandName": brand,
+        "popularity": 0,
+        "sales": prices.length
+      },
+      "price": average,
+      "category": {
+        "name": ""
+      }
     }
   })
 
-  //depois de ir buscar todos os prices da brand, seguir a mesma logica
+  
+//depois de ir buscar todos os prices da brand, seguir a mesma logica
 
-  const entries = db.entries.filter((entries) => entries.brand == brand && entries.event_type == "purchase");
-    
+  //const entries = db.entries.filter((entries) => entries.brand == brand && entries.event_type == "purchase");
+  
+  
+  /*
   if (Object.keys(entries).length > 0) {
 
     let result = [...new Set(entries.filter((object,index) => index === entries.findIndex(obj => JSON.stringify(obj.product_id) === JSON.stringify(object.product_id))).map(item => item.price))];
@@ -165,7 +233,7 @@ router.get('/api/products/salePrice', function *(next) {
         "name": ""
       }
     }
-  }
+  }*/
 });
 
 /**
