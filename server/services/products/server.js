@@ -266,6 +266,8 @@ router.get('/api/products/salesByBrand', function *(next) {
     }
   })
 
+  var results = [];
+
   var sales = doQuery().map(a => a.brand);
 
   this.body = foo(sales);
@@ -293,11 +295,11 @@ router.get('/api/products/salesByBrand', function *(next) {
             } else {
                 if (data.LastEvaluatedKey) {
                     params.ExclusiveStartKey = data.LastEvaluatedKey;
-                    results = results.concat(data.items);
+                    results = results.concat(data.Items);
                     querySalePrice(params, _callback)
                 } else {
                     //means all the results are queried
-                    results = results.concat(data.items);
+                    results = results.concat(data.Items);
                     _callback(results);
                 }
             }
