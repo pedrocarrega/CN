@@ -44,12 +44,20 @@ router.get('/api/products/listCategories', function *(next) {
     mas era melhor ver se a bd tem capacidade para o fazer*/
   }
 
-  docClient.query (params, function (err, data) {
+  docClient.query (params, function scanUntilDone(err, data) {
+   
     if (err) {
-        console.log("products::listCategories::error - " + JSON.stringify(err, null, 2));
+      //idk? What should we do in case of an error?
     }
     else {
-        console.log("products::listCategories::success - " + JSON.stringify(data, null, 2));
+
+        if(data.LastEvaluatedKey){
+          params.ExclusiveStartKey = data.LastEvaluatedKey;
+          return [...data,...docClient.query(params, scanUntilDone)]; // does this work? I want to join the results recursively
+        }else{
+          //means all the results are queried
+          return data;
+        }
     }
   })
 
