@@ -162,7 +162,7 @@ router.get('/api/products/salePrice/:brand', function *(next) {
     },
     ExpressionAttributeValues: { 
         ":b_name": brand,//aqui é que se dá filter à brand que vem como param?
-        ":evt_t": "purchase"
+        ":evt_t": {S: "purchase"}
     }    
   }
 
