@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "koa": "^1.2.5",
-    "koa-router": "^5.4.0"
+    "koa-router": "^5.4.0",
+    "aws-sdk": "^2.648.0"
   },
   "scripts": {
     "start": "node server.js"
