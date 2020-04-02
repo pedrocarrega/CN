@@ -60,20 +60,21 @@ router.get('/api/products/listCategories', function *(next) {
     else {
       if(data.LastEvaluatedKey){
         params.ExclusiveStartKey = data.LastEvaluatedKey;
-        results = results.concat(data.Items);
+        results = results.concat(data.Items.map(item => item.category_code.S));
         //docClient.query(params, scanUntilDone); // does this work? I want to join the results recursively
         queryCategories(params,_callback);
       }else{
         //means all the results are queried
-        results = results.concat(data.Items);
+        results = results.concat(data.Items.map(item => item.category_code.S));
         _callback(results);
       }
     }
     })
   }
 
+	//To be tested
   queryCategories(params, function(results){
-    this.body = [...new Set(results.map(item => (item.S)))];
+    this.body = [...new Set(results))];
   });
   //var non_null = db.entries.filter((evt) => evt.category_code);
   
@@ -110,12 +111,12 @@ router.get('/api/products/popularBrands', function *(next) {
       else {
           if(data.LastEvaluatedKey){
             params.ExclusiveStartKey = data.LastEvaluatedKey;
-            results = results.concat(data.Items);
+            results = results.concat(data.Items.map(item => item.brand.S));
             //docClient.query(params, scanUntilDone); // does this work? I want to join the results recursively
             queryPopular(params,_callback);
           }else{
             //means all the results are queried
-            results = results.concat(data.Items);
+            results = results.concat(data.Items.map(item => item.brand.S));
             _callback(results);
           }
       }
@@ -146,7 +147,7 @@ router.get('/api/products/popularBrands', function *(next) {
 
 
 
-/**
+/** TESTED AND WORKS
  * Gets the average sale price of a brand
  *
  * brand String Brand name
@@ -182,11 +183,11 @@ router.get('/api/products/salePrice/:brand', function *(next) {
       } else {
         if(data.LastEvaluatedKey){
           params.ExclusiveStartKey = data.LastEvaluatedKey;
-          results = results.concat(data.Items);
+          results = results.concat(data.Items.map(item => Number(item.price.N)));
           querySalePrice(params, _callback)
         }else{
           //means all the results are queried
-          results = results.concat(data.Items);
+          results = results.concat(data.Items.map(item => Number(item.price.N)));
           _callback(results);
         }
       }
@@ -197,7 +198,7 @@ router.get('/api/products/salePrice/:brand', function *(next) {
     var prices = results;
     var sum = 0;
     for(var i = 0; i < prices.length; i++){
-      sum += prices[i].N;//MAROSCA
+      sum += prices[i];//MAROSCA
     }
     average = sum/prices.length;
 
@@ -294,11 +295,11 @@ router.get('/api/products/salesByBrand', function *(next) {
             } else {
                 if (data.LastEvaluatedKey) {
                     params.ExclusiveStartKey = data.LastEvaluatedKey;
-                    results = results.concat(data.Items);
+                    results = results.concat(data.Items.map(item => item.brand.S));
                     querySalePrice(params, _callback)
                 } else {
                     //means all the results are queried
-                    results = results.concat(data.Items);
+                    results = results.concat(data.Items.map(item => item.brand.S));
                     _callback(results);
                 }
             }
