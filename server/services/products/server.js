@@ -1,16 +1,16 @@
 const app = require('koa')();
 const router = require('koa-router')();
-const db = require('./db.json');
+const table_name = "cn_table";
 
 //inicio de utilizacao do dynamo
 
 var AWS = require("aws-sdk");
 //Mudar os credenciais aqui
 let awsConfig = {
-    "region": "us-east-1",
-    "endpoint": "http://dynamodb.us-east-1.amazonaws.com",
-    "accessKeyId": "ID", 
-    "secretAccessKey": "SECRET_KEY"
+    "region": "eu-west-1",
+    "endpoint": "http://dynamodb.eu-west-1.amazonaws.com",
+    "accessKeyId": "AKIA6JR7LR5S5FC3PG4D", 
+    "secretAccessKey": "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"
 };
 
 AWS.config.update(awsConfig);
@@ -33,7 +33,7 @@ app.use(function *(next){
 router.get('/api/products/listCategories', function *(next) {
 
   var params = {
-    TableName: "cn_database",
+    TableName: table_name,
     KeyConditionExpression: "pk_id = :v",
     ProjectionExpression: "category_code",
     FilterExpression: "#cc <> :empty_code", //not sure, nao quero strings vazias
@@ -88,7 +88,7 @@ router.get('/api/products/listCategories', function *(next) {
 router.get('/api/products/popularBrands', function *(next) {
 
   var params = {
-    TableName: "cn_database",
+    TableName: table_name,
     KeyConditionExpression: "pk_id = :v",
     ProjectionExpression: "brand",
     FilterExpression: "#b != :empty_code", //not sure, nao quero strings vazias
@@ -158,7 +158,7 @@ router.get('/api/products/salePrice/:brand', function *(next) {
   var brand = this.params.brand;
 
   var params = {
-    TableName: "cn_database",
+    TableName: table_name,
     ProjectionExpression: "price",
     KeyConditionExpression: "pk_id = :v",
     FilterExpression: "#b = :b_name and #t = :evt_t",
@@ -214,33 +214,6 @@ router.get('/api/products/salePrice/:brand', function *(next) {
       }
     }
   })
-
-  
-//depois de ir buscar todos os prices da brand, seguir a mesma logica
-
-  //const entries = db.entries.filter((entries) => entries.brand == brand && entries.event_type == "purchase");
-  
-  
-  /*
-  if (Object.keys(entries).length > 0) {
-
-    let result = [...new Set(entries.filter((object,index) => index === entries.findIndex(obj => JSON.stringify(obj.product_id) === JSON.stringify(object.product_id))).map(item => item.price))];
-
-    var media = Math.round(((result.reduce(function(total, num){
-                  return parseFloat(total) + parseFloat(num);
-                })/result.length) + Number.EPSILON) * 100) / 100;
-    this.body = {
-      "brand": {
-        "brandName": brand,
-        "popularity": 0,
-        "sales": 0
-      },
-      "price": media,
-      "category": {
-        "name": ""
-      }
-    }
-  }*/
 });
 
 /**
@@ -251,7 +224,7 @@ router.get('/api/products/salePrice/:brand', function *(next) {
 router.get('/api/products/salesByBrand', function *(next) {
 
   var params = {
-    TableName: "cn_database",
+    TableName: table_name,
     KeyConditionExpression: "pk_id = :v",
     ProjectionExpression: "brand",
     FilterExpression: "#et = :evt_t and #b != :b", //posso fazer isto?
