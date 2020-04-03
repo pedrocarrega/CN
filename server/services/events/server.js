@@ -1,18 +1,18 @@
 const app = require('koa')();
 const router = require('koa-router')();
-const db = require('./db.json');
-
 var AWS = require("aws-sdk");
-var fs = require("fs");
+
 let awsConfig = {
-	"region": "us-east-1",
-	"endpoint": "http://dynamodb.us-east-1.amazonaws.com",
-	"accessKeyId": "AKIA3IUB2LYWHZQT3PXJ",
-	"secretAccessKey": "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"
+	"region": "eu-west-1",
+	"endpoint": "http://dynamodb.eu-west-1.amazonaws.com",
+	"accessKeyId": "AKIA6JR7LR5S5FC3PG4D",
+	"secretAccessKey": "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"
 };
 
 AWS.config.update(awsConfig);
 let docClient = new AWS.DynamoDB;
+
+const table_name = "cn_table"
 
 // Log requests
 app.use(function *(next){
@@ -24,14 +24,16 @@ app.use(function *(next){
 
 router.get('/api/events/ratio', function* (next) {
 
+	this.body = {"status": "Retrieving data..."}
+
 	var events = [0, 0, 0];
 
 	var params = {
-	TableName : "cn_database",
-	KeyConditionExpression: "pk_id = :v",
-	ExpressionAttributeValues: {
-	    ":v": {N: '0'}
-	}
+		TableName : table_name,
+		KeyConditionExpression: "pk_id = :v",
+		ExpressionAttributeValues: {
+			":v": {N: '0'}
+		}
 	};
 
 	doQueryCount(params, events, 0, function(total, result){
@@ -58,8 +60,8 @@ router.get('/api/events/ratio', function* (next) {
 				"ratio": ratios[2],
 				"count": result[2]
 			}
-	];
-	console.log(this.body);
+		];
+		console.log(this.body);
 	});
 });
 
