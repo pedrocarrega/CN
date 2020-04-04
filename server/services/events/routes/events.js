@@ -80,7 +80,7 @@ router
                 }
             ];
             console.log(result)
-            res.write(result);
+            res.send(result);
         });
     });
 
@@ -123,7 +123,27 @@ function doQueryCount(qParams, events, count, res, callback) {
                     }
                 }
                 var ratios = [events[0]/count, events[1]/count, events[2]/count]
-                res.write(result)
+                var result =[
+                    {
+                        "eventType": "view",
+                        "eventTime": "",
+                        "ratio": ratios[0],
+                        "count": events[0]
+                    },
+                    {
+                        "eventType": "cart",
+                        "eventTime": "",
+                        "ratio": ratios[1],
+                        "count": events[1]
+                    },
+                    {
+                        "eventType": "purchase",
+                        "eventTime": "",
+                        "ratio": ratios[2],
+                        "count": events[2]
+                    }
+                ];
+                res.write(JSON.stringify(result)+"\n");
 				callback(count,events);
 			} else {
 				count += data.Count;
@@ -138,7 +158,27 @@ function doQueryCount(qParams, events, count, res, callback) {
                 }
 
                 var ratios = [events[0]/count, events[1]/count, events[2]/count]
-                res.write("Current ratios \n - View: " + ratios[0] + " \n - Cart: " + ratios[1] + " \n - Purchase: " + ratios[2] + "\n");
+                var result =[
+                    {
+                        "eventType": "view",
+                        "eventTime": "",
+                        "ratio": ratios[0],
+                        "count": events[0]
+                    },
+                    {
+                        "eventType": "cart",
+                        "eventTime": "",
+                        "ratio": ratios[1],
+                        "count": events[1]
+                    },
+                    {
+                        "eventType": "purchase",
+                        "eventTime": "",
+                        "ratio": ratios[2],
+                        "count": events[2]
+                    }
+                ];
+                res.write(JSON.stringify(result) + "\n");
 				qParams.ExclusiveStartKey = data.LastEvaluatedKey;
 				doQueryCount(qParams,events,count,res,callback);
 			}
