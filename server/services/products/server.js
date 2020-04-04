@@ -45,7 +45,7 @@ router.get('/api/products/listCategories', function *(next) {
     TableName: table_name,
     KeyConditionExpression: "pk_id = :v",
     ProjectionExpression: "category_code",
-    FilterExpression: "#cc <> :empty_code", //not sure, nao quero strings vazias
+    FilterExpression: "#cc <> :empty_code",
     ExpressionAttributeNames: {
       "#cc": "category_code"
     },
@@ -53,9 +53,6 @@ router.get('/api/products/listCategories', function *(next) {
       ":empty_code" : {S: "-"},
       ":v" : {N: "0"}
     }
-    /*Falta ainda selecionar os valores distinct
-    Uma solucao seria fazer aqui a selecao de distinct values, 
-    mas era melhor ver se a bd tem capacidade para o fazer*/
   }
 
   var results = [];
@@ -72,12 +69,10 @@ router.get('/api/products/listCategories', function *(next) {
       if(data.LastEvaluatedKey){
         params.ExclusiveStartKey = data.LastEvaluatedKey;
         results = results.concat(data.Items.map(item => item.category_code.S));
-        //docClient.query(params, scanUntilDone); // does this work? I want to join the results recursively
         couter += data.Items.length;
         console.log(counter);
         queryCategories(params,_callback);
       }else{
-        //means all the results are queried
         results = results.concat(data.Items.map(item => item.category_code.S));
         couter += data.Items.length;
         console.log("terminou:" + counter);
@@ -86,12 +81,9 @@ router.get('/api/products/listCategories', function *(next) {
     }
     })
   }
-
-	//To be tested
   queryCategories(params, function(results){
     this.body = [...new Set(results)];
   });
-  //var non_null = db.entries.filter((evt) => evt.category_code);
   
 });
 
@@ -116,7 +108,6 @@ router.get('/api/products/popularBrands', function *() {
     }
   }
 
-  //var results = [];
   var counter = 0;
   var results = {};
 
@@ -189,7 +180,7 @@ router.get('/api/products/salePrice/:brand', function *() {
         "#t": "event_type"
     },
     ExpressionAttributeValues: { 
-        ":b_name": {S: brand},//aqui é que se dá filter à brand que vem como param?
+        ":b_name": {S: brand},
         ":evt_t": {S: "purchase"},
         ":v": {N: "0"}
     }    
@@ -272,26 +263,24 @@ router.get('/api/products/salesByBrand', function *() {
   var counter = 0;
 
   doQuery(params,function(results){
-    this.body = foo(results);
+    this.body = results;
   });
 
-  function foo(arr) {
-    var prev;
-    var conjunto = [];
-      
-      arr.sort();
-      for ( var i = 0; i < arr.length; i++ ) {
-          if ( arr[i] !== prev ) {
-            conjunto.push({'brand': arr[i], 'popularity': 0, "sales": 1});
-          } else {
-            conjunto[conjunto.length-1].sales++;
-          }
-          prev = arr[i];
+  function handleBrands(popularity, data, _callback){
+    var brand_name;
+    for(var i = 0; i < data.Items.length; i++){
+      brand_name = data.Items[i].brand.S;
+      if(popularity[brand_name]){
+        popularity[brand_name] += 1;
+      }else{
+        popularity[brand_name] = 1;
       }
-      return conjunto;
+    }
+    _callback();
   }
 
   var counter = 0;
+  var results = {};
 
     function doQuery(params, _callback) {
         docClient.query(params, function (err, data) {
@@ -301,16 +290,17 @@ router.get('/api/products/salesByBrand', function *() {
             } else {
                 if (data.LastEvaluatedKey) {
                     params.ExclusiveStartKey = data.LastEvaluatedKey;
-                    results = results.concat(data.Items.map(item => item.brand.S));
-                    counter += data.Items.length;
-                    console.log(counter);
-                    querySalePrice(params, _callback);
+                    handleBrands(results, data.Items, function(){
+                      counter += data.Items.length;
+                      console.log(counter);
+                      querySalePrice(params, _callback);
+                    });
                 } else {
-                    //means all the results are queried
-                    results = results.concat(data.Items.map(item => item.brand.S));
-                    counter += data.Items.length;
-                    console.log(counter);
-                    _callback(results);
+                    handleBrands(results, data.Items, function(){
+                      counter += data.Items.length;
+                      console.log(counter);
+                      _callback(results);
+                    });
                 }
             }
         });
