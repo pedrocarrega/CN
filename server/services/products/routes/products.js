@@ -50,16 +50,16 @@ router
             }
             else {
                 if(data.LastEvaluatedKey){
-                params.ExclusiveStartKey = data.LastEvaluatedKey;
-                results = results.concat(data.Items.map(item => item.category_code.S));
-                couter += data.Items.length;
-                console.log(counter);
-                queryCategories(params,_callback);
+                    params.ExclusiveStartKey = data.LastEvaluatedKey;
+                    results = results.concat(data.Items.map(item => item.category_code.S));
+                    counter += data.Items.length;
+                    res.write(counter + " entradas validas\n");
+                    queryCategories(params,_callback);
                 }else{
-                results = results.concat(data.Items.map(item => item.category_code.S));
-                couter += data.Items.length;
-                console.log("terminou:" + counter);
-                _callback(results);
+                    results = results.concat(data.Items.map(item => item.category_code.S));
+                    counter += data.Items.length;
+                    console.log("terminou:" + counter);
+                    _callback(results);
                 }
             }
             });
@@ -100,7 +100,7 @@ router
                     if(data.LastEvaluatedKey){
                     params.ExclusiveStartKey = data.LastEvaluatedKey;
                     counter += data.Items.length;
-                    console.log(counter);
+                    res.write(counter + " entradas validas\n");
                     handleBrands(results, data.Items,function(){
                         queryPopular(params,_callback);
                     });
@@ -123,11 +123,12 @@ router
     });
 
 router
-    .route("/salePrice/:brands")
+    .route("/salePrice/:brand")
     .get((req, res) => {
         console.log("got request");
 
-         var brand = this.params.brand;
+        var brand = req.params.brand;
+        console.log(brand);
 
         var params = {
             TableName: table_name,
@@ -160,8 +161,7 @@ router
                     results = results.concat(data.Items.map(item => Number(item.price.N)));
                     querySalePrice(params, _callback)
                     counter += data.Items.length;
-                    console.log(data.Items);
-                    console.log("another page " + counter);
+                    res.write(counter + " entradas validas\n");
                     }else{
                     //means all the results are queried
                     results = results.concat(data.Items.map(item => Number(item.price.N)));
@@ -197,7 +197,7 @@ router
     });
 
 router
-    .route("/salePrice/:brands")
+    .route('/salesByBrand')
     .get((req, res) => {
         var params = {
             TableName: table_name,
@@ -228,13 +228,12 @@ router
                         params.ExclusiveStartKey = data.LastEvaluatedKey;
                         handleBrands(results, data.Items, function(){
                             counter += data.Items.length;
-                            console.log(counter);
-                            querySalePrice(params, _callback);
+                            res.write(counter + " entradas validas\n");
+                            doQuery(params, _callback);
                         });
                     } else {
                         handleBrands(results, data.Items, function(){
                             counter += data.Items.length;
-                            console.log(counter);
                             _callback(results);
                         });
                     }
@@ -249,8 +248,8 @@ router
 
 function handleBrands(popularity, data, _callback){
     var brand_name;
-    for(var i = 0; i < data.Items.length; i++){
-        brand_name = data.Items[i].brand.S;
+    for(var i = 0; i < data.length; i++){
+        brand_name = data[i].brand.S;
         if(popularity[brand_name]){
         popularity[brand_name] += 1;
         }else{
