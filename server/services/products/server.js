@@ -131,8 +131,10 @@ router.get('/api/products/popularBrands', function *() {
             params.ExclusiveStartKey = data.LastEvaluatedKey;
             counter += data.Items.length;
             console.log(counter);
-            handleBrands(results, data.Items);
-            queryPopular(params,_callback);
+            handleBrands(results, data.Items,function(){
+              queryPopular(params,_callback);
+            });
+            
           }else{
             handleBrands(results, data.Items, function(){
               couter += data.Items.length;
