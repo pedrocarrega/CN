@@ -3,6 +3,15 @@ const router = require('koa-router')();
 const table_name = "cn_table";
 
 //inicio de utilizacao do dynamo
+var fs = require('fs');
+var util = require('util');
+var log_file = fs.createWriteStream(__dirname + '/debug.log', {flags : 'w'});
+var log_stdout = process.stdout;
+
+console.log = function(d) { //
+  log_file.write(util.format(d) + '\n');
+  log_stdout.write(util.format(d) + '\n');
+};
 
 var AWS = require("aws-sdk");
 //Mudar os credenciais aqui
@@ -50,22 +59,28 @@ router.get('/api/products/listCategories', function *(next) {
   }
 
   var results = [];
+  var counter = 0;
 
   function queryCategories(params, _callback){
-    docClient.query (params, function scanUntilDone(err, data) {
+    docClient.query (params, function queryUntilDone(err, data) {
    
     if (err) {
-      //idk? What should we do in case of an error?
+      console.log("listCategories Err");
+      console.log(err);
     }
     else {
       if(data.LastEvaluatedKey){
         params.ExclusiveStartKey = data.LastEvaluatedKey;
         results = results.concat(data.Items.map(item => item.category_code.S));
         //docClient.query(params, scanUntilDone); // does this work? I want to join the results recursively
+        couter += data.Items.length;
+        console.log(counter);
         queryCategories(params,_callback);
       }else{
         //means all the results are queried
         results = results.concat(data.Items.map(item => item.category_code.S));
+        couter += data.Items.length;
+        console.log("terminou:" + counter);
         _callback(results);
       }
     }
@@ -91,7 +106,7 @@ router.get('/api/products/popularBrands', function *() {
     TableName: table_name,
     KeyConditionExpression: "pk_id = :v",
     ProjectionExpression: "brand",
-    FilterExpression: "#b != :empty_code", //not sure, nao quero strings vazias
+    FilterExpression: "#b <> :empty_code", //not sure, nao quero strings vazias
     ExpressionAttributeNames: {
       "#b": "brand",
     },
@@ -102,25 +117,44 @@ router.get('/api/products/popularBrands', function *() {
   }
 
   var results = [];
+  var counter = 0;
+  var results = {"popularity": []};
 
   function queryPopular(params, _callback){
     docClient.query (params, function (err, data) {
       if (err) {
-        //idk? What should we do in case of an error?
+        console.log("popularBrands Err");
+        console.log(err);
       }
       else {
           if(data.LastEvaluatedKey){
             params.ExclusiveStartKey = data.LastEvaluatedKey;
             results = results.concat(data.Items.map(item => item.brand.S));
+            counter += data.Items.length;
+            console.log(counter);
             //docClient.query(params, scanUntilDone); // does this work? I want to join the results recursively
             queryPopular(params,_callback);
           }else{
             //means all the results are queried
             results = results.concat(data.Items.map(item => item.brand.S));
+            couter += data.Items.length;
+            console.log("terminou:" + counter);
             _callback(results);
           }
       }
     });
+  }
+
+  function handleBrands(popularity, data){
+    var brand_name;
+    for(var i = 0; i < data.Items.length; i++){
+      brand_name = data.Items[i].brand.S;
+      if(popularity.hasProperty(brand_name)){
+        popularity.remove
+      }else{
+        popularity.push({brand_name: 1});
+      }
+    }
   }
 
   queryPopular(params, function(results){
@@ -155,6 +189,8 @@ router.get('/api/products/popularBrands', function *() {
  **/
 router.get('/api/products/salePrice/:brand', function *() {
 
+  console.log("got request");
+
   var brand = this.params.brand;
 
   var params = {
@@ -167,7 +203,7 @@ router.get('/api/products/salePrice/:brand', function *() {
         "#t": "event_type"
     },
     ExpressionAttributeValues: { 
-        ":b_name": brand,//aqui é que se dá filter à brand que vem como param?
+        ":b_name": {S: brand},//aqui é que se dá filter à brand que vem como param?
         ":evt_t": {S: "purchase"},
         ":v": {N: "0"}
     }    
@@ -175,19 +211,26 @@ router.get('/api/products/salePrice/:brand', function *() {
 
   var average = 0;
   var results = [];
+  var counter = 0;
 
   function querySalePrice(params, _callback){
     docClient.query (params, function (err, data) {
       if (err) {
-        //idk? What should we do in case of an error?
+        console.log("salePrice Err");
+        console.log(err);
       } else {
         if(data.LastEvaluatedKey){
           params.ExclusiveStartKey = data.LastEvaluatedKey;
           results = results.concat(data.Items.map(item => Number(item.price.N)));
           querySalePrice(params, _callback)
+          counter += data.Items.length;
+          console.log(data.Items);
+          console.log("another page " + counter);
         }else{
           //means all the results are queried
           results = results.concat(data.Items.map(item => Number(item.price.N)));
+          counter += data.Items.length;
+          console.log("terminated " + counter);
           _callback(results);
         }
       }
@@ -227,7 +270,7 @@ router.get('/api/products/salesByBrand', function *() {
     TableName: table_name,
     KeyConditionExpression: "pk_id = :v",
     ProjectionExpression: "brand",
-    FilterExpression: "#et = :evt_t and #b != :b", //posso fazer isto?
+    FilterExpression: "#et = :evt_t and #b <> :b", //posso fazer isto?
     ExpressionAttributeNames: {
         "#et": "event_type",
         "#b": "brand"
@@ -240,6 +283,7 @@ router.get('/api/products/salesByBrand', function *() {
   }
 
   var results = [];
+  var counter = 0;
 
   doQuery(params,function(results){
     this.body = foo(results);
@@ -261,18 +305,25 @@ router.get('/api/products/salesByBrand', function *() {
       return conjunto;
   }
 
+  var counter = 0;
+
     function doQuery(params, _callback) {
         docClient.query(params, function (err, data) {
             if (err) {
-                //idk? What should we do in case of an error?
+                console.log("salesByBrand Err");
+                console.log(err);
             } else {
                 if (data.LastEvaluatedKey) {
                     params.ExclusiveStartKey = data.LastEvaluatedKey;
                     results = results.concat(data.Items.map(item => item.brand.S));
-                    querySalePrice(params, _callback)
+                    counter += data.Items.length;
+                    console.log(counter);
+                    querySalePrice(params, _callback);
                 } else {
                     //means all the results are queried
                     results = results.concat(data.Items.map(item => item.brand.S));
+                    counter += data.Items.length;
+                    console.log(counter);
                     _callback(results);
                 }
             }
