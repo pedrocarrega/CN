@@ -54,7 +54,7 @@ router
             }
         };
 
-        doQueryCount(params, events, 0, function(total, result){
+        doQueryCount(params, events, 0, res, function(total, result){
 
             const ratios = [result[0]/total, result[1]/total, result[2]/total]
             console.log("Ended with: " + total + " values.")
@@ -80,7 +80,7 @@ router
                 }
             ];
             console.log(result)
-            res.send(result)
+            res.write(result);
         });
     });
 
@@ -103,7 +103,7 @@ function test2(params,count,_callback){
     })
 }
 
-function doQueryCount(qParams, events, count, callback) {
+function doQueryCount(qParams, events, count, res, callback) {
 
 	docClient.query(qParams, function (err, data) {
 		if (err) {
@@ -111,7 +111,6 @@ function doQueryCount(qParams, events, count, callback) {
 		}
 		else {
 			// console.log("users::fetchOneByKey::success - " + JSON.stringify(data, null, 2));
-			console.log("Success");
 			if (!data.hasOwnProperty('LastEvaluatedKey')) {
                 count += data.Count;
                 for(i = 0; i < data.Items.length; i++){
@@ -123,10 +122,11 @@ function doQueryCount(qParams, events, count, callback) {
 						events[2]++
                     }
                 }
+                var ratios = [events[0]/count, events[1]/count, events[2]/count]
+                res.write(result)
 				callback(count,events);
 			} else {
 				count += data.Count;
-                console.log("Passou para o next " + count);
 				for(i = 0; i < data.Items.length; i++){
 					if(data.Items[i].event_type.S == 'view'){
 						events[0]++
@@ -135,9 +135,12 @@ function doQueryCount(qParams, events, count, callback) {
 					}else if(data.Items[i].event_type.S == 'purchase'){
 						events[2]++
 					}
-				}
+                }
+
+                var ratios = [events[0]/count, events[1]/count, events[2]/count]
+                res.write("Current ratios \n - View: " + ratios[0] + " \n - Cart: " + ratios[1] + " \n - Purchase: " + ratios[2] + "\n");
 				qParams.ExclusiveStartKey = data.LastEvaluatedKey;
-				doQueryCount(qParams,events,count,callback);
+				doQueryCount(qParams,events,count,res,callback);
 			}
 		}
 	})
