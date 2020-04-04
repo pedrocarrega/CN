@@ -22,7 +22,7 @@ app.use(function *(next){
   console.log('%s %s - %s', this.method, this.url, ms);
 });
 
-router.get('/api/events/ratio', function* (next) {
+router.get('/api/events/ratio', function* () {
 
 	this.body = {"status": "Retrieving data..."}
 
@@ -30,6 +30,7 @@ router.get('/api/events/ratio', function* (next) {
 
 	var params = {
 		TableName : table_name,
+		ProjectionExpression: "event_type",
 		KeyConditionExpression: "pk_id = :v",
 		ExpressionAttributeValues: {
 			":v": {N: '0'}

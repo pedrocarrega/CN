@@ -74,7 +74,7 @@ router.get('/api/products/listCategories', function *(next) {
 
 	//To be tested
   queryCategories(params, function(results){
-    this.body = [...new Set(results))];
+    this.body = [...new Set(results)];
   });
   //var non_null = db.entries.filter((evt) => evt.category_code);
   
@@ -85,7 +85,7 @@ router.get('/api/products/listCategories', function *(next) {
  *
  * returns List
  **/
-router.get('/api/products/popularBrands', function *(next) {
+router.get('/api/products/popularBrands', function *() {
 
   var params = {
     TableName: table_name,
@@ -153,7 +153,7 @@ router.get('/api/products/popularBrands', function *(next) {
  * brand String Brand name
  * returns List
  **/
-router.get('/api/products/salePrice/:brand', function *(next) {
+router.get('/api/products/salePrice/:brand', function *() {
 
   var brand = this.params.brand;
 
@@ -198,7 +198,7 @@ router.get('/api/products/salePrice/:brand', function *(next) {
     var prices = results;
     var sum = 0;
     for(var i = 0; i < prices.length; i++){
-      sum += prices[i];//MAROSCA
+      sum += prices[i];
     }
     average = sum/prices.length;
 
@@ -221,7 +221,7 @@ router.get('/api/products/salePrice/:brand', function *(next) {
  *
  * returns List
  **/
-router.get('/api/products/salesByBrand', function *(next) {
+router.get('/api/products/salesByBrand', function *() {
 
   var params = {
     TableName: table_name,
