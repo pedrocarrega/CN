@@ -116,9 +116,9 @@ router.get('/api/products/popularBrands', function *() {
     }
   }
 
-  var results = [];
+  //var results = [];
   var counter = 0;
-  var results = {"popularity": []};
+  var results = {};
 
   function queryPopular(params, _callback){
     docClient.query (params, function (err, data) {
@@ -129,53 +129,37 @@ router.get('/api/products/popularBrands', function *() {
       else {
           if(data.LastEvaluatedKey){
             params.ExclusiveStartKey = data.LastEvaluatedKey;
-            results = results.concat(data.Items.map(item => item.brand.S));
             counter += data.Items.length;
             console.log(counter);
-            //docClient.query(params, scanUntilDone); // does this work? I want to join the results recursively
+            handleBrands(results, data.Items);
             queryPopular(params,_callback);
           }else{
-            //means all the results are queried
-            results = results.concat(data.Items.map(item => item.brand.S));
-            couter += data.Items.length;
-            console.log("terminou:" + counter);
-            _callback(results);
+            handleBrands(results, data.Items, function(){
+              couter += data.Items.length;
+              console.log("terminou:" + counter);
+              _callback(results);
+            });
+            
           }
       }
     });
   }
 
-  function handleBrands(popularity, data){
+  function handleBrands(popularity, data, _callback){
     var brand_name;
     for(var i = 0; i < data.Items.length; i++){
       brand_name = data.Items[i].brand.S;
-      if(popularity.hasProperty(brand_name)){
-        popularity.remove
+      if(popularity[brand_name]){
+        popularity[brand_name] += 1;
       }else{
-        popularity.push({brand_name: 1});
+        popularity[brand_name] = 1;
       }
     }
+    _callback();
   }
 
   queryPopular(params, function(results){
-    var sales = results;
-    this.body = foo(sales);
-
-    function foo(arr) {
-      var prev;
-      var conjunto = [];
-        
-        arr.sort();
-        for ( var i = 0; i < arr.length; i++ ) {
-            if ( arr[i] !== prev ) {
-              conjunto.push({'brand': arr[i].S, 'popularity': 1, "sales": 0});
-            } else {
-              conjunto[conjunto.length-1].popularity++;
-            }
-            prev = arr[i];
-        }
-        return conjunto;
-    }
+    this.body = results;
   });  
 });
 
