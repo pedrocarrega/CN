@@ -52,12 +52,12 @@ router
                 if(data.LastEvaluatedKey){
                 params.ExclusiveStartKey = data.LastEvaluatedKey;
                 results = results.concat(data.Items.map(item => item.category_code.S));
-                couter += data.Items.length;
+                counter += data.Items.length;
                 console.log(counter);
                 queryCategories(params,_callback);
                 }else{
                 results = results.concat(data.Items.map(item => item.category_code.S));
-                couter += data.Items.length;
+                counter += data.Items.length;
                 console.log("terminou:" + counter);
                 _callback(results);
                 }
@@ -123,11 +123,12 @@ router
     });
 
 router
-    .route("/salePrice/:brands")
+    .route("/salePrice/:brand")
     .get((req, res) => {
         console.log("got request");
 
-         var brand = this.params.brand;
+        var brand = req.params.brand;
+        console.log(brand);
 
         var params = {
             TableName: table_name,
@@ -197,7 +198,7 @@ router
     });
 
 router
-    .route("/salePrice/:brands")
+    .route('/salesByBrand')
     .get((req, res) => {
         var params = {
             TableName: table_name,
@@ -229,7 +230,7 @@ router
                         handleBrands(results, data.Items, function(){
                             counter += data.Items.length;
                             console.log(counter);
-                            querySalePrice(params, _callback);
+                            doQuery(params, _callback);
                         });
                     } else {
                         handleBrands(results, data.Items, function(){
@@ -249,8 +250,8 @@ router
 
 function handleBrands(popularity, data, _callback){
     var brand_name;
-    for(var i = 0; i < data.Items.length; i++){
-        brand_name = data.Items[i].brand.S;
+    for(var i = 0; i < data.length; i++){
+        brand_name = data[i].brand.S;
         if(popularity[brand_name]){
         popularity[brand_name] += 1;
         }else{
