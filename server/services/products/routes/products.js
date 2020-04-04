@@ -50,16 +50,16 @@ router
             }
             else {
                 if(data.LastEvaluatedKey){
-                params.ExclusiveStartKey = data.LastEvaluatedKey;
-                results = results.concat(data.Items.map(item => item.category_code.S));
-                counter += data.Items.length;
-                console.log(counter);
-                queryCategories(params,_callback);
+                    params.ExclusiveStartKey = data.LastEvaluatedKey;
+                    results = results.concat(data.Items.map(item => item.category_code.S));
+                    counter += data.Items.length;
+                    res.write(counter + " entradas validas\n");
+                    queryCategories(params,_callback);
                 }else{
-                results = results.concat(data.Items.map(item => item.category_code.S));
-                counter += data.Items.length;
-                console.log("terminou:" + counter);
-                _callback(results);
+                    results = results.concat(data.Items.map(item => item.category_code.S));
+                    counter += data.Items.length;
+                    console.log("terminou:" + counter);
+                    _callback(results);
                 }
             }
             });
@@ -100,7 +100,7 @@ router
                     if(data.LastEvaluatedKey){
                     params.ExclusiveStartKey = data.LastEvaluatedKey;
                     counter += data.Items.length;
-                    console.log(counter);
+                    res.write(counter + " entradas validas\n");
                     handleBrands(results, data.Items,function(){
                         queryPopular(params,_callback);
                     });
@@ -161,8 +161,7 @@ router
                     results = results.concat(data.Items.map(item => Number(item.price.N)));
                     querySalePrice(params, _callback)
                     counter += data.Items.length;
-                    console.log(data.Items);
-                    console.log("another page " + counter);
+                    res.write(counter + " entradas validas\n");
                     }else{
                     //means all the results are queried
                     results = results.concat(data.Items.map(item => Number(item.price.N)));
@@ -229,13 +228,12 @@ router
                         params.ExclusiveStartKey = data.LastEvaluatedKey;
                         handleBrands(results, data.Items, function(){
                             counter += data.Items.length;
-                            console.log(counter);
+                            res.write(counter + " entradas validas\n");
                             doQuery(params, _callback);
                         });
                     } else {
                         handleBrands(results, data.Items, function(){
                             counter += data.Items.length;
-                            console.log(counter);
                             _callback(results);
                         });
                     }
