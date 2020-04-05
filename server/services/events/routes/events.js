@@ -48,9 +48,10 @@ router
         var params = {
             TableName : table_name,
             ProjectionExpression: "event_type",
-            KeyConditionExpression: "pk_id = :v",
+            KeyConditionExpression: "pk_id = :v and event_id < :e",
             ExpressionAttributeValues: {
-                ":v": {N: '0'}
+                ":v": {N: '0'},
+                ":e": {N: '20000'}
             }
         };
 
@@ -80,7 +81,8 @@ router
                 }
             ];
             console.log(result)
-            res.send(result);
+            res.write(JSON.stringify(result));
+            res.end();
         });
     });
 
