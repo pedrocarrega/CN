@@ -48,10 +48,9 @@ router
         var params = {
             TableName : table_name,
             ProjectionExpression: "event_type",
-            KeyConditionExpression: "pk_id = :v and event_id < :e",
+            KeyConditionExpression: "pk_id = :v",
             ExpressionAttributeValues: {
-                ":v": {N: '0'},
-                ":e": {N: '20000'}
+                ":v": {N: '0'}
             }
         };
 

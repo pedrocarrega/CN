@@ -65,7 +65,8 @@ router
             });
         }
         queryCategories(params, function(results){
-            res.send([...new Set(results)]);
+            res.write(JSON.stringify([...new Set(results)]));
+            res.end();
         });
     });
 
@@ -107,8 +108,7 @@ router
                     
                     }else{
                     handleBrands(results, data.Items, function(){
-                        couter += data.Items.length;
-                        console.log("terminou:" + counter);
+                        counter += data.Items.length;
                         _callback(results);
                     });
                     
@@ -118,7 +118,8 @@ router
         }
         
         queryPopular(params, function(results){
-            res.send(results);
+            res.write(JSON.stringify(results));
+            res.end();
         });  
     });
 
@@ -192,7 +193,8 @@ router
                     "name": ""
                 }
             }
-            res.send(response);
+            res.write(JSON.stringify(response));
+            res.end();
         });
     });
 
@@ -242,7 +244,8 @@ router
         }
 
         doQuery(params,function(results){
-            res.send(results);
+            res.write(JSON.stringify(results));
+            res.end();
         });
     });
 
