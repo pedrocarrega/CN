@@ -1,15 +1,21 @@
 REGION=$1
-
 VPC_STACKNAME=$2
+CLUSTER_NAME=$3
 
 printf "REGION: \`${REGION}\`${NC}\n"
 printf "VPC STACK: \`${VPC_STACKNAME}\`${NC}\n"
 
-#aws iam create-role --role-name eksServiceRole --assume-role-policy-document file://assume-role.json --description "Allows EKS to manage clusters on your behalf."
+aws iam create-role --role-name eksServiceRole --assume-role-policy-document file://eks-service-role/assume-role.json --description "Allows EKS to manage clusters on your behalf."
 
-#aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
 
-#aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+
+aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+
+#aws cloudformation deploy --template-file amazon-eks-vpc-private-subnets.yaml --region $REGION --stack-name $VPC_STACKNAME --capabilities CAPABILITY_NAMED_IAM
 
 
 QUERY=$(cat <<-EOF
@@ -22,8 +28,8 @@ EOF)
 
 
 RESULTS=$(aws cloudformation describe-stacks \
-	--stack-name eks-vpc \
-	--region eu-west-1 \
+	--stack-name $VPC_STACKNAME \
+	--region $REGION \
 	--query "$QUERY" \
 	--output text);
 RESULTS_ARRAY=($RESULTS)
@@ -41,6 +47,7 @@ QUERY2=$(cat <<-EOF
 EOF)
 
 
+
 GET_ROLE=$(aws iam get-role --role-name eksServiceRole | jq '.Role.Arn' -r);
 
 printf  "\`${GET_ROLE}\`${NC}\n"
@@ -48,7 +55,7 @@ printf  "\`${GET_ROLE}\`${NC}\n"
 printf " subnetIds= ${RESULTS_ARRAY[2]},securityGroupIds=${RESULTS_ARRAY[0]} \n\n\n"
 
 aws eks  create-cluster --region $REGION \
-   --name cn_group --kubernetes-version 1.15 \
+   --name $CLUSTER_NAME --kubernetes-version 1.15 \
    --role-arn \
       $GET_ROLE \
    --resources-vpc-config subnetIds=${RESULTS_ARRAY[2]},securityGroupIds=${RESULTS_ARRAY[0]}
