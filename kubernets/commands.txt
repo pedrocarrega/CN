@@ -1,0 +1,36 @@
+==================================CREATING EKS ROLES==================================
+aws iam create-role --role-name eksServiceRole --assume-role-policy-document file://assume-role.json --description "Allows EKS to manage clusters on your behalf."
+
+aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+
+aws iam attach-role-policy --role-name eksServiceRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+
+
+
+
+=============================================VPC===========================================
+
+aws cloudformation deploy --template-file amazon-eks-vpc-private-subnets.yaml --region eu-west-1 --stack-name eks-vpc --capabilities CAPABILITY_NAMED_IAM
+
+QUERY=$(cat <<-EOF
+[
+	Stacks[0].Outputs[?OutputKey==\`ClusterName\`].OutputValue,
+	Stacks[0].Outputs[?OutputKey==\`SecurityGroups\`].OutputValue,
+	Stacks[0].Outputs[?OutputKey==\`VpcId\`].OutputValue,
+	Stacks[0].Outputs[?OutputKey==\`SubnetIds\`].OutputValue
+]
+EOF)
+
+
+RESULTS=$(aws cloudformation describe-stacks \
+	--stack-name eks-vpc \
+	--region eu-west-1 \
+	--query "$QUERY" \
+	--output text);
+RESULTS_ARRAY=($RESULTS)
+
+for ITEM in "${RESULTS_ARRAY[@]}"
+do
+printf "\`${ITEM}\`${NC}\n"
+done
+
