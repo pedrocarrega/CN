@@ -2,8 +2,6 @@ REGION=$1
 CLUSTER_NAME=$2
 STACK_NAME=$3
 
-aws iam add-role-to-instance-profile --role-name Test-Role --instance-profile-name Webserver
-
 ENDPOINT=$(aws eks --region $REGION describe-cluster --name $CLUSTER_NAME  --query "cluster.endpoint" --output text)
 
 CERTIFICATE=$(aws eks --region $REGION describe-cluster --name $CLUSTER_NAME  --query "cluster.certificateAuthority.data" --output text)
@@ -25,10 +23,10 @@ RESULTS=$(aws cloudformation describe-stacks \
 	--output text);
 RESULTS_ARRAY=($RESULTS)
 
-IFS=', ' \'${RESULTS_ARRAY[0]}\' -r -a array <<< "$string"
-SUBNETS=${string[0]} ${string[1]} ${string[2]} ${string[3]}
+IFS=',' read -r -a array <<< "$RESULTS_ARRAY"
+SUBNETS="${array[0]} ${array[1]} ${array[2]} ${array[3]}"
 
-printf  "\`${array[0]}\`${NC}\n"
+printf  "$SUBNETS"
 
 aws eks create-nodegroup \
 --cluster-name $CLUSTER_NAME \
