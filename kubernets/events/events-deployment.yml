@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: events-deployment
+  labels:
+    app: ecommerce-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ecommerce-api
+  template:
+    metadata:
+      labels:
+        app: ecommerce-api
+    spec:
+      containers:
+      - name: events
+        image: 774440115756.dkr.ecr.eu-west-1.amazonaws.com/events:v1
+        ports:
+        - containerPort: 3000

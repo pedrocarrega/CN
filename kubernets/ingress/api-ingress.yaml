@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "ecommerce-ingress"
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+  labels:
+    app: ecommerce-api
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api/events*
+            backend:
+              serviceName: "events"
+              servicePort: 80
+          - path: /api/products*
+            backend:
+              serviceName: "products"
+              servicePort: 80
