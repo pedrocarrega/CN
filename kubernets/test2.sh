@@ -26,8 +26,6 @@ RESULTS_ARRAY=($RESULTS)
 IFS=',' read -r -a array <<< "$RESULTS_ARRAY"
 SUBNETS="${array[0]} ${array[1]} ${array[2]} ${array[3]}"
 
-printf  "$SUBNETS"
-
 aws eks create-nodegroup \
 --cluster-name $CLUSTER_NAME \
 --nodegroup-name $STACK_NAME \
