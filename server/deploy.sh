@@ -79,7 +79,7 @@ do
 
 	sudo docker pull 774440115756.dkr.ecr.eu-west-1.amazonaws.com/$SERVICE_NAME:v1
 
-	printf "Now place the your iAM configuration values"
+	printf "Now place your IAM configuration values"
 	aws configure
 
 	sudo docker tag 774440115756.dkr.ecr.eu-west-1.amazonaws.com/$SERVICE_NAME:v1 $REPO:$TAG
