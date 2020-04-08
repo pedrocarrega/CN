@@ -6,6 +6,11 @@ DEPLOYABLE_SERVICES=(
 	products
 );
 
+aws configure
+
+printf "Creating the stack, this will take some time";
+aws cloudformation deploy --template-file infrastructure/ecs.yml --region $REGION --stack-name $STACK_NAME --capabilities CAPABILITY_NAMED_IAM
+
 PRIMARY='\033[0;34m'
 NC='\033[0m' # No Color
 
@@ -66,9 +71,18 @@ do
 
 	printf "${PRIMARY}* Building \`${SERVICE_NAME}\`${NC}\n";
 
-	# Build the container, and assign a tag to it for versioning
+	# Pull the container, and assign a tag to it for versioning
 	(cd services/$SERVICE_NAME && npm install);
-	sudo docker build -t $SERVICE_NAME ./services/$SERVICE_NAME
+
+	printf "Now place the following configurations:\nID: AKIA3IUB2LYWF5TNE7GR\nPW: Atxkf/+VQhQKUViAJkLyyYYhJG+7MV6qjImoA2dX\nRegion: eu-west-1\nFormat: json\n"
+	aws configure
+
+	sudo docker pull 774440115756.dkr.ecr.eu-west-1.amazonaws.com/$SERVICE_NAME:v1
+
+	printf "Now place the your iAM configuration values"
+	aws configure
+
+	sudo docker tag 774440115756.dkr.ecr.eu-west-1.amazonaws.com/$SERVICE_NAME:v1 $REPO:$TAG
 	sudo docker tag $SERVICE_NAME:latest $REPO:$TAG
 
 	# Push the tag up so we can make a task definition for deploying it
