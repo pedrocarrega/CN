@@ -6,8 +6,6 @@ DEPLOYABLE_SERVICES=(
 	products
 );
 
-aws configure
-
 printf "Creating the stack, this will take some time";
 aws cloudformation deploy --template-file infrastructure/ecs.yml --region $REGION --stack-name $STACK_NAME --capabilities CAPABILITY_NAMED_IAM
 
@@ -42,8 +40,6 @@ VPCID=${RESULTS_ARRAY[4]}
 
 printf "${PRIMARY}* Authenticating with EC2 Container Repository${NC}\n";
 
-`aws ecr get-login --region $REGION --no-include-email`
-
 # Tag for versioning the container images, currently set to timestamp
 TAG=`date +%s`
 
@@ -74,12 +70,18 @@ do
 	# Pull the container, and assign a tag to it for versioning
 	(cd services/$SERVICE_NAME && npm install);
 
-	printf "Now place the following configurations:\nID: AKIA3IUB2LYWF5TNE7GR\nPW: Atxkf/+VQhQKUViAJkLyyYYhJG+7MV6qjImoA2dX\nRegion: eu-west-1\nFormat: json\n"
+	printf "\nNow place the following configurations:\nID: AKIA3IUB2LYWF5TNE7GR\nPW: Atxkf/+VQhQKUViAJkLyyYYhJG+7MV6qjImoA2dX\nRegion: eu-west-1\nFormat: json\n"
 	aws configure
+
+	aws ecr get-login-password --region $REGION | sudo docker login --username AWS --password-stdin 774440115756.dkr.ecr.eu-west-1.amazonaws.com/$SERVICE_NAME
 
 	sudo docker pull 774440115756.dkr.ecr.eu-west-1.amazonaws.com/$SERVICE_NAME:v1
 
+<<<<<<< HEAD
 	printf "Now place your IAM configuration values"
+=======
+	printf "Now place the your iAM configuration values\n"
+>>>>>>> 1932cfc0be427ad0cce0dc1e27660858cc7f1170
 	aws configure
 
 	sudo docker tag 774440115756.dkr.ecr.eu-west-1.amazonaws.com/$SERVICE_NAME:v1 $REPO:$TAG
@@ -87,6 +89,8 @@ do
 
 	# Push the tag up so we can make a task definition for deploying it
 	printf "${PRIMARY}* Pushing \`${SERVICE_NAME}\`${NC}\n";
+
+	aws ecr get-login-password --region $REGION | sudo docker login --username AWS --password-stdin $REPO
 
 	sudo docker push $REPO:$TAG
 
