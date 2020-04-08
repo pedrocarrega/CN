@@ -73,7 +73,8 @@ spec:
   ports:
   - protocol: TCP
     port: 3000
-    targetPort: 3000" > events/events-service.yml
+    targetPort: 3000
+  type: NodePort" > events/events-service.yml
 
 echo "apiVersion: apps/v1
 kind: Deployment
@@ -125,7 +126,8 @@ spec:
   ports:
   - protocol: TCP
     port: 3000
-    targetPort: 3000" > products/products-service.yml
+    targetPort: 3000
+  type: NodePort" > products/products-service.yml
 
 echo "apiVersion: apps/v1
 kind: Deployment
