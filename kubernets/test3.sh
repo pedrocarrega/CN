@@ -1,6 +1,29 @@
 REGION=$1
 CLUSTER_NAME=$2
 
+printf  "Inserir as credenciais de acesso ao ECR ou de admin da conta de AWS:\n"
+aws configure
+
+REPO_EVENTS=`aws ecr create-repository \
+			--region $REGION \
+			--repository-name "events" \
+			--query "repository.repositoryUri" \
+			--output text`
+
+REPO_PRODUCTS=`aws ecr create-repository \
+			--region $REGION \
+			--repository-name "products" \
+			--query "repository.repositoryUri" \
+			--output text`
+
+aws ecr get-login-password --region eu-west-1 | sudo docker login --username AWS --password-stdin $REPO_EVENTS
+sudo docker tag 774440115756.dkr.ecr.eu-west-1.amazonaws.com/events:v1 $REPO_EVENTS:v1
+sudo docker push $REPO_EVENTS:v1
+
+aws ecr get-login-password --region eu-west-1 | sudo docker login --username AWS --password-stdin $REPO_PRODUCTS
+sudo docker tag 774440115756.dkr.ecr.eu-west-1.amazonaws.com/products:v1 $REPO_PRODUCTS:v1
+sudo docker push $REPO_PRODUCTS:v1
+
 eksctl utils associate-iam-oidc-provider \
     --region $REGION \
     --cluster $CLUSTER_NAME \
@@ -31,7 +54,7 @@ metadata:
 spec:
   containers:
   - name: events
-    image: 774440115756.dkr.ecr.eu-west-1.amazonaws.com/events:v1
+    image: $REPO_EVENTS:v1
     ports:
     - containerPort: 3000" > events/events-pod.yml
 
@@ -66,7 +89,7 @@ spec:
     spec:
       containers:
       - name: events
-        image: 774440115756.dkr.ecr.eu-west-1.amazonaws.com/events:v1
+        image: $REPO_EVENTS:v1
         ports:
         - containerPort: 3000" > events/events-deployment.yml
 
@@ -84,7 +107,7 @@ metadata:
 spec:
   containers:
   - name: products
-    image: 774440115756.dkr.ecr.eu-west-1.amazonaws.com/products:v1
+    image: $REPO_PRODUCTS:v1
     ports:
     - containerPort: 3000" > products/products-pod.yml
 
@@ -119,7 +142,7 @@ spec:
     spec:
       containers:
       - name: products
-        image: 774440115756.dkr.ecr.eu-west-1.amazonaws.com/products:v1
+        image: $REPO_PRODUCTS:v1
         ports:
         - containerPort: 3000" > products/products-deployment.yml
 
