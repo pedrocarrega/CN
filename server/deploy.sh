@@ -7,7 +7,7 @@ DEPLOYABLE_SERVICES=(
 );
 
 printf "Creating the stack, this will take some time";
-#aws cloudformation deploy --template-file infrastructure/ecs.yml --region $REGION --stack-name $STACK_NAME --capabilities CAPABILITY_NAMED_IAM
+aws cloudformation deploy --template-file infrastructure/ecs.yml --region $REGION --stack-name $STACK_NAME --capabilities CAPABILITY_NAMED_IAM
 
 PRIMARY='\033[0;34m'
 NC='\033[0m' # No Color
