@@ -2,11 +2,15 @@ REGION=$1
 CLUSTER_NAME=$2
 STACK_NAME=$3
 
+
+
 ENDPOINT=$(aws eks --region $REGION describe-cluster --name $CLUSTER_NAME  --query "cluster.endpoint" --output text)
 
 CERTIFICATE=$(aws eks --region $REGION describe-cluster --name $CLUSTER_NAME  --query "cluster.certificateAuthority.data" --output text)
 
 aws eks --region $REGION update-kubeconfig --name $CLUSTER_NAME
+
+sudo apt install jq
 
 GET_ROLE=$(aws iam get-role --role-name eksServiceRole | jq '.Role.Arn' -r);
 
@@ -31,7 +35,7 @@ aws eks create-nodegroup \
 --nodegroup-name $STACK_NAME \
 --instance-types t2.micro \
 --ami-type AL2_x86_64 \
---scaling-config minSize=1,maxSize=4,desiredSize=3 \
+--scaling-config minSize=1,maxSize=7,desiredSize=3 \
 --node-role $GET_ROLE \
 --subnets $SUBNETS
 

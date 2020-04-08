@@ -73,7 +73,7 @@ spec:
 kubectl apply -f events/events-pod.yml
 kubectl apply -f events/events-service.yml
 kubectl apply -f events/events-deployment.yml
-#kubectl expose deployment events-deployment --type=LoadBalancer --port=3000
+kubectl expose deployment events-deployment --type=LoadBalancer --port=3000
 
 echo "apiVersion: v1
 kind: Pod
@@ -126,4 +126,4 @@ spec:
 kubectl apply -f products/products-pod.yml
 kubectl apply -f products/products-service.yml
 kubectl apply -f products/products-deployment.yml
-#kubectl expose deployment products-deployment --type=LoadBalancer --port=3000
+kubectl expose deployment products-deployment --type=LoadBalancer --port=3000

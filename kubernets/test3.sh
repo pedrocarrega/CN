@@ -24,6 +24,11 @@ aws ecr get-login-password --region eu-west-1 | sudo docker login --username AWS
 sudo docker tag 774440115756.dkr.ecr.eu-west-1.amazonaws.com/products:v1 $REPO_PRODUCTS:v1
 sudo docker push $REPO_PRODUCTS:v1
 
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/aws/service-l4.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/aws/patch-configmap-l4.yaml
+
+
 eksctl utils associate-iam-oidc-provider \
     --region $REGION \
     --cluster $CLUSTER_NAME \
@@ -68,8 +73,7 @@ spec:
   ports:
   - protocol: TCP
     port: 3000
-    targetPort: 3000
-  type: NodePort" > events/events-service.yml
+    targetPort: 3000" > events/events-service.yml
 
 echo "apiVersion: apps/v1
 kind: Deployment
@@ -96,7 +100,7 @@ spec:
 kubectl apply -f events/events-pod.yml
 kubectl apply -f events/events-service.yml
 kubectl apply -f events/events-deployment.yml
-#kubectl expose deployment events-deployment --type=LoadBalancer --port=3000
+kubectl expose deployment events-deployment --type=LoadBalancer --port=3000
 
 echo "apiVersion: v1
 kind: Pod
@@ -121,8 +125,7 @@ spec:
   ports:
   - protocol: TCP
     port: 3000
-    targetPort: 3000
-  type: NodePort" > products/products-service.yml
+    targetPort: 3000" > products/products-service.yml
 
 echo "apiVersion: apps/v1
 kind: Deployment
@@ -149,4 +152,4 @@ spec:
 kubectl apply -f products/products-pod.yml
 kubectl apply -f products/products-service.yml
 kubectl apply -f products/products-deployment.yml
-#kubectl expose deployment products-deployment --type=LoadBalancer --port=3000
+kubectl expose deployment products-deployment --type=LoadBalancer --port=3000
