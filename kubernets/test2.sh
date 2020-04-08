@@ -29,9 +29,9 @@ SUBNETS="${array[0]} ${array[1]} ${array[2]} ${array[3]}"
 aws eks create-nodegroup \
 --cluster-name $CLUSTER_NAME \
 --nodegroup-name $STACK_NAME \
---instance-types t2.micro \
+--instance-types t3.micro \
 --ami-type AL2_x86_64 \
---scaling-config minSize=1,maxSize=4,desiredSize=3 \
+--scaling-config minSize=1,maxSize=4,desiredSize=2 \
 --node-role $GET_ROLE \
 --subnets $SUBNETS
 
