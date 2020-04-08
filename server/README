@@ -1,0 +1,12 @@
+To deploy you need to run the following command:
+
+./deply.sh <region> <stack_name>
+
+You should replace the <> values with your desired values.
+We suggest for the region eu-west-1
+
+iAM configurations to place:
+    ID: AKIA3IUB2LYWF5TNE7GR
+    PW: Atxkf/+VQhQKUViAJkLyyYYhJG+7MV6qjImoA2dX
+    Region: eu-west-1
+    Format: json
