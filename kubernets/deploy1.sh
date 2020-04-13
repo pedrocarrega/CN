@@ -46,13 +46,7 @@ QUERY2=$(cat <<-EOF
 ]
 EOF)
 
-
-
 GET_ROLE=$(aws iam get-role --role-name eksServiceRole | jq '.Role.Arn' -r);
-
-printf  "\`${GET_ROLE}\`${NC}\n"
-
-printf " subnetIds= ${RESULTS_ARRAY[2]},securityGroupIds=${RESULTS_ARRAY[0]} \n\n\n"
 
 aws eks  create-cluster --region $REGION \
    --name $CLUSTER_NAME --kubernetes-version 1.15 \

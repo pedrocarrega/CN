@@ -2,8 +2,6 @@ REGION=$1
 CLUSTER_NAME=$2
 STACK_NAME=$3
 
-
-
 ENDPOINT=$(aws eks --region $REGION describe-cluster --name $CLUSTER_NAME  --query "cluster.endpoint" --output text)
 
 CERTIFICATE=$(aws eks --region $REGION describe-cluster --name $CLUSTER_NAME  --query "cluster.certificateAuthority.data" --output text)
@@ -35,11 +33,7 @@ aws eks create-nodegroup \
 --nodegroup-name $STACK_NAME \
 --instance-types t3.micro \
 --ami-type AL2_x86_64 \
-<<<<<<< HEAD
---scaling-config minSize=1,maxSize=7,desiredSize=3 \
-=======
---scaling-config minSize=1,maxSize=4,desiredSize=2 \
->>>>>>> 1932cfc0be427ad0cce0dc1e27660858cc7f1170
+--scaling-config minSize=1,maxSize=7,desiredSize=6 \
 --node-role $GET_ROLE \
 --subnets $SUBNETS
 

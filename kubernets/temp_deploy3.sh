@@ -1,26 +1,5 @@
-REGION=$1
-CLUSTER_NAME=$2
-
-eksctl utils associate-iam-oidc-provider \
-    --region $REGION \
-    --cluster $CLUSTER_NAME \
-    --approve
-
-GET_ROLE=$(aws iam create-policy \
-    --policy-name ALBIngressControllerIAMPolicy \
-    --policy-document file://ingress/ingress-role.json | jq '.Policy.Arn' -r);
-
-kubectl apply -f ingress/ingress-controller.yaml
-
-kubectl annotate serviceaccount -n kube-system alb-ingress-controller $GET_ROLE
-
-kubectl apply -f ingress/ingress-deploy.yaml
-
-curl -sS "https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/alb-ingress-controller.yaml" \
-     | sed "s/# - --cluster-name=devCluster/- --cluster-name=$CLUSTER_NAME/g" \
-     | kubectl apply -f -
-
-kubectl apply -f ingress/api-ingress.yaml
+mkdir events
+mkdir products
 
 echo "apiVersion: v1
 kind: Pod
@@ -31,7 +10,7 @@ metadata:
 spec:
   containers:
   - name: events
-    image: 774440115756.dkr.ecr.eu-west-1.amazonaws.com/events:v1
+    image:  774440115756.dkr.ecr.eu-west-1.amazonaws.com/events:v1
     ports:
     - containerPort: 3000" > events/events-pod.yml
 
@@ -66,14 +45,14 @@ spec:
     spec:
       containers:
       - name: events
-        image: 774440115756.dkr.ecr.eu-west-1.amazonaws.com/events:v1
+        image:  774440115756.dkr.ecr.eu-west-1.amazonaws.com/events:v1
         ports:
         - containerPort: 3000" > events/events-deployment.yml
 
 kubectl apply -f events/events-pod.yml
 kubectl apply -f events/events-service.yml
 kubectl apply -f events/events-deployment.yml
-kubectl expose deployment events-deployment --type=LoadBalancer --port=3000
+#kubectl expose deployment events-deployment --type=LoadBalancer --port=3000
 
 echo "apiVersion: v1
 kind: Pod
@@ -126,4 +105,4 @@ spec:
 kubectl apply -f products/products-pod.yml
 kubectl apply -f products/products-service.yml
 kubectl apply -f products/products-deployment.yml
-kubectl expose deployment products-deployment --type=LoadBalancer --port=3000
+#kubectl expose deployment products-deployment --type=LoadBalancer --port=3000
