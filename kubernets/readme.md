@@ -26,8 +26,8 @@ For the region we recommend 'eu-west-1', that being said we leave the region sel
 
 2. The second script deploy2.sh requires the same 3 arguments inputted in the same order.
     The node group takes around 10 to 15 minutes to be active. After the node groups are ready, we proceed to the third script.
-    To check the status the node groups, type `aws eks describe-nodegroup --cluster-name CLUSTER_NAME --nodegroup STACK_NAME` , replacing CLUSTER:NAME with the given argument name when executing the script.
-    You will be asked to input the ECR Pull IAM credentials which can be found in the credentials.csv file.
+    To check the status the node groups, type `aws eks describe-nodegroup --cluster-name CLUSTER_NAME --nodegroup STACK_NAME` , replacing CLUSTER_NAME and STACK_NAME with the given argument name when executing the script.
+    You will be asked to input the ECR Pull IAM credentials which can be found in the `credenciais.txt` file.
 
 3. The third script deploy3.sh requires 2 arguments in the following order: 
 	-the region where the stack is hosted
@@ -45,3 +45,17 @@ For the region we recommend 'eu-west-1', that being said we leave the region sel
 		- aws iam get-role --role-name eksServiceRole
 
 	4.2 Inside the ingress/alb-ingress-controller.yaml file, uncomment the `--cluster-name line`, and place the name of the cluster previously given on the other scripts. NOTE: The cluster name must be correct for the scripts to deploy correctly.
+
+	4.3 After changing said files we can finnaly execute script deploy4.sh
+
+5. To access the services, type in the commmand line: `kubectl get ingress` and copy the address given. To access a specific service append the url (ex.:/api/events/ratio)
+
+==============================================================
+
+Deleting deployment:
+
+	1. Navigate to the AWS EKS console at `https://eu-west-1.console.aws.amazon.com/eks/home?region=eu-west-1#/clusters` depending on the region, access the cluster and delete the nodegroup.
+        2. After the nodegroup is deleted, we can then proceed to the deletion of the cluster itself.
+        3. Navigate to the EC2 console at `https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#LoadBalancers` depending on the region and delete the load balancers.
+        4. Navigate to the VPC section at `https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#vpcs` and delete the created non-default VPC
+        5. Navigate to the CloudFormation stacks at `https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks` depending on the region and delete the created stack
