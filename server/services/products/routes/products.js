@@ -1,8 +1,13 @@
+const mongo = require('mongodb').MongoClient;
 const express = require("express");
 let router = express.Router();
-var AWS = require("aws-sdk");
-const table_name = "cn_table"
+const url = "mongodb://localhost:27017/";
 
+//var AWS = require("aws-sdk");
+//const table_name = "cn_table"
+
+
+/*
 let awsConfig = {
 	"region": "eu-west-1",
 	"endpoint": "http://dynamodb.eu-west-1.amazonaws.com",
@@ -12,7 +17,7 @@ let awsConfig = {
 
 AWS.config.update(awsConfig);
 let docClient = new AWS.DynamoDB;
-
+*/
 module.exports = router;
 
 router
@@ -24,49 +29,67 @@ router
 router
     .route("/listCategories")
     .get((req, res) => {
-        var params = {
-            TableName: table_name,
-            KeyConditionExpression: "pk_id = :v",
-            ProjectionExpression: "category_code",
-            FilterExpression: "#cc <> :empty_code",
-            ExpressionAttributeNames: {
-              "#cc": "category_code"
-            },
-            ExpressionAttributeValues: {
-              ":empty_code" : {S: "-"},
-              ":v" : {N: "0"}
-            }
-        }
-        
-        var results = [];
-        var counter = 0;
-        
-        function queryCategories(params, _callback){
-        docClient.query (params, function queryUntilDone(err, data) {
-        
-            if (err) {
-                console.log("listCategories Err");
-                console.log(err);
-            }
-            else {
-                if(data.LastEvaluatedKey){
-                    params.ExclusiveStartKey = data.LastEvaluatedKey;
-                    results = results.concat(data.Items.map(item => item.category_code.S));
-                    counter += data.Items.length;
-                    res.write(counter + " entradas validas\n");
-                    queryCategories(params,_callback);
-                }else{
-                    results = results.concat(data.Items.map(item => item.category_code.S));
-                    counter += data.Items.length;
-                    console.log("terminou:" + counter);
-                    _callback(results);
+
+        mongo.connect(url, function (err, db){
+
+            if (err) throw err;
+            var dbo = db.db("mongodb");
+
+            var results = await dbo.collection("entries").distinct("category_code");
+            console.log(results);
+
+            res.write(JSON.stringify(results));
+            res.end();
+            //var counter = 0;
+
+            /*var params = {
+                TableName: table_name,
+                KeyConditionExpression: "pk_id = :v",
+                ProjectionExpression: "category_code",
+                FilterExpression: "#cc <> :empty_code",
+                ExpressionAttributeNames: {
+                  "#cc": "category_code"
+                },
+                ExpressionAttributeValues: {
+                  ":empty_code" : {S: "-"},
+                  ":v" : {N: "0"}
                 }
             }
+            
+            
+            
+            
+            function queryCategories(params, _callback){
+            docClient.query (params, function queryUntilDone(err, data) {
+            
+                if (err) {
+                    console.log("listCategories Err");
+                    console.log(err);
+                }
+                else {
+                    if(data.LastEvaluatedKey){
+                        params.ExclusiveStartKey = data.LastEvaluatedKey;
+                        results = results.concat(data.Items.map(item => item.category_code.S));
+                        counter += data.Items.length;
+                        res.write(counter + " entradas validas\n");
+                        queryCategories(params,_callback);
+                    }else{
+                        results = results.concat(data.Items.map(item => item.category_code.S));
+                        counter += data.Items.length;
+                        console.log("terminou:" + counter);
+                        _callback(results);
+                    }
+                }
+                });
+            }
+            */
+
+
+
+            queryCategories(params, function (results) {
+                res.write(JSON.stringify([...new Set(results)]));
+                res.end();
             });
-        }
-        queryCategories(params, function(results){
-            res.write(JSON.stringify([...new Set(results)]));
-            res.end();
         });
     });
 
@@ -74,6 +97,27 @@ router
 router
     .route("/popularBrands")
     .get((req, res) => {
+
+        mongo.connect(url, function (err, db) {
+
+            if (err) throw err;
+            var dbo = db.db("mongodb");
+
+            var query = await dbo.collection("entries").find().sort(brand);
+            let results = [];
+
+            for (var i = 0; i < query.length; i++) {
+                results.push({ query.brand, dbo.collection("entries").count({ brand: query.brand }) });
+            }
+
+            //handleBrands(query);
+
+            res.write(JSON.stringify(results));
+            res.end();
+
+        });
+
+        /*
         var params = {
             TableName: table_name,
             KeyConditionExpression: "pk_id = :v",
@@ -120,7 +164,8 @@ router
         queryPopular(params, function(results){
             res.write(JSON.stringify(results));
             res.end();
-        });  
+        }); 
+        */
     });
 
 router
@@ -131,6 +176,18 @@ router
         var brand = req.params.brand;
         console.log(brand);
 
+        mongo.connect(url, function (err, db) {
+            if (err) throw err;
+            var dbo = db.db("mongodb");
+
+            var results = await dbo.collection("entries").find({ brand: brand, event_type : 'purchase' });
+            var result = results.reduce((Number(a.price), Number(b.price)) => a + b, 0);
+
+            res.write(JSON.stringify(result));
+            res.end();
+        });
+
+        /*
         var params = {
             TableName: table_name,
             ProjectionExpression: "price",
@@ -196,11 +253,34 @@ router
             res.write(JSON.stringify(response));
             res.end();
         });
+        */
     });
 
 router
     .route('/salesByBrand')
     .get((req, res) => {
+
+        mongo.connect(url, function (err, db) {
+            if (err) throw err;
+
+            var dbo = db.db("mongodb");
+
+            //var query = dbo.collection("entries").find({ event_type: 'purchase' }).sort(brand);
+
+            var query = dbo.collection("entries").distinct({ event_type: 'purchase' });
+
+            let results = [];
+
+            for (var i = 0; i < query.length; i++) {
+                results.push({ query.brand, dbo.collection("entries").count({ brand: query.brand }) });
+            }
+
+            //handleBrands(query);
+            res.send(JSON.stringify(results));
+            res.end();
+        });
+
+        /*
         var params = {
             TableName: table_name,
             KeyConditionExpression: "pk_id = :v",
@@ -247,16 +327,17 @@ router
             res.write(JSON.stringify(results));
             res.end();
         });
+        */
     });
 
-function handleBrands(popularity, data, _callback){
+function handleBrands(data, _callback){
     var brand_name;
     for(var i = 0; i < data.length; i++){
-        brand_name = data[i].brand.S;
-        if(popularity[brand_name]){
-        popularity[brand_name] += 1;
+        brand_name = data[i].brand;
+        if(results[brand_name]){
+            results[brand_name] += 1;
         }else{
-        popularity[brand_name] = 1;
+            results[brand_name] = 1;
         }
     }
     _callback();

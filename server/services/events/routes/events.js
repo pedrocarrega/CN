@@ -1,8 +1,11 @@
 const express = require("express");
 let router = express.Router();
-var AWS = require("aws-sdk");
-const table_name = "cn_table"
+//var AWS = require("aws-sdk");
+//const table_name = "cn_table"
+const mongo = require('mongodb').MongoClient;
+const url = "mongodb://localhost:27017/";
 
+/*
 let awsConfig = {
 	"region": "eu-west-1",
 	"endpoint": "http://dynamodb.eu-west-1.amazonaws.com",
@@ -12,7 +15,7 @@ let awsConfig = {
 
 AWS.config.update(awsConfig);
 let docClient = new AWS.DynamoDB;
-
+*/
 module.exports = router;
 
 router
@@ -20,7 +23,7 @@ router
     .get((req, res) => {
         res.send("Events service available: \n - /api/events/ratio \n")
     });
-
+/*
 router
     .route("/test")
     .get((req, res) => {
@@ -39,12 +42,52 @@ router
             res.send(result)
         });
     });
+*/
 
 router
     .route("/ratio")
     .get((req, res) => {
         var events = [0, 0, 0];
 
+        mongo.connect(url, function (err, db) {
+            if (err) throw err;
+            var dbo = db.db("mongodb");
+
+            events[0] = await dbo.collection("entries").count({ event_type: 'view' });
+            events[1] = await dbo.collection("entries").count({ event_type: 'cart' });
+            events[2] = await dbo.collection("entries").count({ event_type: 'purchase' });
+
+            const total = events[0] + events[1] + events[2];
+
+            const ratios = [result[0] / total, result[1] / total, result[2] / total]
+            console.log("Ended with: " + total + " values.")
+            console.log(ratios)
+            var result = [
+                {
+                    "eventType": "view",
+                    "eventTime": "",
+                    "ratio": ratios[0],
+                    "count": result[0]
+                },
+                {
+                    "eventType": "cart",
+                    "eventTime": "",
+                    "ratio": ratios[1],
+                    "count": result[1]
+                },
+                {
+                    "eventType": "purchase",
+                    "eventTime": "",
+                    "ratio": ratios[2],
+                    "count": result[2]
+                }
+            ];
+            console.log(result)
+            res.write(JSON.stringify(result));
+            res.end();
+        });
+
+        /*
         var params = {
             TableName : table_name,
             ProjectionExpression: "event_type",
@@ -53,6 +96,8 @@ router
                 ":v": {N: '0'}
             }
         };
+
+        
 
         doQueryCount(params, events, 0, res, function(total, result){
 
@@ -83,8 +128,9 @@ router
             res.write(JSON.stringify(result));
             res.end();
         });
+        */
     });
-
+/*
 function test2(params,count,_callback){
     docClient.query (params, function (err, data) {
         if (err) {
@@ -186,3 +232,4 @@ function doQueryCount(qParams, events, count, res, callback) {
 		}
 	})
 }
+*/
