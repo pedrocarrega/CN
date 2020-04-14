@@ -26,7 +26,7 @@ For the region we recommend 'eu-west-1', that being said we leave the region sel
 
 2. The second script deploy2.sh requires the same 3 arguments inputted in the same order.
     The node group takes around 10 to 15 minutes to be active. After the node groups are ready, we proceed to the third script.
-    To check the status the node groups, type `aws eks describe-nodegroup --cluster-name CLUSTER_NAME` , replacing CLUSTER:NAME with the given argument name when executing the script.
+    To check the status the node groups, type `aws eks describe-nodegroup --cluster-name CLUSTER_NAME --nodegroup STACK_NAME` , replacing CLUSTER:NAME with the given argument name when executing the script.
     You will be asked to input the ECR Pull IAM credentials which can be found in the credentials.csv file.
 
 3. The third script deploy3.sh requires 2 arguments in the following order: 
