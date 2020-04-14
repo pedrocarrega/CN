@@ -4,8 +4,8 @@ kind: ClusterRole
 metadata:
   labels:
     app.kubernetes.io/name: alb-ingress-controller
-  annotations:                                                                        # Add the annotations line
-    eks.amazonaws.com/role-arn: arn:aws:iam::774440115756:role/eksServiceRole            # Add the IAM role
+  annotations:                                           # Add the annotations line
+    eks.amazonaws.com/role-arn: 		         # Add the IAM role
   name: alb-ingress-controller
 rules:
   - apiGroups:

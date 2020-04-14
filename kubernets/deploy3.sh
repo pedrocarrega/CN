@@ -1,7 +1,7 @@
 REGION=$1
 CLUSTER_NAME=$2
 
-printf  "Inserir as credenciais de acesso ao ECR ou de admin da conta de AWS:\n"
+printf  "Inserir as credenciais de acesso ao ECR ou de admin da conta pessoal de AWS:\n"
 aws configure
 
 REPO_EVENTS=`aws ecr create-repository \
@@ -16,39 +16,26 @@ REPO_PRODUCTS=`aws ecr create-repository \
 			--query "repository.repositoryUri" \
 			--output text`
 
-aws ecr get-login-password --region eu-west-1 | sudo docker login --username AWS --password-stdin $REPO_EVENTS
+aws ecr get-login-password --region $REGION| sudo docker login --username AWS --password-stdin $REPO_EVENTS
 sudo docker tag 774440115756.dkr.ecr.eu-west-1.amazonaws.com/events:v1 $REPO_EVENTS:v1
 sudo docker push $REPO_EVENTS:v1
 
-aws ecr get-login-password --region eu-west-1 | sudo docker login --username AWS --password-stdin $REPO_PRODUCTS
+aws ecr get-login-password --region $REGION | sudo docker login --username AWS --password-stdin $REPO_PRODUCTS
 sudo docker tag 774440115756.dkr.ecr.eu-west-1.amazonaws.com/products:v1 $REPO_PRODUCTS:v1
 sudo docker push $REPO_PRODUCTS:v1
 
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/aws/service-l4.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/provider/aws/patch-configmap-l4.yaml
-
-
-eksctl utils associate-iam-oidc-provider \
-    --region $REGION \
-    --cluster $CLUSTER_NAME \
-    --approve
-
 GET_ROLE=$(aws iam create-policy \
-    --policy-name ALBIngressControllerIAMPolicy \
+    --policy-name ALBIngressControllerIAMPolicyEcommerce \
     --policy-document file://ingress/ingress-role.json | jq '.Policy.Arn' -r);
 
-kubectl apply -f ingress/ingress-controller.yaml
+aws iam attach-role-policy \
+    --policy-arn $GET_ROLE \
+    --role-name eksServiceRole
 
-kubectl annotate serviceaccount -n kube-system alb-ingress-controller $GET_ROLE
+printf $GET_ROLE
 
-kubectl apply -f ingress/ingress-deploy.yaml
-
-curl -sS "https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/alb-ingress-controller.yaml" \
-     | sed "s/# - --cluster-name=devCluster/- --cluster-name=$CLUSTER_NAME/g" \
-     | kubectl apply -f -
-
-kubectl apply -f ingress/api-ingress.yaml
+mkdir events
+mkdir products
 
 echo "apiVersion: v1
 kind: Pod
@@ -98,11 +85,6 @@ spec:
         ports:
         - containerPort: 3000" > events/events-deployment.yml
 
-kubectl apply -f events/events-pod.yml
-kubectl apply -f events/events-service.yml
-kubectl apply -f events/events-deployment.yml
-kubectl expose deployment events-deployment --type=LoadBalancer --port=3000
-
 echo "apiVersion: v1
 kind: Pod
 metadata:
@@ -150,8 +132,3 @@ spec:
         image: $REPO_PRODUCTS:v1
         ports:
         - containerPort: 3000" > products/products-deployment.yml
-
-kubectl apply -f products/products-pod.yml
-kubectl apply -f products/products-service.yml
-kubectl apply -f products/products-deployment.yml
-kubectl expose deployment products-deployment --type=LoadBalancer --port=3000
