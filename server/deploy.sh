@@ -77,11 +77,7 @@ do
 
 	sudo docker pull 774440115756.dkr.ecr.eu-west-1.amazonaws.com/$SERVICE_NAME:v1
 
-<<<<<<< HEAD
-	printf "Now place your IAM configuration values"
-=======
-	printf "Now place the your iAM configuration values\n"
->>>>>>> 1932cfc0be427ad0cce0dc1e27660858cc7f1170
+	printf "Now place your IAM configuration values:\n"
 	aws configure
 
 	sudo docker tag 774440115756.dkr.ecr.eu-west-1.amazonaws.com/$SERVICE_NAME:v1 $REPO:$TAG
@@ -101,8 +97,8 @@ do
 		[{
 			"name": "$SERVICE_NAME",
 			"image": "$REPO:$TAG",
-			"cpu": 256,
-			"memory": 256,
+			"cpu": 1024,
+			"memory": 1024,
 			"portMappings": [{
 				"containerPort": 3000,
 				"hostPort": 0
