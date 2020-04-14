@@ -1,8 +1,6 @@
 REGION=$1
 CLUSTER_NAME=$2
 
-printf  "Inserir as credenciais de acesso ao ECR ou de admin da conta pessoal de AWS:\n"
-aws configure
 
 REPO_EVENTS=`aws ecr create-repository \
 			--region $REGION \
