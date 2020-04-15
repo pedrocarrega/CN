@@ -90,8 +90,8 @@ router
                 res.write(JSON.stringify([...new Set(results)]));
                 res.end();
             });
+            */
         });
-        */
     });
 
 
@@ -104,21 +104,25 @@ router
             if (err) throw err;
             var dbo = db.db("ecommerce");
 
-            var query = await dbo.collection("entries").find().sort(brand);
+            console.log(await dbo.collection("entries").aggregate({$group: {brand: '$brand', count: {$sum: 1}}}))
+/*
+            var query = []
+            query.concat(await dbo.collection("entries").distinct("brand"));
             console.log(query);
-            let results = [];
+            let results = [{}];
 
-            /*
+            
             for (var i = 0; i < query.length; i++) {
-                results.push({ query.brand, dbo.collection("entries").countDocuments({ brand: query.brand }) });
+                results.push({ query[i], await dbo.collection("entries").countDocuments({ brand: query[i] }) });
             }
-            */
+            
+            
 
             //handleBrands(query);
 
             res.write(JSON.stringify(results));
             res.end();
-
+*/
         });
 
         /*
@@ -171,7 +175,7 @@ router
         }); 
         */
     });
-
+/*
 router
     .route("/salePrice/:brand")
     .get((req, res) => {
@@ -186,7 +190,7 @@ router
 
             var results = await dbo.collection("entries").find({ brand: brand, event_type : 'purchase' });
             console.log(results);
-            //var result = results.reduce((Number(a.price), Number(b.price)) => a + b, 0);
+            var result = results.reduce((Number(a.price), Number(b.price)) => a + b, 0);
 
             res.write(JSON.stringify(result));
             res.end();
@@ -259,7 +263,7 @@ router
             res.end();
         });
         */
-    });
+   // });
 
 router
     .route('/salesByBrand')
@@ -276,11 +280,11 @@ router
 
             let results = [];
 
-            /*
+            
             for (var i = 0; i < query.length; i++) {
-                results.push({ query.brand, dbo.collection("entries").countDocuments({ brand: query.brand }) });
+                //results.push({ query[i], await dbo.collection("entries").countDocuments({ brand: query.brand }) });
             }
-            */
+            
 
             //handleBrands(query);
             res.send(JSON.stringify(results));
