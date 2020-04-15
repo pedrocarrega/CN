@@ -191,7 +191,7 @@ router
 
             var results = await dbo.collection("entries").find({ brand: brand, event_type : 'purchase' });
             console.log(results);
-            var result = results.reduce(reducer, 0);
+            var result = 0;//results.reduce(reducer, 0);
 
             res.write(JSON.stringify(result));
             res.end();
