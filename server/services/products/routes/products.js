@@ -1,7 +1,7 @@
 const mongo = require('mongodb').MongoClient;
 const express = require("express");
 let router = express.Router();
-const url = "mongodb://localhost:27017/";
+const url = "mongodb+srv://sprint1:sprint1@cn-db-cfmpq.mongodb.net/test?retryWrites=true&w=majority";
 
 //var AWS = require("aws-sdk");
 //const table_name = "cn_table"
