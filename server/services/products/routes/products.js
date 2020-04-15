@@ -106,13 +106,13 @@ router
 
             //console.log(await dbo.collection("entries").aggregate({$group: {brand: '$brand', count: {$sum: 1}}}))
 
-            var query = []
-            query.concat(await dbo.collection("entries").distinct("brand"));
-            console.log(query);
+            var query = await dbo.collection("entries").distinct("brand");
+            //console.log(query);
             let results = [{}];
 
             
             for (var i = 0; i < query.length; i++) {
+                console.log(i)
                 results.push({ brand: query[i], count: await dbo.collection("entries").countDocuments({ brand: query[i] }) });
             }
             
@@ -175,7 +175,7 @@ router
         }); 
         */
     });
-/*
+
 router
     .route("/salePrice/:brand")
     .get((req, res) => {
@@ -263,7 +263,7 @@ router
             res.end();
         });
         */
-   // });
+    });
 
 router
     .route('/salesByBrand')
@@ -276,8 +276,8 @@ router
 
             //var query = dbo.collection("entries").find({ event_type: 'purchase' }).sort(brand);
 
-            var query = dbo.collection("entries").distinct({ event_type: 'purchase' });
-
+            var query = await dbo.collection("entries").distinct({ event_type: 'purchase' });
+            console.log(query)
             let results = [];
 
             
