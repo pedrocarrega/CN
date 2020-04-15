@@ -47,19 +47,20 @@ router
 router
     .route("/ratio")
     .get((req, res) => {
+        console.log("test");
         var events = [0, 0, 0];
 
-        mongo.connect(url, function (err, db) {
+        mongo.connect(url, async function (err, db) {
             if (err) throw err;
-            var dbo = db.db("mongodb");
+            var dbo = db.db("ecommerce");
 
-            events[0] = await dbo.collection("entries").count({ event_type: 'view' });
-            events[1] = await dbo.collection("entries").count({ event_type: 'cart' });
-            events[2] = await dbo.collection("entries").count({ event_type: 'purchase' });
+            events[0] = await dbo.collection("entries").countDocuments({ event_type: 'view' });
+            events[1] = await dbo.collection("entries").countDocuments({ event_type: 'cart' });
+            events[2] = await dbo.collection("entries").countDocuments({ event_type: 'purchase' });
 
             const total = events[0] + events[1] + events[2];
 
-            const ratios = [result[0] / total, result[1] / total, result[2] / total]
+            const ratios = [events[0] / total, events[1] / total, events[2] / total]
             console.log("Ended with: " + total + " values.")
             console.log(ratios)
             var result = [
@@ -67,19 +68,19 @@ router
                     "eventType": "view",
                     "eventTime": "",
                     "ratio": ratios[0],
-                    "count": result[0]
+                    "count": events[0]
                 },
                 {
                     "eventType": "cart",
                     "eventTime": "",
                     "ratio": ratios[1],
-                    "count": result[1]
+                    "count": events[1]
                 },
                 {
                     "eventType": "purchase",
                     "eventTime": "",
                     "ratio": ratios[2],
-                    "count": result[2]
+                    "count": events[2]
                 }
             ];
             console.log(result)
