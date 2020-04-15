@@ -104,8 +104,8 @@ router
             if (err) throw err;
             var dbo = db.db("ecommerce");
 
-            console.log(await dbo.collection("entries").aggregate({$group: {brand: '$brand', count: {$sum: 1}}}))
-/*
+            //console.log(await dbo.collection("entries").aggregate({$group: {brand: '$brand', count: {$sum: 1}}}))
+
             var query = []
             query.concat(await dbo.collection("entries").distinct("brand"));
             console.log(query);
@@ -113,7 +113,7 @@ router
 
             
             for (var i = 0; i < query.length; i++) {
-                results.push({ query[i], await dbo.collection("entries").countDocuments({ brand: query[i] }) });
+                results.push({ brand: query[i], count: await dbo.collection("entries").countDocuments({ brand: query[i] }) });
             }
             
             
@@ -122,7 +122,7 @@ router
 
             res.write(JSON.stringify(results));
             res.end();
-*/
+
         });
 
         /*
@@ -282,7 +282,7 @@ router
 
             
             for (var i = 0; i < query.length; i++) {
-                //results.push({ query[i], await dbo.collection("entries").countDocuments({ brand: query.brand }) });
+                results.push({ brand: query[i], count: await dbo.collection("entries").countDocuments({ brand: query.brand }) });
             }
             
 
