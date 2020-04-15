@@ -179,21 +179,21 @@ router
 router
     .route("/salePrice/:brand")
     .get((req, res) => {
-        console.log("got request");
-        const reducer = (accumulator, currentValue) => accumulator + currentValue;
+        //console.log("got request");
+        //const reducer = (accumulator, currentValue) => accumulator + currentValue;
 
         var brand = req.params.brand;
-        console.log(brand);
+        //console.log(brand);
 
         mongo.connect(url, async function (err, db) {
             if (err) throw err;
             var dbo = db.db("ecommerce");
 
-            var results = await dbo.collection("entries").find({ brand: brand, event_type : 'purchase' });
+            var results = await dbo.collection("entries").find({ brand: brand, event_type : 'purchase' }).project("price");
             console.log(results);
             var result = 0;//results.reduce(reducer, 0);
 
-            res.write(JSON.stringify(result));
+            res.write(JSON.stringify(results));
             res.end();
         });
 
@@ -281,11 +281,11 @@ router
             console.log(query)
             let results = [];
 
-            
+            /*
             for (var i = 0; i < query.length; i++) {
                 results.push({ brand: query[i], count: await dbo.collection("entries").countDocuments({ brand: query.brand }) });
             }
-            
+            */
 
             //handleBrands(query);
             res.send(JSON.stringify(results));
