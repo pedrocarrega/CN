@@ -188,10 +188,10 @@ router
         mongo.connect(url, async function (err, db) {
             if (err) throw err;
             var dbo = db.db("ecommerce");
-
-            var results = await dbo.collection("entries").find({ brand: brand, event_type : 'purchase' }).project("price");
+            var result = 0;
+            var results = await dbo.collection("entries").find({ brand: brand, event_type: 'purchase' }).project("price").forEach(function (price) { result+=price });
             console.log(results);
-            var result = 0;//results.reduce(reducer, 0);
+            //results.reduce(reducer, 0);
 
             res.write(JSON.stringify(results));
             res.end();
