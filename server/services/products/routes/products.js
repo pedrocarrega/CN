@@ -106,19 +106,19 @@ router
 
             //console.log(await dbo.collection("entries").aggregate({$group: {brand: '$brand', count: {$sum: 1}}}))
 
-            var query = await dbo.collection("entries").distinct("brand");
-            //console.log(query);
+            var query = await dbo.collection("entries").find().sort({brand: 1}).toArray();
+            //console.log(await query);
             let results = [{}];
 
-            
+            /*
             for (var i = 0; i < query.length; i++) {
                 console.log(i)
                 results.push({ brand: query[i], count: await dbo.collection("entries").countDocuments({ brand: query[i] }) });
             }
-            
+            */
             
 
-            //handleBrands(query);
+            handleBrands(results, await query);
 
             res.write(JSON.stringify(results));
             res.end();
@@ -272,20 +272,15 @@ router
 
             var dbo = db.db("ecommerce");
 
-            //var query = dbo.collection("entries").find({ event_type: 'purchase' }).sort(brand);
+            var query = await dbo.collection("entries").find({ event_type: 'purchase' }).sort({brand : 1}).toArray();
 
-            var query = await dbo.collection("entries").distinct({ event_type: 'purchase' });
-            console.log(query)
-            let results = [];
+            console.log(await query);
+            
+            var results = [{}];
 
-            /*
-            for (var i = 0; i < query.length; i++) {
-                results.push({ brand: query[i], count: await dbo.collection("entries").countDocuments({ brand: query.brand }) });
-            }
-            */
-
-            //handleBrands(query);
-            res.send(JSON.stringify(results));
+            await handleBrands(results, await query);
+            
+            res.write(JSON.stringify(await results));
             res.end();
         });
 
@@ -339,7 +334,7 @@ router
         */
     });
 
-function handleBrands(data, _callback){
+function handleBrands(results, data){
     var brand_name;
     for(var i = 0; i < data.length; i++){
         brand_name = data[i].brand;
@@ -349,5 +344,4 @@ function handleBrands(data, _callback){
             results[brand_name] = 1;
         }
     }
-    _callback();
 }
