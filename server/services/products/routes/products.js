@@ -179,21 +179,18 @@ router
 router
     .route("/salePrice/:brand")
     .get((req, res) => {
-        //console.log("got request");
-        //const reducer = (accumulator, currentValue) => accumulator + currentValue;
 
         var brand = req.params.brand;
-        //console.log(brand);
 
         mongo.connect(url, async function (err, db) {
             if (err) throw err;
             var dbo = db.db("ecommerce");
             var result = 0;
-            var results = await dbo.collection("entries").find({ brand: brand, event_type: 'purchase' }).project("price").forEach(function (price) { result+=price });
-            console.log(results);
-            //results.reduce(reducer, 0);
+            var count = 0;
+            
+            await dbo.collection("entries").find({ brand: brand, event_type: 'purchase' }).forEach(function (item) { result += item.price; count++; });
 
-            res.write(JSON.stringify(results));
+            res.write(JSON.stringify(result/count));
             res.end();
         });
 
