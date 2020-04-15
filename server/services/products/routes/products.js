@@ -180,6 +180,7 @@ router
     .route("/salePrice/:brand")
     .get((req, res) => {
         console.log("got request");
+        const reducer = (accumulator, currentValue) => accumulator + currentValue;
 
         var brand = req.params.brand;
         console.log(brand);
@@ -190,7 +191,7 @@ router
 
             var results = await dbo.collection("entries").find({ brand: brand, event_type : 'purchase' });
             console.log(results);
-            var result = results.reduce((Number(a.price), Number(b.price)) => a + b, 0);
+            var result = results.reduce(reducer, 0);
 
             res.write(JSON.stringify(result));
             res.end();
