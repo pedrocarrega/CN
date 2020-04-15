@@ -30,10 +30,10 @@ router
     .route("/listCategories")
     .get((req, res) => {
 
-        mongo.connect(url, function (err, db){
+        mongo.connect(url, async function (err, db){
 
             if (err) throw err;
-            var dbo = db.db("mongodb");
+            var dbo = db.db("ecommerce");
 
             var results = await dbo.collection("entries").distinct("category_code");
             console.log(results);
@@ -82,7 +82,7 @@ router
                 }
                 });
             }
-            */
+            
 
 
 
@@ -91,6 +91,7 @@ router
                 res.end();
             });
         });
+        */
     });
 
 
@@ -98,17 +99,20 @@ router
     .route("/popularBrands")
     .get((req, res) => {
 
-        mongo.connect(url, function (err, db) {
+        mongo.connect(url, async function (err, db) {
 
             if (err) throw err;
-            var dbo = db.db("mongodb");
+            var dbo = db.db("ecommerce");
 
             var query = await dbo.collection("entries").find().sort(brand);
+            console.log(query);
             let results = [];
 
+            /*
             for (var i = 0; i < query.length; i++) {
-                results.push({ query.brand, dbo.collection("entries").count({ brand: query.brand }) });
+                results.push({ query.brand, dbo.collection("entries").countDocuments({ brand: query.brand }) });
             }
+            */
 
             //handleBrands(query);
 
@@ -176,12 +180,13 @@ router
         var brand = req.params.brand;
         console.log(brand);
 
-        mongo.connect(url, function (err, db) {
+        mongo.connect(url, async function (err, db) {
             if (err) throw err;
-            var dbo = db.db("mongodb");
+            var dbo = db.db("ecommerce");
 
             var results = await dbo.collection("entries").find({ brand: brand, event_type : 'purchase' });
-            var result = results.reduce((Number(a.price), Number(b.price)) => a + b, 0);
+            console.log(results);
+            //var result = results.reduce((Number(a.price), Number(b.price)) => a + b, 0);
 
             res.write(JSON.stringify(result));
             res.end();
@@ -260,10 +265,10 @@ router
     .route('/salesByBrand')
     .get((req, res) => {
 
-        mongo.connect(url, function (err, db) {
+        mongo.connect(url, async function (err, db) {
             if (err) throw err;
 
-            var dbo = db.db("mongodb");
+            var dbo = db.db("ecommerce");
 
             //var query = dbo.collection("entries").find({ event_type: 'purchase' }).sort(brand);
 
@@ -271,9 +276,11 @@ router
 
             let results = [];
 
+            /*
             for (var i = 0; i < query.length; i++) {
-                results.push({ query.brand, dbo.collection("entries").count({ brand: query.brand }) });
+                results.push({ query.brand, dbo.collection("entries").countDocuments({ brand: query.brand }) });
             }
+            */
 
             //handleBrands(query);
             res.send(JSON.stringify(results));
