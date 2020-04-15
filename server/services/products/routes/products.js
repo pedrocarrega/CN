@@ -108,7 +108,7 @@ router
 
             var query = await dbo.collection("entries").find().sort({brand: 1}).toArray();
             //console.log(await query);
-            let results = [{}];
+            let results = {};
 
             /*
             for (var i = 0; i < query.length; i++) {
@@ -274,11 +274,11 @@ router
 
             var query = await dbo.collection("entries").find({ event_type: 'purchase' }).sort({brand : 1}).toArray();
 
-            console.log(await query);
+            //console.log(await query);
             
-            var results = [{}];
+            var results = {};
 
-            await handleBrands(results, await query, function(arg){
+            handleBrands(results, await query, function(arg){
                 res.write(JSON.stringify(arg));
                 res.end();
             });
@@ -338,7 +338,8 @@ router
 
 function handleBrands(results, data, _callback){
     var brand_name;
-    for(var i = 0; i < data.length; i++){
+    for(var i = 2; i < data.length; i++){
+        console.log(results);
         brand_name = data[i].brand;
         if(results[brand_name]){
             results[brand_name] += 1;
