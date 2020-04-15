@@ -1,23 +1,8 @@
 const mongo = require('mongodb').MongoClient;
 const express = require("express");
 let router = express.Router();
-const url = "mongodb+srv://sprint1:sprint1@cn-db-cfmpq.mongodb.net/test?retryWrites=true&w=majority";
+const url = "mongodb://database:27017";
 
-//var AWS = require("aws-sdk");
-//const table_name = "cn_table"
-
-
-/*
-let awsConfig = {
-	"region": "eu-west-1",
-	"endpoint": "http://dynamodb.eu-west-1.amazonaws.com",
-	"accessKeyId": "AKIA6JR7LR5S5FC3PG4D",
-	"secretAccessKey": "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"
-};
-
-AWS.config.update(awsConfig);
-let docClient = new AWS.DynamoDB;
-*/
 module.exports = router;
 
 router
@@ -36,61 +21,12 @@ router
             var dbo = db.db("ecommerce");
 
             var results = await dbo.collection("entries").distinct("category_code");
-            console.log(results);
-
-            res.write(JSON.stringify(results));
-            res.end();
-            //var counter = 0;
-
-            /*var params = {
-                TableName: table_name,
-                KeyConditionExpression: "pk_id = :v",
-                ProjectionExpression: "category_code",
-                FilterExpression: "#cc <> :empty_code",
-                ExpressionAttributeNames: {
-                  "#cc": "category_code"
-                },
-                ExpressionAttributeValues: {
-                  ":empty_code" : {S: "-"},
-                  ":v" : {N: "0"}
-                }
+            var result = {"results":[]};
+            for(var i = 0; i < results.length; i++){
+                result.results.push({"name": results[i]})
             }
-            
-            
-            
-            
-            function queryCategories(params, _callback){
-            docClient.query (params, function queryUntilDone(err, data) {
-            
-                if (err) {
-                    console.log("listCategories Err");
-                    console.log(err);
-                }
-                else {
-                    if(data.LastEvaluatedKey){
-                        params.ExclusiveStartKey = data.LastEvaluatedKey;
-                        results = results.concat(data.Items.map(item => item.category_code.S));
-                        counter += data.Items.length;
-                        res.write(counter + " entradas validas\n");
-                        queryCategories(params,_callback);
-                    }else{
-                        results = results.concat(data.Items.map(item => item.category_code.S));
-                        counter += data.Items.length;
-                        console.log("terminou:" + counter);
-                        _callback(results);
-                    }
-                }
-                });
-            }
-            
 
-
-
-            queryCategories(params, function (results) {
-                res.write(JSON.stringify([...new Set(results)]));
-                res.end();
-            });
-            */
+            res.send(result);            
         });
     });
 
@@ -103,77 +39,22 @@ router
 
             if (err) throw err;
             var dbo = db.db("ecommerce");
-
-            //console.log(await dbo.collection("entries").aggregate({$group: {brand: '$brand', count: {$sum: 1}}}))
-
-            var query = await dbo.collection("entries").find().sort({brand: 1}).toArray();
-            //console.log(await query);
-            let results = {};
-
-            /*
-            for (var i = 0; i < query.length; i++) {
-                console.log(i)
-                results.push({ brand: query[i], count: await dbo.collection("entries").countDocuments({ brand: query[i] }) });
-            }
-            */
             
+            var cursor = dbo.collection("entries").aggregate([{$group: {_id: '$brand', count: {$sum: 1}}}])
+            var result = {"results": []};
 
-            handleBrands(results, await query);
-
-            res.write(JSON.stringify(results));
-            res.end();
-
-        });
-
-        /*
-        var params = {
-            TableName: table_name,
-            KeyConditionExpression: "pk_id = :v",
-            ProjectionExpression: "brand",
-            FilterExpression: "#b <> :empty_code", //not sure, nao quero strings vazias
-            ExpressionAttributeNames: {
-                "#b": "brand",
-            },
-            ExpressionAttributeValues: {
-                ":empty_code" : {S: "-"},
-                ":v" : {N: "0"}
-            }
-        }
-        
-        var counter = 0;
-        var results = {};
-    
-        function queryPopular(params, _callback){
-            docClient.query (params, function (err, data) {
-                if (err) {
-                console.log("popularBrands Err");
-                console.log(err);
-                }
-                else {
-                    if(data.LastEvaluatedKey){
-                    params.ExclusiveStartKey = data.LastEvaluatedKey;
-                    counter += data.Items.length;
-                    res.write(counter + " entradas validas\n");
-                    handleBrands(results, data.Items,function(){
-                        queryPopular(params,_callback);
-                    });
-                    
-                    }else{
-                    handleBrands(results, data.Items, function(){
-                        counter += data.Items.length;
-                        _callback(results);
-                    });
-                    
-                    }
+            cursor.each(function(err, docs) {
+                
+                
+                if(docs == null) {
+                  db.close();
+                  res.send(result);
+                  console.log(result);
+                }else{
+                    result.results.push({"brandName": docs._id, "popularity":docs.count, "sales": 0});
                 }
             });
-        }
-        
-        queryPopular(params, function(results){
-            res.write(JSON.stringify(results));
-            res.end();
-        }); 
-        */
+        });
     });
 
 router
@@ -187,80 +68,21 @@ router
             var dbo = db.db("ecommerce");
             var result = 0;
             var count = 0;
+            var result = {"results": []};
             
-            await dbo.collection("entries").find({ brand: brand, event_type: 'purchase' }).forEach(function (item) { result += item.price; count++; });
-
-            res.write(JSON.stringify(result/count));
-            res.end();
-        });
-
-        /*
-        var params = {
-            TableName: table_name,
-            ProjectionExpression: "price",
-            KeyConditionExpression: "pk_id = :v",
-            FilterExpression: "#b = :b_name and #t = :evt_t",
-            ExpressionAttributeNames: {
-                "#b": "brand",
-                "#t": "event_type"
-            },
-            ExpressionAttributeValues: { 
-                ":b_name": {S: brand},
-                ":evt_t": {S: "purchase"},
-                ":v": {N: "0"}
-            }    
-        }
-
-        var average = 0;
-        var results = [];
-        var counter = 0;
-
-        function querySalePrice(params, _callback){
-            docClient.query (params, function (err, data) {
-                if (err) {
-                    console.log("salePrice Err");
-                    console.log(err);
-                } else {
-                    if(data.LastEvaluatedKey){
-                    params.ExclusiveStartKey = data.LastEvaluatedKey;
-                    results = results.concat(data.Items.map(item => Number(item.price.N)));
-                    querySalePrice(params, _callback)
-                    counter += data.Items.length;
-                    res.write(counter + " entradas validas\n");
-                    }else{
-                    //means all the results are queried
-                    results = results.concat(data.Items.map(item => Number(item.price.N)));
-                    counter += data.Items.length;
-                    console.log("terminated " + counter);
-                    _callback(results);
-                    }
+            var cursor = dbo.collection("entries").aggregate([{ "$match": { "brand": brand}},{$group: {_id: '$brand', total: {$sum: 1}, sum: {$sum: '$price'}}}])//.forEach(printjson);
+            cursor.each(function(err, docs) {
+                
+                
+                if(docs == null) {
+                    db.close();
+                    res.send(result);
+                    console.log(result);
+                }else{
+                    result.results.push({"brand":{"brandName":docs._id,"popularity":0, "sales":0},"price":docs.sum/docs.total, "category":{"name": ""}});
                 }
-            }); 
-        }
-
-        querySalePrice(params, function(results){
-            var prices = results;
-            var sum = 0;
-            for(var i = 0; i < prices.length; i++){
-            sum += prices[i];
-            }
-            average = sum/prices.length;
-
-            var response = {
-                "brand": {
-                    "brandName": brand,
-                    "popularity": 0,
-                    "sales": prices.length
-                },
-                "price": average,
-                "category": {
-                    "name": ""
-                }
-            }
-            res.write(JSON.stringify(response));
-            res.end();
-        });
-        */
+            });  
+        });  
     });
 
 router
@@ -268,84 +90,24 @@ router
     .get((req, res) => {
 
         mongo.connect(url, async function (err, db) {
+
             if (err) throw err;
-
             var dbo = db.db("ecommerce");
-
-            var query = await dbo.collection("entries").find({ event_type: 'purchase' }).sort({brand : 1}).toArray();
-
-            //console.log(await query);
             
-            var results = {};
+            var cursor = dbo.collection("entries").aggregate([{ "$match": { "event_type": "purchase"}},{$group: {_id: '$brand', count: {$sum: 1}}}])//.forEach(printjson);
 
-            handleBrands(results, await query, function(arg){
-                res.write(JSON.stringify(arg));
-                res.end();
-            });
-            
-            
-        });
-
-        /*
-        var params = {
-            TableName: table_name,
-            KeyConditionExpression: "pk_id = :v",
-            ProjectionExpression: "brand",
-            FilterExpression: "#et = :evt_t and #b <> :b", //posso fazer isto?
-            ExpressionAttributeNames: {
-                "#et": "event_type",
-                "#b": "brand"
-            },
-            ExpressionAttributeValues: { 
-                ":evt_t": { S: 'purchase' }, //é assim que filtro so vendas?
-                ":b": {"S": '-'},
-                ":v": {"N": '0'}
-            }    
-        }
-
-        var counter = 0;
-        var results = {};
-        
-        function doQuery(params, _callback) {
-            docClient.query(params, function (err, data) {
-                if (err) {
-                    console.log("salesByBrand Err");
-                    console.log(err);
-                } else {
-                    if (data.LastEvaluatedKey) {
-                        params.ExclusiveStartKey = data.LastEvaluatedKey;
-                        handleBrands(results, data.Items, function(){
-                            counter += data.Items.length;
-                            res.write(counter + " entradas validas\n");
-                            doQuery(params, _callback);
-                        });
-                    } else {
-                        handleBrands(results, data.Items, function(){
-                            counter += data.Items.length;
-                            _callback(results);
-                        });
-                    }
+            var result = {"results": []};
+            cursor.each(function(err, docs) {
+                
+                
+                if(docs == null) {
+                    db.close();
+                    res.send(result);
+                    console.log(result);
+                }else{
+                    result.results.push({"brandName": docs._id, "popularity":0, "sales": docs.count});
                 }
-            });
-        }
-
-        doQuery(params,function(results){
-            res.write(JSON.stringify(results));
-            res.end();
+            });    
+            
         });
-        */
     });
-
-function handleBrands(results, data, _callback){
-    var brand_name;
-    for(var i = 2; i < data.length; i++){
-        console.log(results);
-        brand_name = data[i].brand;
-        if(results[brand_name]){
-            results[brand_name] += 1;
-        }else{
-            results[brand_name] = 1;
-        }
-    }
-    _callback(results);
-}
