@@ -278,10 +278,12 @@ router
             
             var results = [{}];
 
-            await handleBrands(results, await query);
+            await handleBrands(results, await query, function(arg){
+                res.write(JSON.stringify(arg));
+                res.end();
+            });
             
-            res.write(JSON.stringify(await results));
-            res.end();
+            
         });
 
         /*
@@ -334,7 +336,7 @@ router
         */
     });
 
-function handleBrands(results, data){
+function handleBrands(results, data, _callback){
     var brand_name;
     for(var i = 0; i < data.length; i++){
         brand_name = data[i].brand;
@@ -344,4 +346,5 @@ function handleBrands(results, data){
             results[brand_name] = 1;
         }
     }
+    _callback(results);
 }
