@@ -10,3 +10,7 @@ kubectl apply -f events/events-deployment.yml
 kubectl apply -f products/products-pod.yml
 kubectl apply -f products/products-service.yml
 kubectl apply -f products/products-deployment.yml
+
+kubectl apply -f database/database-pod.yml
+kubectl apply -f database/database-service.yml 
+kubectl apply -f database/database-deployment.yml

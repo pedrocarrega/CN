@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: events-deployment
+  name: database-deployment
   labels:
     app: ecommerce-api
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: ecommerce-api
@@ -15,7 +15,7 @@ spec:
         app: ecommerce-api
     spec:
       containers:
-      - name: events
-        image: 982606647141.dkr.ecr.eu-west-1.amazonaws.com/events:v1
+      - name: database
+        image:  982606647141.dkr.ecr.eu-west-1.amazonaws.com/database:v1
         ports:
-        - containerPort: 3000
+        - containerPort: 27017

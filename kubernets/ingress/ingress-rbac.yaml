@@ -5,7 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/name: alb-ingress-controller
   annotations:                                           # Add the annotations line
-    eks.amazonaws.com/role-arn: 	         # Add the IAM role Example: arn:aws:iam::774440115756:role/eksServiceRole
+    eks.amazonaws.com/role-arn: arn:aws:iam::982606647141:policy/ALBIngressControllerIAMPolicyEcommerce # Add the IAM role Example: arn:aws:iam::774440115756:role/eksServiceRole
   name: alb-ingress-controller
 rules:
   - apiGroups:
