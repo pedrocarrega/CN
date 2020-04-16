@@ -22,13 +22,13 @@ aws ecr get-login-password --region $REGION | sudo docker login --username AWS -
 sudo docker tag 774440115756.dkr.ecr.eu-west-1.amazonaws.com/products:v1 $REPO_PRODUCTS:v1
 sudo docker push $REPO_PRODUCTS:v1
 
-printf("Inserir dados presentes no ficheiro database_access.txt");
+printf "Inserir dados presentes no ficheiro database_access.txt\n"
 aws configure
 
 aws ecr get-login-password --region $REGION| sudo docker login --username AWS --password-stdin 982606647141.dkr.ecr.eu-west-1.amazonaws.com/database
 sudo docker pull 982606647141.dkr.ecr.eu-west-1.amazonaws.com/database:v1
 
-printf("Insira as suas credenciais de admin aws");
+printf "Insira as suas credenciais de admin aws\n"
 aws configure
 
 REPO_DATABASE=`aws ecr create-repository \
