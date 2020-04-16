@@ -1,2 +1,3 @@
 Access key ID: AKIA6JR7LR5SWYEWFOFB
 Secret access key: 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
+Region: eu-west-1
