@@ -41,6 +41,27 @@ Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 
 \maketitle
 
+\section{Motivação para Dataset e Serviços}
+
+O dataset ecommerce foi escolhido pelo grupo devido ao grande número de eventos gerados e consequente informação produzida durante a utilização de uma loja de ecommerce. Informação esta que pode ser utilizada de diversas formas através de um grande número de variados serviços. Essa mesma informação poderá ser utilizada em vários contextos, sendo que escolhemos os seguintes 5 serviços que demonstram diferentes tipos de informação sobre o dataset:
+
+\begin{itemize}
+  \item api/products/listCategories: Fornece todas as diferentes categorias presentes nos dados
+  \item api/products/popularBrands: Fornece a contagem de eventos associados a cada marca
+  \item api/products/salesByBrand: Lista o numero de vendas de cada marca
+  \item api/products/salePrice: Calcula o valor médio de venda de uma determinada marca
+  \item api/events/ratio: Apresenta a distribuição relativa de cada tipo de evento, havendo os possíveis valores: view, cart e purchase
+\end{itemize}
+
+Os serviços foram escolhidos de forma a que consigam fazer diferentes tipos de operações sobre os dados, desde serviços mais específicos e por isso com menos carga na base de dados, a serviços mais abrangentes e consequente aumento de carga. Foram também escolhidos pois todos os serviços fornecem dados úteis para serem explorados no contexto de lojas de ecommerce.
+
+\section{Diagrama de Casos de Uso}
+\begin{figure}[H]
+  \centering
+    \includegraphics[scale=0.42]{Use_Cases.png}
+  \caption{Diagrama de casos de uso}
+\end{figure}
+
 \section{Requisitos}
 
 \begin{table}[H]
@@ -75,14 +96,6 @@ Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 	\end{center}
 	\caption{Requisitos Funcionais}
 \end{table}
-\paragraph{}
-
-\section{Diagrama de Casos de Uso}
-\begin{figure}[H]
-  \centering
-	\includegraphics[scale=0.42]{Use_Cases.png}
-  \caption{Diagrama de casos de uso}
-\end{figure}
 
 \section{Arquitetura da aplicação}
 \begin{figure}[H]
@@ -108,7 +121,7 @@ O servidor exportado do Swagger irá receber os pedidos a partir da API Gateway,
 
 \subsection{Base de dados}
 A base de dados irá conter o conteúdo dos ficheiros .csv do nosso data set, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente. 
-\newpage
+%\newpage
 \section{Arquitetura técnica}
 %Digam-me o que acham
 
@@ -129,5 +142,67 @@ Já a Estabilidade é garantida devido a ter a Lógica de negócio distribuída 
 \newline
 
 Dado que o API é definido em Swagger, a implementação do cliente e servidor são facilmente traduzidos para uma outra linguagem exportável, garantindo a Portabilidade. Visto que a lógica de negócio vai ser implementada num servidor NodeJS, a maior parte do código desenvolvido poderá ser instalado noutra plataforma Cloud sem grandes mudanças, sendo as principais diferenças o acesso à base de dados da nova plataforma e a comunicação com a API Gateway. A camada de apresentação também não sofraria de mudanças de grau elevado, sendo que apenas a comunicação para a API Gateway mudaria.
+
+
+\section{Lançamento em Kubernetes}
+O scripts de deployment do sistema foram separados em 4 devido à necessidade dos clusters e node groups estarem ativos, antes de proceder aos próximos passos. Existe também uma secção de edição de ficheiro manual, o que fez a quebra entre o terceiro e o quarto script.
+
+Antes da execução dos scripts é necessário verificar a existência dos seguintes repositórios, roles e policies e caso existam, precisam de ser \textbf{eliminados}:
+\begin{enumerate}
+	\item Repositórios com nomes \textit{products} e \textit{events}
+	\item AWS Role com nome eksServiceRole
+	\item AWS Policy com nome ALBIngressControllerIAMPolicyEcommerce
+\end{enumerate}
+
+Para a execução dos scripts são necessárias as seguintes ferramentas:
+\begin{itemize}
+	\item AWS CLI
+	\item eksctl
+	\item kubectl
+\end{itemize}
+
+A região a escolher para o lançamento poderá ser qualquer um, porém recomendamos a região eu-west-1. Esta região terá de ser a mesma nos argumentos de todos os scripts que requeiram a mesma.
+
+
+\subsection{deploy1.sh}
+O primeiro script de deployment recebe 3 argumentos na seguinte ordem:
+\begin{enumerate}
+	\item A região onde a Stack e o Cluster vão ser lançados (ex.: \textbf{eu-west-1})
+	\item O nome da Stack que terá de ser único (nenhuma outra Stack na CloudFormation da conta pessoal poderá ter o mesmo nome) para o script funcionar corretamente (ex.:\textbf{ecommerce-stack})
+	\item O nome do Cluster que também terá de ser único (ex.:\textbf{ecommerce-cluster})
+\end{enumerate}
+
+A criação da stack e do cluster irá demorar cerca de 10 a 20 minutos até ficarem ativos, após o qual poderemos proceder à execução do segundo script. O estado do script pode ser verificado com o seguinte comando:
+\begin{itemize}
+	\item \textit{aws eks describe-cluster \texttt{-{}-}name CLUSTER\_NAME} , mudando CLUSTER\_NAME para o nome do cluster dado nos argumentos
+\end{itemize}
+A execução do segundo script só deve ser feita quando o estado do cluster estiver em \textbf{ACTIVE}.
+
+\subsection{deploy2.sh}
+O segundo script recebe os mesmos argumentos que o primeiro, todos na mesma ordem. Neste script vão ser criados os node groups e o pull das imagens dos serviços.
+
+Para realizar o pull, irá ser pedido para inserir os credenciais IAM que dão acesso aos repositórios por nós criados. Estes credenciais encontram-se no ficheiro \textbf{credenciais.txt} juntamente com a região onde os repositórios se encontram.
+
+No fim da execução do script, é necessário verificar o estado dos node groups antes de proceder ao próximo script. O estado pode ser verificado com o seguinte comando: 
+\begin{itemize}
+	\item \textit{aws eks describe-nodegroup \texttt{-{}-}cluster-name CLUSTER\_NAME \texttt{-{}-}nodegroup STACK\_NAME} , mudando CLUSTER\_NAME e STACK\_NAME para os respetivos nomes dados nos argumentos
+\end{itemize}
+No final irá ser pedido para introduzir os credenciais de IAM para a conta de AWS pessoal de modo a poder criar os repositórios e fazer push das imagens no script seguinte.
+Após o estado do node group passar para \textbf{ACTIVE} podemos proceder À execução do terceiro script.
+
+\subsection{deploy3.sh}
+O terceiro script recebe 2 argumentos na seguinte ordem:
+\begin{itemize}
+	\item A região que deverá ser idêntica às inseridas nos scripts anteriores
+	\item O nome do cluster que também deverá ser o mesmo
+\end{itemize}
+Para a correto funcionamento deste script, salienta-se a necessidade de apagar os repositórios, roles e policies anteriormente referidos.
+
+Após a criação dos repositórios e o push das imagens para os mesmos, será pedido para mudar os credenciais IAM para os que se encontram no ficheiro \textbf{credenciais_mongo.txt} para realizar o pull da imagem da base de dados.
+
+Depois de realizar o pull irá ser pedido para mudar os credenciais de novo para a conta pessoal de AWS para a criação do repositório da base de dados e o push da imagem.
+
+\subsection{deploy4.sh}
+
 
 \end{document}
