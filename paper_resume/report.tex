@@ -95,11 +95,14 @@ O terceiro script recebe 2 argumentos na seguinte ordem:
 \end{itemize}
 Para a correto funcionamento deste script, salienta-se a necessidade de apagar os repositórios, roles e policies anteriormente referidos.
 
-Após a criação dos repositórios e o push das imagens para os mesmos, será pedido para mudar os credenciais IAM para os que se encontram no ficheiro \textbf{credenciais_mongo.txt} para realizar o pull da imagem da base de dados.
+Após a criação dos repositórios e o push das imagens para os mesmos, será pedido para mudar os credenciais IAM para os que se encontram no ficheiro \textbf{credenciais\_mongo.txt} para realizar o pull da imagem da base de dados.
 
 Depois de realizar o pull irá ser pedido para mudar os credenciais de novo para a conta pessoal de AWS para a criação do repositório da base de dados e o push da imagem.
 
 \subsection{deploy4.sh}
+Antes da execução do 4 ficheiro de deployment, as seguintes mudanças terão de ser realizadas nos ficheiros \textbf{ingress/ingress-rbac.yaml} e \textbf{ingress/alb-ingress-controller.yaml}.
 
+\subsubsection{ingress/ingress-rbac.yaml}
+Neste ficheiro 
 
 \end{document}
