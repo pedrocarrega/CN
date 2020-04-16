@@ -59,11 +59,28 @@ Os serviços foram escolhidos de forma a que consigam fazer diferentes tipos de 
 \section{Diagrama de Casos de Uso}
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.42]{Use_Cases.png}
+    \includegraphics[scale=0.36]{Use_Cases.png}
   \caption{Diagrama de casos de uso}
 \end{figure}
-
+\paragraph{}
 \section{Requisitos}
+
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{|p{3.8cm}|p{8.2cm}|}
+		\hline
+			\textbf{Requisitos\newline Funcionais} & \textbf{Descrição}\\ \hline
+			Listar\newline Categorias Disponíveis & Serviço que fornece aos clientes todas as categorias \\ \hline
+			Visualizar\newline Popularidade das\newline Marcas & Serviço que fornece cada marca associada com a sua popularidade\\ \hline
+			Visualizar\newline Número de Vendas\newline Individuais & Fornece o numero total de vendas de cada marca\\ \hline
+			Visualizar\newline Preço Médio de Venda & Fornece o preço médio dos produtos vendidos de uma determinada marca \\ \hline
+			Visualizar\newline Rácio de Tipo\newline de Eventos & Fornece a percentagem de cada tipo de evento \\ \hline
+	\end{tabular}
+	\label{tab2}
+	\end{center}
+	\caption{Requisitos Funcionais}
+\end{table}
+
 
 \begin{table}[H]
 	\begin{center}
@@ -81,22 +98,7 @@ Os serviços foram escolhidos de forma a que consigam fazer diferentes tipos de 
 	\end{center}
 	\caption{Requisitos Não Funcionais}
 \end{table}
-
-\begin{table}[H]
-	\begin{center}
-		\begin{tabular}{|p{3.8cm}|p{8.2cm}|}
-		\hline
-			\textbf{Requisitos\newline Funcionais} & \textbf{Descrição}\\ \hline
-			Listar\newline Categorias Disponíveis & Serviço que fornece aos clientes todas as categorias \\ \hline
-			Visualizar\newline Popularidade das\newline Marcas & Serviço que fornece cada marca associada com a sua popularidade\\ \hline
-			Visualizar\newline Número de Vendas\newline Individuais & Fornece o numero total de vendas de cada marca\\ \hline
-			Visualizar\newline Preço Médio de Venda & Fornece o preço médio dos produtos vendidos de uma determinada marca \\ \hline
-			Visualizar\newline Rácio de Tipo\newline de Eventos & Fornece a percentagem de cada tipo de evento \\ \hline
-	\end{tabular}
-	\label{tab2}
-	\end{center}
-	\caption{Requisitos Funcionais}
-\end{table}
+\paragraph{}
 
 \section{Arquitetura da aplicação}
 \begin{figure}[H]
@@ -254,5 +256,59 @@ Para remover a montagem do sistema, seguem-se os seguintes passos:
 	\item Na consola de IAM Policies \url{https://console.aws.amazon.com/iam/home?#/policies}, eliminar a policy com o seguinte nome: \textbf{ALBIngressControllerIAMPolicyEcommerce}. Após a eliminação, navegar para a secção dos Roles, e apagar o role com o seguinte nome: \textbf{eksServiceRole}.
 	\item Na consola de CloudFormation \url{https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks}, eliminar a stack criada com o nome dado nos scripts anteriores.
 \end{enumerate}
+
+\section{Cenários de Validação}
+
+\begin{itemize}
+	\item Listar Categorias:
+	\begin{enumerate}
+		\item Inserir o url mencionado posteriormente.
+		\item Após alguns segundos irá aparecer no ecrã o resultado.
+	\end{enumerate}
+	\item Listar a popularidade das marcas:
+	\begin{enumerate}
+		\item Inserir o url mencionado posteriormente.
+		\item Após alguns segundos irá aparecer no ecrã o resultado.
+	\end{enumerate}
+	\item Listar vendas de cada marca:
+	\begin{enumerate}
+		\item Inserir o url mencionado posteriormente.
+		\item Após alguns segundos irá aparecer no ecrã o resultado.
+	\end{enumerate}
+	\item Listar o preço médio de uma marca:
+	\begin{enumerate}
+		\item Inserir o url mencionado posteriormente adicionado "/<Marca>", aonde <Marca> representa a marca que o utilizador quer analisar.
+		\item Após alguns segundos irá aparecer no ecrã o resultado.
+	\end{enumerate}
+	\item Ver o ratio dos eventos possíveis:
+	\begin{enumerate}
+		\item Inserir o url mencionado posteriormente.
+		\item Após alguns segundos irá aparecer no ecrã o resultado.
+	\end{enumerate}
+	\item Portabilidade:
+	\begin{enumerate}
+		\item 
+	\end{enumerate}
+	\item Legibilidade:
+	\begin{enumerate}
+		\item 
+	\end{enumerate}
+	\item Estabilidade:
+	\begin{enumerate}
+		\item 
+	\end{enumerate}
+	\item Elasticidade:
+	\begin{enumerate}
+		\item 
+	\end{enumerate}
+	\item Escalabilidade:
+	\begin{enumerate}
+		\item 
+	\end{enumerate}
+	\item Confiabilidade:
+	\begin{enumerate}
+		\item 
+	\end{enumerate}
+\end{itemize}
 
 \end{document}
