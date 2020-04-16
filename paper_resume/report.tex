@@ -158,7 +158,9 @@ Finalmente utilizamos a ferramenta do Data Pipeline, que por sua vez originou v�
 	
 	\item Na implementação das queries para a DynamoDB, reparamos numa limitação dos resultados obtidos com o despoletar de uma query. Isto deve-se ao facto da DynamoDB limitar os resultados de cada query a "páginas" de 1MB, sendo que uma página é um conjuntos das entradas filtradas pela query. Tivemos então que lidar com a paginação, que provou ser pouco eficiente, baseando-se na utilização da última entrada da página anterior, e despolentando uma nova query a partir dessa entrada, logo necessitando de \textit{TAMANHO\_DATASET}/1MB queries.
 	
-	\item As queries da DynamoDB são de 2 tipos: \textbf{Scan} e \textbf{Query}. Inicialmente
+	\item As queries da DynamoDB são de 2 tipos: \textbf{Scan} e \textbf{Query}. Inicialmente usamos Scans para alguns serviços disponibilizados, porém, estes eram muito ineficientes em comparação com as queries dado que necessitavam de percorrer a tabela inteira. Recriamos então a tabela, de modo a fornecer uma Primary Key comum a todas as entradas e com uma coluna \textbf{event\_id} que era denominada como Sorting Key, distinguindo todas as entradas. Isto possibilitou a utilização de queries da DynamoDB que aumentou o desempenho para certos serviços. Porém, existiam outros serviços (como o caso do \textit{/api/events/ratio}) que necessitavam de percorrer a base de dados na sua totalidade para mostrar as estatísticas pretendidas, pelo que não se verificou um aumento de desempenho significante entre a utilização de Queries ou Scans.
+	
+	\item QUERIES DEMASIADO LENTAS - EXPLICAR RAZÃO
 \end{enumerate}
 
 \section{Lançamento em Kubernetes}
@@ -186,8 +188,9 @@ Com a utilização do Ingress, reparamos que existe a possibilidade deste poder 
 O primeiro script de deployment recebe 3 argumentos na seguinte ordem:
 \begin{enumerate}
 	\item A região onde a Stack e o Cluster vão ser lançados (ex.: \textbf{eu-west-1})
-	\item O nome da Stack que terá de ser único (nenhuma outra Stack na CloudFormation da conta pessoal poderá ter o mesmo nome) para o script funcionar corretamente (ex.:\textbf{ecommerce-stack})
-	\item O nome do Cluster que também terá de ser único (ex.:\textbf{ecommerce-cluster})
+	\item O nome da Stack que terá de ser único (nenhuma outra Stack na CloudFormation da conta pessoal poderá ter o mesmo nome) para o script funcionar corretamente (ex.: \textbf{ecommerce-stack})
+	\item O nome do Cluster que também terá de ser único (ex.: \textbf{ecommerce-cluster})
+	\item Exemplo de execução: \textit{./deploy1.sh eu-west-1 e-stack e-cluster}
 \end{enumerate}
 
 A criação da stack e do cluster irá demorar cerca de 10 a 20 minutos até ficarem ativos, após o qual poderemos proceder à execução do segundo script. O estado do script pode ser verificado com o seguinte comando:
