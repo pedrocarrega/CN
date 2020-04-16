@@ -27,6 +27,7 @@
 \usepackage{xcolor}
 \usepackage{adjustbox}
 \usepackage{float}
+\usepackage{hyperref}
 
 
 \begin{document}
@@ -104,7 +105,7 @@ Os serviços foram escolhidos de forma a que consigam fazer diferentes tipos de 
   \caption{Arquitetura da aplicação}
 \end{figure}
 
-Após a definição da API com o Swagger na fase anterior, foi implementado de raiz um servidor em NodeJS que segue a API definida.
+Após a definição da API na fase anterior, foi implementado de raiz um servidor em NodeJS que segue a API definida.
 
 
 \subsection{Load Balancer}
@@ -118,6 +119,7 @@ O servidor irá receber os pedidos a partir do Load Balancer, e processá-los de
 \subsection{Base de dados}
 A base de dados irá conter o conteúdo dos ficheiros .csv do nosso dataset, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente. 
 %\newpage
+
 \section{Arquitetura técnica}
 %Digam-me o que acham
 
@@ -125,7 +127,7 @@ A base de dados irá conter o conteúdo dos ficheiros .csv do nosso dataset, que
 Para garantir os requisitos não funcionais mencionados a cima devemos ter em atenção os serviços da cloud escolhidos, pois proporcionam vários aspetos fundamentais dos requisitos.
 \newline
 
-A utilização dos serviços disponibilizados pela AWS permite cumprir alguns dos requisitos não funcionais mencionados, nomeadamente a Escalabilidade e a Elasticidade. Já o Load Balancer permite que este serviço da cloud trate automaticamente da separação dos diferentes tipos de pedidos HTTP recebidos para os respetivos serviços. A base de dados utilizada consiste uma imagem docker baseada na imagem mongo que como o nome sugere é uma imagem de MongoDB. Foi escolhida esta alternativa de forma a não estar dependente dos serviços de Bases de Dados de um fornecedor específico, sendo que com esta opção a imagem pode ser implementada numa instância em qualquer fornecedor cloud. Quanto à escalabilidade a imagem poderia ser replicada por diversas réplicas de forma a distribuir os pedidos feitos pelas diferentes réplicas.  %NOT TOTALY SURE,devemos por isto?
+A utilização dos serviços disponibilizados pela AWS permite cumprir alguns dos requisitos não funcionais mencionados, nomeadamente a Escalabilidade e a Elasticidade. Já o Load Balancer implementado com o Ingress permite que este serviço da cloud trate automaticamente da separação dos diferentes tipos de pedidos HTTP recebidos para os respetivos serviços. A base de dados utilizada consiste uma imagem docker baseada na imagem mongo que como o nome sugere é uma imagem de MongoDB. Foi escolhida esta alternativa de forma a não estar dependente dos serviços de Bases de Dados de um fornecedor específico, sendo que com esta opção a imagem pode ser implementada numa instância em qualquer fornecedor cloud. Quanto à escalabilidade a imagem poderia ser replicada por diversas réplicas de forma a distribuir os pedidos feitos pelas diferentes réplicas.  %NOT TOTALY SURE,devemos por isto?
 \newline
 
 A Confiabilidade do sistema também é melhorada com a instalação em serviços na cloud, visto estas terem deteções automáticas de falhas de servidores, possibilitando a migração do sistema virtualizado para outro servidor funcional.
@@ -139,8 +141,8 @@ Já a Estabilidade é garantida devido a ter a Lógica de negócio distribuída 
 
 
 A utilização do Docker permite-nos facilmente fazer deploy de um serviço, em qualquer máquina e em qualquer um fornecedor de cloud. Isto deve-se ao Dockerfile garantir a instalação de todas as dependências do serviço, variando conforme a linguagem de implementação do mesmo, cumprindo assim o requisito de Portabilidade do sistema.
-%Dado que o API é definido em Swagger, a implementação do cliente e servidor são facilmente traduzidos para uma outra linguagem exportável, garantindo a Portabilidade. Visto que a lógica de negócio vai ser implementada num servidor NodeJS, a maior parte do código desenvolvido poderá ser instalado noutra plataforma Cloud sem grandes mudanças, sendo as principais diferenças o acesso à base de dados da nova plataforma e a comunicação com a API Gateway. A camada de apresentação também não sofraria de mudanças de grau elevado, sendo que apenas a comunicação para a API Gateway mudaria.
 
+\section{Implementação}
 
 \section{Lançamento em Kubernetes}
 O scripts de deployment do sistema foram separados em 4 devido à necessidade dos clusters e node groups estarem ativos, antes de proceder aos próximos passos. Existe também uma secção de edição de ficheiro manual, o que fez a quebra entre o terceiro e o quarto script.
@@ -161,6 +163,7 @@ Para a execução dos scripts são necessárias as seguintes ferramentas:
 
 A região a escolher para o lançamento poderá ser qualquer um, porém recomendamos a região eu-west-1. Esta região terá de ser a mesma nos argumentos de todos os scripts que requeiram a mesma.
 
+Com a utilização do Ingress, reparamos que existe a possibilidade deste poder usar VPCs antigas, para prevenir que tal ocorra, sugerimos apagar Target Groups que não estejam a ser utilizados.
 
 \subsection{deploy1.sh}
 O primeiro script de deployment recebe 3 argumentos na seguinte ordem:
@@ -204,6 +207,37 @@ Depois de realizar o pull irá ser pedido para mudar os credenciais de novo para
 Antes da execução do 4 ficheiro de deployment, as seguintes mudanças terão de ser realizadas nos ficheiros \textbf{ingress/ingress-rbac.yaml} e \textbf{ingress/alb-ingress-controller.yaml}.
 
 \subsubsection{ingress/ingress-rbac.yaml}
-Neste ficheiro 
+Neste ficheiro é necessário inserir manualmente os dados relativos ao role criado no ficheiro na seguinte linha:
+\begin{itemize}
+	\item \textbf{eks.amazonaws.com/role-arn:}
+\end{itemize}
+Para aceder ao valor do ARN do role criado, basta inserir na linha de comandos as seguintes instruções:
+\begin{itemize}
+	\item \textbf{aws iam get-role \texttt{-{}-}role-name eksServiceRole}
+\end{itemize}
+
+\subsubsection{ingress/alb-ingress-controller.yaml}
+Neste ficheiro é necessário inserir a informação relativa ao cluster criado para que o Ingress utilize os recursos corretos. Para tal é necessário alterar no ficheiro, na linha \textbf{- \texttt{-{}-}cluster-name=CLUSTER\_NAME},
+alterando \textbf{CLUSTER\_NAME} pelo nome do cluster dado nos argumentos dos scripts anteriores.
+
+Após a execução destes 2 passos, executa-se o quarto e último script, \textbf{deploy4.sh} sem parâmetros de entrada.
+
+\subsection{Acesso aos serviços}
+Após a aplicação dos ficheiros yaml do Ingress, é possível aceder ao sistema executando o comando:
+\begin{itemize}
+	\item \textbf{kubectl get ingress}
+\end{itemize}
+Deste comando retira-se o endereço que se encontra em \textit{Address} e adiciona-se os paths para os serviços disponibilizados (ex.: <address>/api/products/listCategories).
+
+\subsection{Desconstrução do deployment}
+Para remover a montagem do sistema, seguem-se os seguintes passos:
+\begin{enumerate}
+	\item Na consola de EKS \url{https://eu-west-1.console.aws.amazon.com/eks/home?region=eu-west-1#/clusters}, dependendo da região escolhida, selecionar o cluster e apagar o node group correspondente. Após dos node groups terem sido eliminados, proceder com a eliminação do cluster.
+	\item Na consola de EC2 \url{https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#LoadBalancers}, eliminar os load balancers criados. Na mesma consola navegar para os target groups e apagar aqueles que estejam relacionados com o VPC criado.
+	\item Na consola de VPC \url{https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#NatGateways}, eliminar as NATs criadas. Após a eliminação, navegar para a secção dos VPCs e eliminar as VPCs correspondentes que contém o nome dado à stack.
+	\item Na consola de ECR \url{https://console.aws.amazon.com/ecr/repositories?region=us-east-1}, eliminar os seguintes repositórios: \textit{database}, \textit{events} e \textit{products}.
+	\item Na consola de IAM Policies \url{https://console.aws.amazon.com/iam/home?#/policies}, eliminar a policy com o seguinte nome: \textbf{ALBIngressControllerIAMPolicyEcommerce}. Após a eliminação, navegar para a secção dos Roles, e apagar o role com o seguinte nome: \textbf{eksServiceRole}.
+	\item Na consola de CloudFormation \url{https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks}, eliminar a stack criada com o nome dado nos scripts anteriores.
+\end{enumerate}
 
 \end{document}
