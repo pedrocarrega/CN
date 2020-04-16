@@ -174,7 +174,7 @@ O primeiro script de deployment recebe 3 argumentos na seguinte ordem:
 
 A criação da stack e do cluster irá demorar cerca de 10 a 20 minutos até ficarem ativos, após o qual poderemos proceder à execução do segundo script. O estado do script pode ser verificado com o seguinte comando:
 \begin{itemize}
-	\item \textit{aws eks describe-cluster --name CLUSTER\_NAME} , mudando CLUSTER\_NAME para o nome do cluster dado nos argumentos
+	\item \textit{aws eks describe-cluster \texttt{-{}-}name CLUSTER\_NAME} , mudando CLUSTER\_NAME para o nome do cluster dado nos argumentos
 \end{itemize}
 A execução do segundo script só deve ser feita quando o estado do cluster estiver em \textbf{ACTIVE}.
 
@@ -183,6 +183,26 @@ O segundo script recebe os mesmos argumentos que o primeiro, todos na mesma orde
 
 Para realizar o pull, irá ser pedido para inserir os credenciais IAM que dão acesso aos repositórios por nós criados. Estes credenciais encontram-se no ficheiro \textbf{credenciais.txt} juntamente com a região onde os repositórios se encontram.
 
-No fim
+No fim da execução do script, é necessário verificar o estado dos node groups antes de proceder ao próximo script. O estado pode ser verificado com o seguinte comando: 
+\begin{itemize}
+	\item \textit{aws eks describe-nodegroup \texttt{-{}-}cluster-name CLUSTER\_NAME \texttt{-{}-}nodegroup STACK\_NAME} , mudando CLUSTER\_NAME e STACK\_NAME para os respetivos nomes dados nos argumentos
+\end{itemize}
+No final irá ser pedido para introduzir os credenciais de IAM para a conta de AWS pessoal de modo a poder criar os repositórios e fazer push das imagens no script seguinte.
+Após o estado do node group passar para \textbf{ACTIVE} podemos proceder À execução do terceiro script.
+
+\subsection{deploy3.sh}
+O terceiro script recebe 2 argumentos na seguinte ordem:
+\begin{itemize}
+	\item A região que deverá ser idêntica às inseridas nos scripts anteriores
+	\item O nome do cluster que também deverá ser o mesmo
+\end{itemize}
+Para a correto funcionamento deste script, salienta-se a necessidade de apagar os repositórios, roles e policies anteriormente referidos.
+
+Após a criação dos repositórios e o push das imagens para os mesmos, será pedido para mudar os credenciais IAM para os que se encontram no ficheiro \textbf{credenciais_mongo.txt} para realizar o pull da imagem da base de dados.
+
+Depois de realizar o pull irá ser pedido para mudar os credenciais de novo para a conta pessoal de AWS para a criação do repositório da base de dados e o push da imagem.
+
+\subsection{deploy4.sh}
+
 
 \end{document}
