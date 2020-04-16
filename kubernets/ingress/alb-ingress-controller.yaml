@@ -22,7 +22,7 @@ spec:
             # Name of your cluster. Used when naming resources created
             # by the ALB Ingress Controller, providing distinction between
             # clusters. Change CLUSTER_NAME to the created cluster's name
-            - --cluster-name=cluster
+            - --cluster-name=CLUSTER_NAME
 
           image: docker.io/amazon/aws-alb-ingress-controller:v1.1.6
       serviceAccountName: alb-ingress-controller
