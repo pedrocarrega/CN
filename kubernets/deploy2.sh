@@ -33,7 +33,7 @@ aws eks create-nodegroup \
 --nodegroup-name $STACK_NAME \
 --instance-types t3.micro \
 --ami-type AL2_x86_64 \
---scaling-config minSize=1,maxSize=7,desiredSize=6 \
+--scaling-config minSize=1,maxSize=20,desiredSize=15 \
 --node-role $GET_ROLE \
 --subnets $SUBNETS
 
