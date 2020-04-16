@@ -27,7 +27,7 @@
 \usepackage{xcolor}
 \usepackage{adjustbox}
 \usepackage{float}
-\usepackage{hyperref}
+\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
 
 
 \begin{document}
@@ -59,28 +59,11 @@ Os serviços foram escolhidos de forma a que consigam fazer diferentes tipos de 
 \section{Diagrama de Casos de Uso}
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.36]{Use_Cases.png}
+    \includegraphics[scale=0.42]{Use_Cases.png}
   \caption{Diagrama de casos de uso}
 \end{figure}
-\paragraph{}
+
 \section{Requisitos}
-
-\begin{table}[H]
-	\begin{center}
-		\begin{tabular}{|p{3.8cm}|p{8.2cm}|}
-		\hline
-			\textbf{Requisitos\newline Funcionais} & \textbf{Descrição}\\ \hline
-			Listar\newline Categorias Disponíveis & Serviço que fornece aos clientes todas as categorias \\ \hline
-			Visualizar\newline Popularidade das\newline Marcas & Serviço que fornece cada marca associada com a sua popularidade\\ \hline
-			Visualizar\newline Número de Vendas\newline Individuais & Fornece o numero total de vendas de cada marca\\ \hline
-			Visualizar\newline Preço Médio de Venda & Fornece o preço médio dos produtos vendidos de uma determinada marca \\ \hline
-			Visualizar\newline Rácio de Tipo\newline de Eventos & Fornece a percentagem de cada tipo de evento \\ \hline
-	\end{tabular}
-	\label{tab2}
-	\end{center}
-	\caption{Requisitos Funcionais}
-\end{table}
-
 
 \begin{table}[H]
 	\begin{center}
@@ -98,7 +81,22 @@ Os serviços foram escolhidos de forma a que consigam fazer diferentes tipos de 
 	\end{center}
 	\caption{Requisitos Não Funcionais}
 \end{table}
-\paragraph{}
+
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{|p{3.8cm}|p{8.2cm}|}
+		\hline
+			\textbf{Requisitos\newline Funcionais} & \textbf{Descrição}\\ \hline
+			Listar\newline Categorias Disponíveis & Serviço que fornece aos clientes todas as categorias \\ \hline
+			Visualizar\newline Popularidade das\newline Marcas & Serviço que fornece cada marca associada com a sua popularidade\\ \hline
+			Visualizar\newline Número de Vendas\newline Individuais & Fornece o numero total de vendas de cada marca\\ \hline
+			Visualizar\newline Preço Médio de Venda & Fornece o preço médio dos produtos vendidos de uma determinada marca \\ \hline
+			Visualizar\newline Rácio de Tipo\newline de Eventos & Fornece a percentagem de cada tipo de evento \\ \hline
+	\end{tabular}
+	\label{tab2}
+	\end{center}
+	\caption{Requisitos Funcionais}
+\end{table}
 
 \section{Arquitetura da aplicação}
 \begin{figure}[H]
@@ -159,6 +157,8 @@ Finalmente utilizamos a ferramenta do Data Pipeline, que por sua vez originou v�
 	\item No início da utilização do Data Pipeline, o tempo de escrita para a tabela aparentava ser muito elevado, rondando os 15 minutos para um ficheiro de 8MB. Isto deve-se ao facto das tabelas da DynamoDB terem um controlo da taxa de transferência, que caso for demasiado elevada, consumia para além do que o free tier da AWS fornecia, consumindo recursos monetários em elevadas quantidades na nossa experiência.
 	
 	\item Na implementação das queries para a DynamoDB, reparamos numa limitação dos resultados obtidos com o despoletar de uma query. Isto deve-se ao facto da DynamoDB limitar os resultados de cada query a "páginas" de 1MB, sendo que uma página é um conjuntos das entradas filtradas pela query. Tivemos então que lidar com a paginação, que provou ser pouco eficiente, baseando-se na utilização da última entrada da página anterior, e despolentando uma nova query a partir dessa entrada, logo necessitando de \textit{TAMANHO\_DATASET}/1MB queries.
+	
+	\item As queries da DynamoDB são de 2 tipos: \textbf{Scan} e \textbf{Query}. Inicialmente
 \end{enumerate}
 
 \section{Lançamento em Kubernetes}
@@ -249,66 +249,12 @@ Deste comando retira-se o endereço que se encontra em \textit{Address} e adicio
 \subsection{Desconstrução do deployment}
 Para remover a montagem do sistema, seguem-se os seguintes passos:
 \begin{enumerate}
-	\item Na consola de EKS \url{https://eu-west-1.console.aws.amazon.com/eks/home?region=eu-west-1#/clusters}, dependendo da região escolhida, selecionar o cluster e apagar o node group correspondente. Após dos node groups terem sido eliminados, proceder com a eliminação do cluster.
-	\item Na consola de EC2 \url{https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#LoadBalancers}, eliminar os load balancers criados. Na mesma consola navegar para os target groups e apagar aqueles que estejam relacionados com o VPC criado.
-	\item Na consola de VPC \url{https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#NatGateways}, eliminar as NATs criadas. Após a eliminação, navegar para a secção dos VPCs e eliminar as VPCs correspondentes que contém o nome dado à stack.
-	\item Na consola de ECR \url{https://console.aws.amazon.com/ecr/repositories?region=us-east-1}, eliminar os seguintes repositórios: \textit{database}, \textit{events} e \textit{products}.
-	\item Na consola de IAM Policies \url{https://console.aws.amazon.com/iam/home?#/policies}, eliminar a policy com o seguinte nome: \textbf{ALBIngressControllerIAMPolicyEcommerce}. Após a eliminação, navegar para a secção dos Roles, e apagar o role com o seguinte nome: \textbf{eksServiceRole}.
-	\item Na consola de CloudFormation \url{https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks}, eliminar a stack criada com o nome dado nos scripts anteriores.
+	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/eks/home?region=eu-west-1#/clusters}{EKS}, dependendo da região escolhida, selecionar o cluster e apagar o node group correspondente. Após dos node groups terem sido eliminados, proceder com a eliminação do cluster.
+	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#LoadBalancers}{EC2}, eliminar os load balancers criados. Na mesma consola navegar para os target groups e apagar aqueles que estejam relacionados com o VPC criado.
+	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#NatGateways}{VPC}, eliminar as NATs criadas. Após a eliminação, navegar para a secção dos VPCs e eliminar as VPCs correspondentes que contém o nome dado à stack.
+	\item Na consola de \href{https://console.aws.amazon.com/ecr/repositories?region=us-east-1}{ECR}, eliminar os seguintes repositórios: \textit{database}, \textit{events} e \textit{products}.
+	\item Na consola de \href{https://console.aws.amazon.com/iam/home?#/policies}{IAM Policies}, eliminar a policy com o seguinte nome: \textbf{ALBIngressControllerIAMPolicyEcommerce}. Após a eliminação, navegar para a secção dos Roles, e apagar o role com o seguinte nome: \textbf{eksServiceRole}.
+	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks}{CloudFormation}, eliminar a stack criada com o nome dado nos scripts anteriores.
 \end{enumerate}
-
-\section{Cenários de Validação}
-
-\begin{itemize}
-	\item Listar Categorias:
-	\begin{enumerate}
-		\item Inserir o url mencionado posteriormente.
-		\item Após alguns segundos irá aparecer no ecrã o resultado.
-	\end{enumerate}
-	\item Listar a popularidade das marcas:
-	\begin{enumerate}
-		\item Inserir o url mencionado posteriormente.
-		\item Após alguns segundos irá aparecer no ecrã o resultado.
-	\end{enumerate}
-	\item Listar vendas de cada marca:
-	\begin{enumerate}
-		\item Inserir o url mencionado posteriormente.
-		\item Após alguns segundos irá aparecer no ecrã o resultado.
-	\end{enumerate}
-	\item Listar o preço médio de uma marca:
-	\begin{enumerate}
-		\item Inserir o url mencionado posteriormente adicionado "/<Marca>", aonde <Marca> representa a marca que o utilizador quer analisar.
-		\item Após alguns segundos irá aparecer no ecrã o resultado.
-	\end{enumerate}
-	\item Ver o ratio dos eventos possíveis:
-	\begin{enumerate}
-		\item Inserir o url mencionado posteriormente.
-		\item Após alguns segundos irá aparecer no ecrã o resultado.
-	\end{enumerate}
-	\item Portabilidade:
-	\begin{enumerate}
-		\item 
-	\end{enumerate}
-	\item Legibilidade:
-	\begin{enumerate}
-		\item 
-	\end{enumerate}
-	\item Estabilidade:
-	\begin{enumerate}
-		\item 
-	\end{enumerate}
-	\item Elasticidade:
-	\begin{enumerate}
-		\item 
-	\end{enumerate}
-	\item Escalabilidade:
-	\begin{enumerate}
-		\item 
-	\end{enumerate}
-	\item Confiabilidade:
-	\begin{enumerate}
-		\item 
-	\end{enumerate}
-\end{itemize}
 
 \end{document}
