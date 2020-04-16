@@ -104,23 +104,19 @@ Os serviços foram escolhidos de forma a que consigam fazer diferentes tipos de 
   \caption{Arquitetura da aplicação}
 \end{figure}
 
-Após a definição da API com o Swagger na fase anterior, possibilitou a opção de exportar do API definido um Cliente (em Java) e um Servidor NodeJS.
+Após a definição da API com o Swagger na fase anterior, foi implementado de raiz um servidor em NodeJS que segue a API definida.
 
-\subsection{System Frontend}
-O frontend irá dispor as funcionalidades anteriormente definidas. Pode ser extraído do ficheiro Swagger em formato HTML.
-\newline
 
-\subsection{API Gateway}
-Este gateway irá ser encarregado de receber pedidos HTTP vindos do frontend e reencaminhá-los para o servidor NodeJS que tratará da lógica de negócio. Também irá encaminhar as respostas vindas do servidor para o frontend de modo disponibilizar os dados pretendidos.
-\newline %removam isto se nao gostarem do espaço k adiciona
+\subsection{Load Balancer}
+Foi implementado um Load Balancer que distribui os pedidos HTTP recebidos dos clientes browser e que reencaminha para os respetivos serviços.
 
 
 \subsection{Servidor NodeJS}
-O servidor exportado do Swagger irá receber os pedidos a partir da API Gateway, e processá-los de acordo com a funcionalidade pretendida. A lógica de negócio é aqui tratada, realizando as queries necessárias para a base de dados. Ao receber os dados, processa-os de acordo com a funcionalidade, e encaminha o resultado para a gateway.
-\newline %removam isto se nao gostarem do espaço k adiciona
+O servidor irá receber os pedidos a partir do Load Balancer, e processá-los de acordo com a funcionalidade pretendida. A lógica de negócio é aqui tratada, realizando as queries necessárias para a base de dados. Ao receber os dados, processa-os de acordo com a funcionalidade, e encaminha o resultado para o Load Balancer.
+%\newline %removam isto se nao gostarem do espaço k adiciona
 
 \subsection{Base de dados}
-A base de dados irá conter o conteúdo dos ficheiros .csv do nosso data set, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente. 
+A base de dados irá conter o conteúdo dos ficheiros .csv do nosso dataset, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente. 
 %\newpage
 \section{Arquitetura técnica}
 %Digam-me o que acham
@@ -129,19 +125,21 @@ A base de dados irá conter o conteúdo dos ficheiros .csv do nosso data set, qu
 Para garantir os requisitos não funcionais mencionados a cima devemos ter em atenção os serviços da cloud escolhidos, pois proporcionam vários aspetos fundamentais dos requisitos.
 \newline
 
-A utilização dos serviços disponibilizados pela AWS permite cumprir alguns dos requisitos não funcionais mencionados, nomeadamente a Escalabilidade e a Elasticidade. A implementação da API através da API Gateway permite que este serviço da cloud trate automaticamente da carga de pedidos HTTP recebida, não sendo necessário a criação de scripts especializados para distribuição de carga. A base de dados a ser implementada na Amazon DynamoDB também permite escalabilidade e também eficácia na resolução de queries, tratando da carga de queries automaticamente tal como os restantes serviços da cloud.
+A utilização dos serviços disponibilizados pela AWS permite cumprir alguns dos requisitos não funcionais mencionados, nomeadamente a Escalabilidade e a Elasticidade. Já o Load Balancer permite que este serviço da cloud trate automaticamente da separação dos diferentes tipos de pedidos HTTP recebidos para os respetivos serviços. A base de dados utilizada consiste uma imagem docker baseada na imagem mongo que como o nome sugere é uma imagem de MongoDB. Foi escolhida esta alternativa de forma a não estar dependente dos serviços de Bases de Dados de um fornecedor específico, sendo que com esta opção a imagem pode ser implementada numa instância em qualquer fornecedor cloud. Quanto à escalabilidade a imagem poderia ser replicada por diversas réplicas de forma a distribuir os pedidos feitos pelas diferentes réplicas.  %NOT TOTALY SURE,devemos por isto?
 \newline
 
 A Confiabilidade do sistema também é melhorada com a instalação em serviços na cloud, visto estas terem deteções automáticas de falhas de servidores, possibilitando a migração do sistema virtualizado para outro servidor funcional.
 \newline
 
-A Estabilidade é garantida nas várias ferramentas usadas na instalação do sistema. O API Gateway da AWS tratará automaticamente da carga de pedidos HTTP recebida, não sendo necessário a criação de scripts para mitigação de carga.
+A Estabilidade é garantida nas várias ferramentas usadas na instalação do sistema. O Load Balancer como referido anteriormente faz a distribuição dos pedidos HTTP para os respetivos serviços, sendo que o Kubernetes atribui um DNS igual para todas as réplicas do serviço de maneira a que o Load Balancer apenas reencaminhe para o respetivo DNS, sendo o Kubernetes a distribuir a carga pelas respetivas réplicas do serviço. Isto permite que o sistema escale com facilidade já que aumentar o número de réplicas de um micro-serviço em Kubernetes é um processo rápido e sem necessitar de qualquer alteração no Load Balancer.
 \newline
 
 Já a Estabilidade é garantida devido a ter a Lógica de negócio distribuída por várias máquinas virtuais que cumprem a função de servidores.
 \newline
 
-Dado que o API é definido em Swagger, a implementação do cliente e servidor são facilmente traduzidos para uma outra linguagem exportável, garantindo a Portabilidade. Visto que a lógica de negócio vai ser implementada num servidor NodeJS, a maior parte do código desenvolvido poderá ser instalado noutra plataforma Cloud sem grandes mudanças, sendo as principais diferenças o acesso à base de dados da nova plataforma e a comunicação com a API Gateway. A camada de apresentação também não sofraria de mudanças de grau elevado, sendo que apenas a comunicação para a API Gateway mudaria.
+
+A utilização do Docker permite-nos facilmente fazer deploy de um serviço, em qualquer máquina e em qualquer um fornecedor de cloud. Isto deve-se ao Dockerfile garantir a instalação de todas as dependências do serviço, variando conforme a linguagem de implementação do mesmo, cumprindo assim o requisito de Portabilidade do sistema.
+%Dado que o API é definido em Swagger, a implementação do cliente e servidor são facilmente traduzidos para uma outra linguagem exportável, garantindo a Portabilidade. Visto que a lógica de negócio vai ser implementada num servidor NodeJS, a maior parte do código desenvolvido poderá ser instalado noutra plataforma Cloud sem grandes mudanças, sendo as principais diferenças o acesso à base de dados da nova plataforma e a comunicação com a API Gateway. A camada de apresentação também não sofraria de mudanças de grau elevado, sendo que apenas a comunicação para a API Gateway mudaria.
 
 
 \section{Lançamento em Kubernetes}
@@ -198,7 +196,7 @@ O terceiro script recebe 2 argumentos na seguinte ordem:
 \end{itemize}
 Para a correto funcionamento deste script, salienta-se a necessidade de apagar os repositórios, roles e policies anteriormente referidos.
 
-Após a criação dos repositórios e o push das imagens para os mesmos, será pedido para mudar os credenciais IAM para os que se encontram no ficheiro \textbf{credenciais_mongo.txt} para realizar o pull da imagem da base de dados.
+Após a criação dos repositórios e o push das imagens para os mesmos, será pedido para mudar os credenciais IAM para os que se encontram no ficheiro \textbf{credenciais\_mongo.txt} para realizar o pull da imagem da base de dados.
 
 Depois de realizar o pull irá ser pedido para mudar os credenciais de novo para a conta pessoal de AWS para a criação do repositório da base de dados e o push da imagem.
 
