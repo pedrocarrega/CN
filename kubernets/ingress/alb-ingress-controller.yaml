@@ -21,8 +21,9 @@ spec:
             # REQUIRED
             # Name of your cluster. Used when naming resources created
             # by the ALB Ingress Controller, providing distinction between
-            # clusters. Change CLUSTER_NAME to the created cluster's name
+            # clusters. Change CLUSTER_NAME to the created cluster's name and VPC_ID to the value given
             - --cluster-name=CLUSTER_NAME
+            - --aws-vpc-id=VPC_ID
 
           image: docker.io/amazon/aws-alb-ingress-controller:v1.1.6
       serviceAccountName: alb-ingress-controller
