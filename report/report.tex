@@ -28,7 +28,7 @@
 \usepackage{adjustbox}
 \usepackage{float}
 \usepackage[colorlinks=true,urlcolor=blue,linkcolor=black]{hyperref}
-%\usepackage[scaled]{uarial}
+\usepackage[scaled]{uarial}
 \renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
 
 
@@ -232,7 +232,7 @@ Para realizar o pull, irá ser pedido para inserir os credenciais IAM que dão a
 
 No fim da execução do script, é necessário verificar o estado dos node groups antes de proceder ao próximo script. O estado pode ser verificado com o seguinte comando: 
 \begin{itemize}
-	\item \textit{aws eks describe-nodegroup \texttt{-{}-}cluster-name CLUSTER\_NAME \texttt{-{}-}nodegroup STACK\_NAME} , mudando CLUSTER\_NAME e STACK\_NAME para os respetivos nomes dados nos argumentos
+	\item \textit{aws eks describe-nodegroup \texttt{-{}-}cluster-name CLUSTER\_NAME \texttt{-{}-} nodegroup STACK\_NAME} , mudando CLUSTER\_NAME e STACK\_NAME para os respetivos nomes dados nos argumentos
 \end{itemize}
 No final irá ser pedido para introduzir os credenciais de IAM para a conta de AWS pessoal de modo a poder criar os repositórios e fazer push das imagens no script seguinte.
 Após o estado do node group passar para \textbf{ACTIVE} podemos proceder À execução do terceiro script.
@@ -263,8 +263,22 @@ Para aceder ao valor do ARN do role criado, basta inserir na linha de comandos a
 \end{itemize}
 
 \subsubsection{ingress/alb-ingress-controller.yaml}
-Neste ficheiro é necessário inserir a informação relativa ao cluster criado para que o Ingress utilize os recursos corretos. Para tal é necessário alterar no ficheiro, na linha \textbf{- \texttt{-{}-}cluster-name=CLUSTER\_NAME},
+Neste ficheiro é necessário inserir a informação relativa ao cluster criado para que o Ingress utilize os recursos corretos. Para tal é necessário alterar no ficheiro, na linha: 
+\begin{itemize}
+	\item \textbf{- \texttt{-{}-}cluster-name=CLUSTER\_NAME}
+\end{itemize}
 alterando \textbf{CLUSTER\_NAME} pelo nome do cluster dado nos argumentos dos scripts anteriores.
+
+Na linha:
+\begin{itemize}
+	\item \textbf{- \texttt{-{}-}aws-vpc-id=VPC\_ID}
+\end{itemize}
+alterar \textbf{VPC\_ID} pelo ID do VPC gerado na criação da Stack. Este ID pode ser verificado correndo o script \textbf{get-vpc-id.sh} com os seguintes parametros de entrada:
+\begin{itemize}
+	\item A região onde a Stack foi criada
+	\item O nome da stack dado na criação
+\end{itemize}
+Exemplo de execução: \textbf{./get-vpc-id.sh eu-west-1 stack}
 
 Após a execução destes 2 passos, executa-se o quarto e último script, \textbf{deploy4.sh} sem parâmetros de entrada.
 
@@ -273,7 +287,7 @@ Após a aplicação dos ficheiros yaml do Ingress, é possível aceder ao sistem
 \begin{itemize}
 	\item \textbf{kubectl get ingress}
 \end{itemize}
-Deste comando retira-se o endereço que se encontra em \textit{Address} e adiciona-se os paths para os serviços disponibilizados (ex.: <address>/api/products/listCategories).
+Deste comando retira-se o endereço que se encontra em \textit{Address} e adiciona-se os paths para os serviços disponibilizados (ex.: <address>/api/products/ listCategories).
 
 \subsection{Desconstrução do deployment}
 Para remover a montagem do sistema, seguem-se os seguintes passos:
@@ -341,7 +355,7 @@ Para remover a montagem do sistema, seguem-se os seguintes passos:
 	\end{enumerate}
 \end{itemize}
 
-\section{Discussão}
-Durante o desenvolvimento do projeto foram encontrados bastantes obstáculos, seja na implementação dos serviços, na escolhe e consequente aplicação da base de dados ou na automatização dos scripts de implementação dos serviços desenvolvidos. Todos estes problemas resultaram em muitas horas de trabalho extra por parte do grupo, mas serviram também de aprendizagem, seja em como trabalhar com fornecedores de serviços na nuvem, ou como desenvolver scripts de automatização de implementação. Apesar de todos os problemas, o grupo foi capaz de os solucionar de forma eficiente como mencionados na secção da Arquitetura técnica.
+\section{Conclusão e Discussão}
+Durante o desenvolvimento do projeto foram encontrados bastantes obstáculos, seja na implementação dos serviços, na escolha e consequente aplicação da base de dados ou na automatização dos scripts de implementação dos serviços desenvolvidos. Todos estes problemas resultaram em muitas horas de trabalho extra por parte do grupo, mas serviram também de aprendizagem, seja em como trabalhar com fornecedores de serviços na nuvem, ou o desenvolvimento de scripts de automatização de deployment. Apesar de todos os problemas, o grupo foi capaz de os solucionar de forma eficiente como mencionados na secção da Arquitetura técnica.
 
 \end{document}
