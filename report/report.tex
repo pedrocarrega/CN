@@ -316,11 +316,9 @@ Para remover a montagem do sistema, seguem-se os seguintes passos:
 	\end{enumerate}
 	\item Portabilidade:
 	\begin{enumerate}
-		\item 
-	\end{enumerate}
-	\item Legibilidade:
-	\begin{enumerate}
-		\item 
+		\item Escolher 2 diferentes provedores de serviço cloud
+		\item Implementar os serviços criados nos diferentes serviços
+		\item Verficar que ambos os serviços se encontram funcionais
 	\end{enumerate}
 	\item Estabilidade:
 	\begin{enumerate}
@@ -328,20 +326,13 @@ Para remover a montagem do sistema, seguem-se os seguintes passos:
 	\end{enumerate}
 	\item Elasticidade:
 	\begin{enumerate}
-		\item Verfique o numero de worker nodes ativos
-		\item 
-	\end{enumerate}
-	\item Escalabilidade:
-	\begin{enumerate}
-		\item 
-	\end{enumerate}
-	\item Confiabilidade:
-	\begin{enumerate}
-		\item 
+		\item Verfique o numero de maquinas virtuais ativas
+		\item Assumindo uma baixa carga de sistema, sobrecarregue o serviço com pedidos
+		\item Visualize o numero de maquinas virtuais ativas aumentar de forma a poder satisfazer os diferentes pedidos sem afetar a qualidade do serviço
 	\end{enumerate}
 \end{itemize}
 
-\section{Discussão}
+\section{Discussão e Conclusões}
 Durante o desenvolvimento do projeto foram encontrados bastantes obstáculos, seja na implementação dos serviços, na escolhe e consequente aplicação da base de dados ou na automatização dos scripts de implementação dos serviços desenvolvidos. Todos estes problemas resultaram em muitas horas de trabalho extra por parte do grupo, mas serviram também de aprendizagem, seja em como trabalhar com fornecedores de serviços na nuvem, ou como desenvolver scripts de automatização de implementação. Apesar de todos os problemas, o grupo foi capaz de os solucionar de forma eficiente como mencionados na secção da Arquitetura técnica.
 
 \end{document}
