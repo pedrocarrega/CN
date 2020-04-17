@@ -186,6 +186,9 @@ Mudando a implementação da base de dados para uma de MongoDB, deparamo-nos com
 \subsection{Load Balancer}
 Para o balanceamento da carga no deployment em Kubernetes, utilizamos um controlador de Ingress, o NGINX. Este controlador encaminha os vários pedidos para os serviços correspondentes. No nosso caso concretamente, os pedidos com o URL \textit{/api/events*} e \textit{/api/products*} são encaminhados para os seus respetivos serviços que estão deployed nas Kubernetes. Os serviços por sua vez fazem o balanceamento de carga automaticamente pelos vários pods por nós lançados que contém a implementação do Web Server.
 
+Na implementação do Ingress controller deparamo-nos com problemas no deployment do Ingress em si, pois este não mostrava o endereço necessário para realizar o load balancing, não conseguimos antes da primeira entrega encontrar o problema no nosso deployment, pelo que tivemos que fazer expose dos 2 serviços individualmente para ter um sistema que responda a queries.
+
+Já na segunda entrega fizemos uma nova implementação do controlador Ingress, desta vez dando as permissões necessárias e acrescentado os dados corretos no ficheiros YAML relacionados com o Ingress, resultand num deployment correto do load balancer.
 \section{Lançamento em Kubernetes}
 O scripts de deployment do sistema foram separados em 4 devido à necessidade dos clusters e node groups estarem ativos, antes de proceder aos próximos passos. Existe também uma secção de edição de ficheiro manual, o que fez a quebra entre o terceiro e o quarto script.
 
