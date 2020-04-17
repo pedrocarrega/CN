@@ -44,6 +44,7 @@ aws ecr get-login-password --region eu-west-1 | sudo docker login --username AWS
 
 sudo docker pull 774440115756.dkr.ecr.eu-west-1.amazonaws.com/events:v1
 sudo docker pull 774440115756.dkr.ecr.eu-west-1.amazonaws.com/products:v1
+sudo docker pull 774440115756.dkr.ecr.eu-west-1.amazonaws.com/database:v1
 
 printf  "Inserir as credenciais de acesso ao ECR ou de admin da conta pessoal de AWS:\n"
 aws configure
