@@ -27,7 +27,7 @@
 \usepackage{xcolor}
 \usepackage{adjustbox}
 \usepackage{float}
-\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
+\usepackage[colorlinks=true,urlcolor=blue,linkcolor=black]{hyperref}
 
 
 \begin{document}
@@ -41,6 +41,9 @@ Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 %\email{\{fc49480,fc49470,fc49521\}@alunos.fc.ul.pt}}
 
 \maketitle
+
+%\renewcommand*\contentsname{Indíce}
+\tableofcontents
 
 \section{Motivação para Dataset e Serviços}
 
@@ -143,9 +146,8 @@ Já a Estabilidade é garantida devido a ter a Lógica de negócio distribuída 
 A utilização do Docker permite-nos facilmente fazer deploy de um serviço, em qualquer máquina e em qualquer um fornecedor de cloud. Isto deve-se ao Dockerfile garantir a instalação de todas as dependências do serviço, variando conforme a linguagem de implementação do mesmo, cumprindo assim o requisito de Portabilidade do sistema.
 
 \section{Implementação}
-A implementação do web server foi inicialmente realizada em NodeJS com a utilização de um router Koa. Porém a gramática das operações do Koa não estavam bem documentadas, pelo que mudamos a implementação para um router Express.
 
-\subsection{Implementação - Base de dados}
+\subsection{Base de dados}
 Uma das maiores dificuldades que tivemos foi a passagem dos dados em formato CSV para uma tabela na DynamoDB. Começamos primeiro com a criação de scripts em Python, com a utilização de bibliotecas disponibilizadas pela AWS. Isto mostrou-se não fazível devido às limitações do tamanho do heap e da memória consumida, visto o ficheiro CSV ser de grandes dimensões.
 
 Passamos para a implementação do mesmo script mas através do AWS Lambda mas deparamo-nos com o mesmo problema, sem sucesso na escrita para a DynamoDB.
@@ -163,7 +165,8 @@ Finalmente utilizamos a ferramenta do Data Pipeline, que por sua vez originou v�
 	\item Porém, existiam outros serviços (como o caso do \textit{/api/events/ratio}) que necessitavam de percorrer a base de dados na sua totalidade para mostrar as estatísticas pretendidas, pelo que não se verificou um aumento de desempenho significante entre a utilização de Queries ou Scans. Estas queries demoravam em média 10 a 15 minutos por cada pedido realizado, não sendo um tempo de execução aceitável.
 \end{enumerate}
 
-\subsection{Load Balancing}
+\subsection{Web Server}
+
 \section{Lançamento em Kubernetes}
 O scripts de deployment do sistema foram separados em 4 devido à necessidade dos clusters e node groups estarem ativos, antes de proceder aos próximos passos. Existe também uma secção de edição de ficheiro manual, o que fez a quebra entre o terceiro e o quarto script.
 
@@ -185,7 +188,7 @@ A região a escolher para o lançamento poderá ser qualquer um, porém recomend
 
 Com a utilização do Ingress, reparamos que existe a possibilidade deste poder usar VPCs antigas, para prevenir que tal ocorra, sugerimos apagar Target Groups que não estejam a ser utilizados.
 
-\subsection{Lançamento em Kubernetes - deploy1.sh}
+\subsection{deploy1.sh}
 O primeiro script de deployment recebe 3 argumentos na seguinte ordem:
 \begin{enumerate}
 	\item A região onde a Stack e o Cluster vão ser lançados (ex.: \textbf{eu-west-1})
@@ -200,7 +203,7 @@ A criação da stack e do cluster irá demorar cerca de 10 a 20 minutos até fic
 \end{itemize}
 A execução do segundo script só deve ser feita quando o estado do cluster estiver em \textbf{ACTIVE}.
 
-\subsection{Lançamento em Kubernetes - deploy2.sh}
+\subsection{deploy2.sh}
 O segundo script recebe os mesmos argumentos que o primeiro, todos na mesma ordem. Neste script vão ser criados os node groups e o pull das imagens dos serviços.
 
 Para realizar o pull, irá ser pedido para inserir os credenciais IAM que dão acesso aos repositórios por nós criados. Estes credenciais encontram-se no ficheiro \textbf{credenciais.txt} juntamente com a região onde os repositórios se encontram.
@@ -212,7 +215,7 @@ No fim da execução do script, é necessário verificar o estado dos node group
 No final irá ser pedido para introduzir os credenciais de IAM para a conta de AWS pessoal de modo a poder criar os repositórios e fazer push das imagens no script seguinte.
 Após o estado do node group passar para \textbf{ACTIVE} podemos proceder À execução do terceiro script.
 
-\subsection{Lançamento em Kubernetes - deploy3.sh}
+\subsection{deploy3.sh}
 O terceiro script recebe 2 argumentos na seguinte ordem:
 \begin{itemize}
 	\item A região que deverá ser idêntica às inseridas nos scripts anteriores
@@ -224,7 +227,7 @@ Após a criação dos repositórios e o push das imagens para os mesmos, será p
 
 Depois de realizar o pull irá ser pedido para mudar os credenciais de novo para a conta pessoal de AWS para a criação do repositório da base de dados e o push da imagem.
 
-\subsection{Lançamento em Kubernetes - deploy4.sh}
+\subsection{deploy4.sh}
 Antes da execução do 4 ficheiro de deployment, as seguintes mudanças terão de ser realizadas nos ficheiros \textbf{ingress/ingress-rbac.yaml} e \textbf{ingress/alb-ingress-controller.yaml}.
 
 \subsubsection{ingress/ingress-rbac.yaml}
