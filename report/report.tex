@@ -163,10 +163,14 @@ Finalmente utilizamos a ferramenta do Data Pipeline, que por sua vez originou v�
 	\item As queries da DynamoDB são de 2 tipos: \textbf{Scan} e \textbf{Query}. Inicialmente usamos Scans para alguns serviços disponibilizados, porém, estes eram muito ineficientes em comparação com as queries dado que necessitavam de percorrer a tabela inteira. Recriamos então a tabela, de modo a fornecer uma Primary Key comum a todas as entradas e com uma coluna \textbf{event\_id} que era denominada como Sorting Key, distinguindo todas as entradas. Isto possibilitou a utilização de queries da DynamoDB que aumentou o desempenho para certos serviços. 
 	
 	\item Porém, existiam outros serviços (como o caso do \textit{/api/events/ratio}) que necessitavam de percorrer a base de dados na sua totalidade para mostrar as estatísticas pretendidas, pelo que não se verificou um aumento de desempenho significante entre a utilização de Queries ou Scans. Estas queries demoravam em média 10 a 15 minutos por cada pedido realizado, não sendo um tempo de execução aceitável.
+	
+	\item Foi concluído que a DynamoDB não era uma base de dados adequada para a realização de análise de dados. Daí, mudamos a implementação para uma imagem Docker de Mongo.
 \end{enumerate}
 
 \subsection{Web Server}
+O Web Server foi inicialmente implementado em NodeJS com um router Koa. Porém a documentação relativa ao router era escassa em comparação a outras alternativas, razão pela qual mudamos para um router Express que se encontrava com melhor documentação.
 
+As queries para a base de dados na DynamoDB foram implementadas em NodeJS, onde foi necessário tratar da paginação. A documentação relativa à paginação das queries encontrava-se disponível sendo a implementação relativamente simples, excluindo as tentativas de 
 \section{Lançamento em Kubernetes}
 O scripts de deployment do sistema foram separados em 4 devido à necessidade dos clusters e node groups estarem ativos, antes de proceder aos próximos passos. Existe também uma secção de edição de ficheiro manual, o que fez a quebra entre o terceiro e o quarto script.
 
