@@ -3,7 +3,7 @@
 \BOOKMARK [1][-]{section.3}{Requisitos}{}% 3
 \BOOKMARK [1][-]{section.4}{Arquitetura da aplica\347\343o}{}% 4
 \BOOKMARK [2][-]{subsection.4.1}{Load Balancer}{section.4}% 5
-\BOOKMARK [2][-]{subsection.4.2}{Servidor NodeJS}{section.4}% 6
+\BOOKMARK [2][-]{subsection.4.2}{Servidores NodeJS}{section.4}% 6
 \BOOKMARK [2][-]{subsection.4.3}{Base de dados}{section.4}% 7
 \BOOKMARK [1][-]{section.5}{Arquitetura t\351cnica}{}% 8
 \BOOKMARK [1][-]{section.6}{Implementa\347\343o}{}% 9
@@ -19,3 +19,5 @@
 \BOOKMARK [3][-]{subsubsection.7.4.2}{ingress/alb-ingress-controller.yaml}{subsection.7.4}% 19
 \BOOKMARK [2][-]{subsection.7.5}{Acesso aos servi\347os}{section.7}% 20
 \BOOKMARK [2][-]{subsection.7.6}{Desconstru\347\343o do deployment}{section.7}% 21
+\BOOKMARK [1][-]{section.8}{Cen\341rios de Valida\347\343o}{}% 22
+\BOOKMARK [1][-]{section.9}{Discuss\343o e Conclus\365es}{}% 23
