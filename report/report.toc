@@ -1,0 +1,22 @@
+\babel@toc {portuguese}{}
+\contentsline {section}{\numberline {1}Motivação para Dataset e Serviços}{2}{section.1}%
+\contentsline {section}{\numberline {2}Diagrama de Casos de Uso}{3}{section.2}%
+\contentsline {section}{\numberline {3}Requisitos}{4}{section.3}%
+\contentsline {section}{\numberline {4}Arquitetura da aplicação}{5}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Load Balancer}{5}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Servidor NodeJS}{5}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Base de dados}{6}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Arquitetura técnica}{6}{section.5}%
+\contentsline {section}{\numberline {6}Implementação}{7}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Base de dados}{7}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Web Server}{8}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Load Balancer}{8}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Lançamento em Kubernetes}{9}{section.7}%
+\contentsline {subsection}{\numberline {7.1}deploy1.sh}{9}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}deploy2.sh}{10}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}deploy3.sh}{10}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}deploy4.sh}{11}{subsection.7.4}%
+\contentsline {subsubsection}{\numberline {7.4.1}ingress/ingress-rbac.yaml}{11}{subsubsection.7.4.1}%
+\contentsline {subsubsection}{\numberline {7.4.2}ingress/alb-ingress-controller.yaml}{11}{subsubsection.7.4.2}%
+\contentsline {subsection}{\numberline {7.5}Acesso aos serviços}{11}{subsection.7.5}%
+\contentsline {subsection}{\numberline {7.6}Desconstrução do deployment}{12}{subsection.7.6}%
