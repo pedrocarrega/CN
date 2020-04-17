@@ -45,7 +45,7 @@ For the region we recommend 'eu-west-1', that being said we leave the region sel
 	Inside the `ingress/ingress-rbac.yaml` file, at the annotations, the role ARN must be written in front of  `eks.amazonaws.com/role-arn:`. This value can be checked by typing the following command in the console:
 		- `aws iam get-role --role-name eksServiceRole`
 
-4.2 Inside the `ingress/alb-ingress-controller.yaml` file, uncomment the `--cluster-name` line, and place the name of the cluster previously given on the other scripts. On the `--aws-vpc-id` line, add the VPC ID given by running the `get_vpc_id.sh` script.
+4.2 Inside the `ingress/alb-ingress-controller.yaml` file, uncomment the `--cluster-name` line, and place the name of the cluster previously given on the other scripts. On the `--aws-vpc-id` line, add the VPC ID given by running the `get-vpc-id.sh` script.
 NOTE: The cluster name must be correct for the scripts to deploy correctly.
 
 4.3 After changing said files we can finnaly execute script deploy4.sh

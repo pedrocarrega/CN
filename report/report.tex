@@ -28,8 +28,8 @@
 \usepackage{adjustbox}
 \usepackage{float}
 \usepackage[colorlinks=true,urlcolor=blue,linkcolor=black]{hyperref}
-%\usepackage[scaled]{uarial}
-%\renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
+\usepackage[scaled]{uarial}
+\renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
 
 
 \begin{document}
@@ -64,27 +64,11 @@ Os serviços foram escolhidos de forma a que consigam fazer diferentes tipos de 
 \section{Diagrama de Casos de Uso}
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.38]{Use_Cases.png}
+    \includegraphics[scale=0.42]{Use_Cases.png}
   \caption{Diagrama de casos de uso}
 \end{figure}
 
 \section{Requisitos}
-
-\begin{table}[H]
-	\begin{center}
-		\begin{tabular}{|p{3.8cm}|p{9.2cm}|}
-		\hline
-			\textbf{Requisitos\newline Funcionais} & \textbf{Descrição}\\ \hline
-			Listar\newline Categorias Disponíveis & Serviço que fornece aos clientes todas as categorias \\ \hline
-			Visualizar\newline Popularidade das\newline Marcas & Serviço que fornece cada marca associada com a sua popularidade\\ \hline
-			Visualizar\newline Número de Vendas\newline Individuais & Fornece o numero total de vendas de cada marca\\ \hline
-			Visualizar\newline Preço Médio de Venda & Fornece o preço médio dos produtos vendidos de uma determinada marca \\ \hline
-			Visualizar\newline Rácio de Tipo\newline de Eventos & Fornece a percentagem de cada tipo de evento \\ \hline
-	\end{tabular}
-	\label{tab2}
-	\end{center}
-	\caption{Requisitos Funcionais}
-\end{table}
 
 \begin{table}[H]
 	\begin{center}
@@ -103,7 +87,21 @@ Os serviços foram escolhidos de forma a que consigam fazer diferentes tipos de 
 	\caption{Requisitos Não Funcionais}
 \end{table}
 
-
+\begin{table}[H]
+	\begin{center}
+		\begin{tabular}{|p{3.8cm}|p{8.2cm}|}
+		\hline
+			\textbf{Requisitos\newline Funcionais} & \textbf{Descrição}\\ \hline
+			Listar\newline Categorias Disponíveis & Serviço que fornece aos clientes todas as categorias \\ \hline
+			Visualizar\newline Popularidade das\newline Marcas & Serviço que fornece cada marca associada com a sua popularidade\\ \hline
+			Visualizar\newline Número de Vendas\newline Individuais & Fornece o numero total de vendas de cada marca\\ \hline
+			Visualizar\newline Preço Médio de Venda & Fornece o preço médio dos produtos vendidos de uma determinada marca \\ \hline
+			Visualizar\newline Rácio de Tipo\newline de Eventos & Fornece a percentagem de cada tipo de evento \\ \hline
+	\end{tabular}
+	\label{tab2}
+	\end{center}
+	\caption{Requisitos Funcionais}
+\end{table}
 
 \section{Arquitetura da aplicação}
 \begin{figure}[H]
@@ -125,7 +123,7 @@ Os servidores irão receber os pedidos a partir do Load Balancer, e processá-lo
 
 \subsection{Base de dados}
 A base de dados irá conter o conteúdo dos ficheiros .csv do nosso dataset, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente. 
-\newpage
+%\newpage
 
 \section{Arquitetura técnica}
 %Digam-me o que acham
