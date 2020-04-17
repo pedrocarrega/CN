@@ -44,7 +44,7 @@ Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 
 \maketitle
 
-%\renewcommand*\contentsname{Indíce}
+\renewcommand*\contentsname{Indíce}
 \tableofcontents
 
 \section{Motivação para Dataset e Serviços}
@@ -297,6 +297,8 @@ Após a aplicação dos ficheiros yaml do Ingress, é possível aceder ao sistem
 	\item \textbf{kubectl get ingress}
 \end{itemize}
 Deste comando retira-se o endereço que se encontra em \textit{Address} e adiciona-se os paths para os serviços disponibilizados (ex.: <address>/api/products/ listCategories).
+
+Deparamos com um problema no load balancing na kubernetes, que também foi verificado no caso da implementação com o ELB da AWS na fase anterior à entrega das kubernetes, especificamente no serviço /api/events/ratio. Porém tal como na dita fase, não conseguimos depurar o deployment de modo a determinar o possível erro que causa os timeouts. Executando kubectl expose sobre o deployment do serviço do ratio, as queries retornam normalmente. Acreditamos que o problema se encontre no load balancer do Ingress.
 
 \subsection{Desconstrução do deployment}
 Para remover a montagem do sistema, seguem-se os seguintes passos:
