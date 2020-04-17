@@ -34,7 +34,7 @@
 
 \begin{document}
 
-\title{Fase 3 - Requisitos, Casos de Uso e Arquitetura}
+\title{Relatório Preliminar}
 \author{Pedro Carrega, nº49480 \and
 Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 }
@@ -49,7 +49,7 @@ Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 
 \section{Motivação para Dataset e Serviços}
 
-O dataset ecommerce foi escolhido pelo grupo devido ao grande número de eventos gerados e consequente informação produzida durante a utilização de uma loja de ecommerce. Informação esta que pode ser utilizada de diversas formas através de um grande número de variados serviços. Essa mesma informação poderá ser utilizada em vários contextos, sendo que escolhemos os seguintes 5 serviços que demonstram diferentes tipos de informação sobre o dataset:
+O dataset Ecommerce foi escolhido pelo grupo devido ao grande número de eventos gerados e consequente informação produzida durante a utilização de uma loja de ecommerce. Informação esta que pode ser utilizada de diversas formas através de um grande número de variados serviços. Essa mesma informação poderá ser utilizada em vários contextos, sendo que escolhemos os seguintes 5 serviços que demonstram diferentes tipos de informação sobre o dataset:
 
 \begin{itemize}
   \item api/products/listCategories: Fornece todas as diferentes categorias presentes nos dados
@@ -132,7 +132,7 @@ A base de dados irá conter o conteúdo dos ficheiros .csv do nosso dataset, que
 Para garantir os requisitos não funcionais mencionados a cima devemos ter em atenção os serviços da cloud escolhidos, pois proporcionam vários aspetos fundamentais dos requisitos.
 \newline
 
-A utilização dos serviços disponibilizados pela AWS permite cumprir alguns dos requisitos não funcionais mencionados, nomeadamente a Escalabilidade e a Elasticidade. Já o Load Balancer implementado com o Ingress permite que este serviço da cloud trate automaticamente da separação dos diferentes tipos de pedidos HTTP recebidos para os respetivos serviços. A base de dados utilizada consiste uma imagem docker baseada na imagem mongo que como o nome sugere é uma imagem de MongoDB. Foi escolhida esta alternativa de forma a não estar dependente dos serviços de Bases de Dados de um fornecedor específico, sendo que com esta opção a imagem pode ser implementada numa instância em qualquer fornecedor cloud. Quanto à escalabilidade a imagem poderia ser replicada por diversas réplicas de forma a distribuir os pedidos feitos pelas diferentes réplicas.  %NOT TOTALY SURE,devemos por isto?
+A utilização dos serviços disponibilizados pela AWS permite cumprir alguns dos requisitos não funcionais mencionados, nomeadamente a Escalabilidade e a Elasticidade. Já o Load Balancer implementado com o Ingress permite que este serviço da cloud trate automaticamente da separação dos diferentes tipos de pedidos HTTP recebidos para os respetivos serviços. A base de dados utilizada consiste numa imagem Docker baseada na imagem Mongo que como o nome sugere é uma imagem de MongoDB. Foi escolhida esta alternativa de forma a não estar dependente dos serviços de Bases de Dados de um fornecedor específico, sendo que com esta opção a imagem pode ser implementada numa instância em qualquer fornecedor cloud. Quanto à escalabilidade a imagem poderia ser replicada por diversas réplicas de forma a distribuir os pedidos feitos.
 \newline
 
 A Confiabilidade do sistema também é melhorada com a instalação em serviços na cloud, visto estas terem deteções automáticas de falhas de servidores, possibilitando a migração do sistema virtualizado para outro servidor funcional.
@@ -173,7 +173,7 @@ Ao apercebemo-nos de que DynamoDB não seria a melhor escolha para a base de dad
 
 Verificamos que utilizar o serviço fornecido pelo MongoDB Atlas tinha custos dos quais não poderíamos suportar, optámos então por utilizar a imagem Mongo disponibilizada online. Mas isto não seria suficiente, pois queríamos que o processo fosse simples, tal como montar qualquer outro container, mas para isso queríamos que a imagem contivesse os dados do dataset para popular a base de dados com o respetivo ficheiro. 
 
-Para conseguir obter esta simplicidade, recorremos a um Dockerfile que usa como imagem base a imagem de Mongo mas para tal necessitaríamos de acrescentar um novo conjunto de operações. Portanto adicionamos a funcionalidade de, ao dar build, copiar o ficheiro CSV com os dados do dataset para a imagem a construir. De seguida necessitámos de definir um shell script que fosse executado depois de correr a imagem. Definimos um simples script que trataria de executar a base de dados e consequentemente importasse os dados contidos no ficheiro CSV presente na imagem. Ao definir o seguinte script, o mesmo foi acrescentado como entrypoint no Dockerfile para que fosse executado assim que a imagem fosse instalada. Foi também acrescentada a cópia do script para o container tal como foi feito anteriormente com o ficheiro CSV.
+Para conseguir obter esta simplicidade, recorremos a um Dockerfile que usa como imagem base a imagem de Mongo mas para tal necessitaríamos de acrescentar um novo conjunto de operações. Portanto adicionamos a funcionalidade de, ao dar build, copiar o ficheiro CSV com os dados do dataset para a imagem a construir. De seguida necessitámos de definir um shell script que fosse executado depois de correr a imagem. Definimos um simples script que trataria de executar a base de dados e consequentemente importasse os dados contidos no ficheiro CSV presente na imagem, sendo o ficheiro apagado no fim do import de modo a não ocupar espaço de armazenamento. Ao definir o seguinte script, o mesmo foi acrescentado como entrypoint no Dockerfile para que fosse executado assim que a imagem fosse instalada. Foi também acrescentada a cópia do script para o container tal como foi feito anteriormente com o ficheiro CSV.
 
 Depois de definir toda esta estrutura construimos a imagem e fizemos push para um repositório da AWS para que ficasse acessível. Assim conseguimos obter uma imagem de uma Base de Dados Mongo que é facilmente montada em qualquer máquina devido à utilização do Docker. Bastando puxar a imagem do repositório e correr como qualquer outra imagem.
 
@@ -357,6 +357,9 @@ Os docker containers tornam os sistema muito portável dado que é uma ferrament
 \section{Discussão e Conclusões}
 Durante o desenvolvimento do projeto foram encontrados bastantes obstáculos, seja na implementação dos serviços, na escolhe e consequente aplicação da base de dados ou na automatização dos scripts de implementação dos serviços desenvolvidos. Todos estes problemas resultaram em muitas horas de trabalho extra por parte do grupo, mas serviram também de aprendizagem, seja em como trabalhar com fornecedores de serviços na nuvem, ou como desenvolver scripts de automatização de implementação. Apesar de todos os problemas, o grupo foi capaz de os solucionar de forma eficiente como mencionados na secção da Arquitetura técnica.
 
+O DynamoDB aparenta ser uma boa solução para fazer hosting de bases de dados onde a procura seja limitada a um conjunto de valores limitados. Isto torna-o pouco útil para a nossa implementação, porém, continua a ser uma boa ferramenta para os casos mencionados se a base de dados for de dimensões elevadas, sendo difícil fazer o hosting local da mesma.
 
+Os serviços da cloud no geral, se utilizadas de forma correta, aparentam ser poderosas em sentido computacional, tendo uma grande variedade de ferramentas que possibilita a implementação de aplicações, serviços ou outra qualquer funcionalidade.
 
+Na nossa experiência pessoal, a documentação da AWS foi mais escassa em comparação ao GCP. Dado a escolha entre ambas recomendaríamos fortemente a utilização do GCP para futuras implementações.
 \end{document}
