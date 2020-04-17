@@ -114,11 +114,11 @@ Após a definição da API na fase anterior, foi implementado de raiz um servido
 
 
 \subsection{Load Balancer}
-Foi implementado um Load Balancer que distribui os pedidos HTTP recebidos dos clientes browser e que reencaminha para os respetivos serviços.
+Foi implementado um Load Balancer utilizando o Ingress que distribui os pedidos HTTP recebidos dos clientes browser e que reencaminha para os respetivos serviços.
 
 
-\subsection{Servidor NodeJS}
-O servidor irá receber os pedidos a partir do Load Balancer, e processá-los de acordo com a funcionalidade pretendida. A lógica de negócio é aqui tratada, realizando as queries necessárias para a base de dados. Ao receber os dados, processa-os de acordo com a funcionalidade, e encaminha o resultado para o Load Balancer.
+\subsection{Servidores NodeJS}
+Os servidores irão receber os pedidos a partir do Load Balancer, e processá-los de acordo com a funcionalidade pretendida. A lógica de negócio é aqui tratada, realizando as queries necessárias para a base de dados. Ao receber os dados, processa-os de acordo com a funcionalidade, e encaminha o resultado para o Load Balancer.
 %\newline %removam isto se nao gostarem do espaço k adiciona
 
 \subsection{Base de dados}
@@ -244,7 +244,7 @@ No fim da execução do script, é necessário verificar o estado dos node group
 	\item \textit{aws eks describe-nodegroup \texttt{-{}-}cluster-name CLUSTER\_NAME \texttt{-{}-} nodegroup STACK\_NAME} , mudando CLUSTER\_NAME e STACK\_NAME para os respetivos nomes dados nos argumentos
 \end{itemize}
 No final irá ser pedido para introduzir os credenciais de IAM para a conta de AWS pessoal de modo a poder criar os repositórios e fazer push das imagens no script seguinte.
-Após o estado do node group passar para \textbf{ACTIVE} podemos proceder À execução do terceiro script.
+Após o estado do node group passar para \textbf{ACTIVE} podemos proceder à execução do terceiro script.
 
 \subsection{deploy3.sh}
 O terceiro script recebe 2 argumentos na seguinte ordem:
@@ -266,7 +266,7 @@ Neste ficheiro é necessário inserir manualmente os dados relativos ao role cri
 \begin{itemize}
 	\item \textbf{eks.amazonaws.com/role-arn:}
 \end{itemize}
-Para aceder ao valor do ARN do role criado, basta inserir na linha de comandos as seguintes instruções:
+Para aceder ao valor do ARN do role criado, basta inserir na linha de comandos o seguinte comando:
 \begin{itemize}
 	\item \textbf{aws iam get-role \texttt{-{}-}role-name eksServiceRole}
 \end{itemize}
@@ -285,7 +285,7 @@ Na linha:
 alterar \textbf{VPC\_ID} pelo ID do VPC gerado na criação da Stack. Este ID pode ser verificado correndo o script \textbf{get-vpc-id.sh} com os seguintes parametros de entrada:
 \begin{itemize}
 	\item A região onde a Stack foi criada
-	\item O nome da stack dado na criação
+	\item O nome da Stack dado na criação
 \end{itemize}
 Exemplo de execução: \textbf{./get-vpc-id.sh eu-west-1 stack}
 
@@ -314,17 +314,17 @@ Para remover a montagem do sistema, seguem-se os seguintes passos:
 \begin{itemize}
 	\item Listar Categorias:
 	\begin{enumerate}
-		\item Inserir o url mencionado posteriormente.
+		\item Inserir no navegador o URL anteriormente mencionado acrescentado \textbf{/api/products/listCategories}
 		\item Após alguns segundos irá aparecer no ecrã o resultado.
 	\end{enumerate}
 	\item Listar a popularidade das marcas:
 	\begin{enumerate}
-		\item Inserir o url mencionado posteriormente.
+		\item Inserir no navegador o URL anteriormente mencionado acrescentado \textbf{/api/products/popularBrands}
 		\item Após alguns segundos irá aparecer no ecrã o resultado.
 	\end{enumerate}
 	\item Listar vendas de cada marca:
 	\begin{enumerate}
-		\item Inserir o url mencionado posteriormente.
+		\item Inserir no navegador o URL anteriormente mencionado acrescentado \textbf{/api/products/salePrice}
 		\item Após alguns segundos irá aparecer no ecrã o resultado.
 	\end{enumerate}
 	\item Listar o preço médio de uma marca:
@@ -334,22 +334,21 @@ Para remover a montagem do sistema, seguem-se os seguintes passos:
 	\end{enumerate}
 	\item Ver o ratio dos eventos possíveis:
 	\begin{enumerate}
-		\item Inserir o url mencionado posteriormente.
+		\item Inserir no navegador o URL anteriormente mencionado acrescentado \textbf{/api/events/ratio}
 		\item Após alguns segundos irá aparecer no ecrã o resultado.
 	\end{enumerate}
 	\item Portabilidade:
 	\begin{enumerate}
-		\item Escolher 2 diferentes provedores de serviço cloud
-		\item Implementar os serviços criados nos diferentes serviços
+		\item Escolher 2 diferentes fornecedores de serviço cloud
+		\item Implementar os serviços criados, nas plataformas diferentes utilizando os docker containers fornecidos.
 		\item Verficar que ambos os serviços se encontram funcionais
 	\end{enumerate}
-	\item Estabilidade:
-	\begin{enumerate}
-		\item 
-	\end{enumerate}
+
+Os docker containers tornam os sistema muito portável dado que é uma ferramenta comum entre os vários fornecedores de serviços cloud. Daí o deployment dos serviços é facilitada caso seja necessário a mudança de fornecedor, sendo apenas necessário tratar dos aspetos técnicos em termos de balanceamento de carga e quantidade de instâncias ativas nos serviços utilizando as ferramentas de cada fornecedor.
+
 	\item Elasticidade:
 	\begin{enumerate}
-		\item Verfique o numero de maquinas virtuais ativas
+		\item Verfique o numero de instâncias virtuais ativas
 		\item Assumindo uma baixa carga de sistema, sobrecarregue o serviço com pedidos
 		\item Visualize o numero de maquinas virtuais ativas aumentar de forma a poder satisfazer os diferentes pedidos sem afetar a qualidade do serviço
 	\end{enumerate}
@@ -357,5 +356,7 @@ Para remover a montagem do sistema, seguem-se os seguintes passos:
 
 \section{Discussão e Conclusões}
 Durante o desenvolvimento do projeto foram encontrados bastantes obstáculos, seja na implementação dos serviços, na escolhe e consequente aplicação da base de dados ou na automatização dos scripts de implementação dos serviços desenvolvidos. Todos estes problemas resultaram em muitas horas de trabalho extra por parte do grupo, mas serviram também de aprendizagem, seja em como trabalhar com fornecedores de serviços na nuvem, ou como desenvolver scripts de automatização de implementação. Apesar de todos os problemas, o grupo foi capaz de os solucionar de forma eficiente como mencionados na secção da Arquitetura técnica.
+
+
 
 \end{document}
