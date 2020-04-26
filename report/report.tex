@@ -199,116 +199,49 @@ Na implementação do Ingress controller deparamo-nos com problemas no deploymen
 
 Já na segunda entrega fizemos uma nova implementação do controlador Ingress, desta vez dando as permissões necessárias e acrescentado os dados corretos no ficheiros YAML relacionados com o Ingress, resultand num deployment correto do load balancer.
 \section{Lançamento em Kubernetes}
-O scripts de deployment do sistema foram separados em 4 devido à necessidade dos clusters e node groups estarem ativos, antes de proceder aos próximos passos. Existe também uma secção de edição de ficheiro manual, o que fez a quebra entre o terceiro e o quarto script.
+Para realizar o deployment do sistema é usado apenas um script de forma a tornar todo o processo mais prático, automatizando todo o deployment.
 
-Antes da execução dos scripts é necessário verificar a existência dos seguintes repositórios, roles e policies e caso existam, precisam de ser \textbf{eliminados}:
+Antes da execução do script é necessário verificar a existência dos seguintes repositórios, roles e policies e caso existam, precisam de ser \textbf{eliminados}:
 \begin{enumerate}
 	\item Repositórios com nomes \textit{products} e \textit{events}
 	\item AWS Role com nome eksServiceRole
 	\item AWS Policy com nome ALBIngressControllerIAMPolicyEcommerce
 \end{enumerate}
 
-Para a execução dos scripts são necessárias as seguintes ferramentas:
-\begin{itemize}
-	\item AWS CLI
-	\item eksctl
-	\item kubectl
-\end{itemize}
+Para a execução do script é necessário ter a ferramenta eksctl.
 
-A região a escolher para o lançamento poderá ser qualquer um, porém recomendamos a região eu-west-1. Esta região terá de ser a mesma nos argumentos de todos os scripts que requeiram a mesma.
+A região a escolher para o lançamento poderá ser qualquer um, porém recomendamos a região eu-west-1. 
 
-Com a utilização do Ingress, reparamos que existe a possibilidade deste poder usar VPCs antigas, para prevenir que tal ocorra, sugerimos apagar Target Groups que não estejam a ser utilizados.
+Com a utilização do Ingress, reparámos que existe a possibilidade deste poder usar VPCs antigas, para prevenir que tal ocorra, sugerimos apagar Target Groups que não estejam a ser utilizados.
 
-\subsection{deploy1.sh}
-O primeiro script de deployment recebe 3 argumentos na seguinte ordem:
+\subsection{deploy.sh}
+O script de deployment recebe 2 argumentos na seguinte ordem:
 \begin{enumerate}
 	\item A região onde a Stack e o Cluster vão ser lançados (ex.: \textbf{eu-west-1})
-	\item O nome da Stack que terá de ser único (nenhuma outra Stack na CloudFormation da conta pessoal poderá ter o mesmo nome) para o script funcionar corretamente (ex.: \textbf{ecommerce-stack})
 	\item O nome do Cluster que também terá de ser único (ex.: \textbf{ecommerce-cluster})
-	\item Exemplo de execução: \textit{./deploy1.sh eu-west-1 e-stack e-cluster}
+	\item Exemplo de execução: \textit{./deploy.sh eu-west-1 e-cluster}
 \end{enumerate}
 
-A criação da stack e do cluster irá demorar cerca de 10 a 20 minutos até ficarem ativos, após o qual poderemos proceder à execução do segundo script. O estado do script pode ser verificado com o seguinte comando:
-\begin{itemize}
-	\item \textit{aws eks describe-cluster \texttt{-{}-}name CLUSTER\_NAME} , mudando CLUSTER\_NAME para o nome do cluster dado nos argumentos
-\end{itemize}
-A execução do segundo script só deve ser feita quando o estado do cluster estiver em \textbf{ACTIVE}.
-
-\subsection{deploy2.sh}
-O segundo script recebe os mesmos argumentos que o primeiro, todos na mesma ordem. Neste script vão ser criados os node groups e o pull das imagens dos serviços.
-
-Para realizar o pull, irá ser pedido para inserir os credenciais IAM que dão acesso aos repositórios por nós criados. Estes credenciais encontram-se no ficheiro \textbf{credenciais.txt} juntamente com a região onde os repositórios se encontram.
-
-No fim da execução do script, é necessário verificar o estado dos node groups antes de proceder ao próximo script. O estado pode ser verificado com o seguinte comando: 
-\begin{itemize}
-	\item \textit{aws eks describe-nodegroup \texttt{-{}-}cluster-name CLUSTER\_NAME \texttt{-{}-} nodegroup STACK\_NAME} , mudando CLUSTER\_NAME e STACK\_NAME para os respetivos nomes dados nos argumentos
-\end{itemize}
-No final irá ser pedido para introduzir os credenciais de IAM para a conta de AWS pessoal de modo a poder criar os repositórios e fazer push das imagens no script seguinte.
-Após o estado do node group passar para \textbf{ACTIVE} podemos proceder à execução do terceiro script.
-
-\subsection{deploy3.sh}
-O terceiro script recebe 2 argumentos na seguinte ordem:
-\begin{itemize}
-	\item A região que deverá ser idêntica às inseridas nos scripts anteriores
-	\item O nome do cluster que também deverá ser o mesmo
-\end{itemize}
-Para a correto funcionamento deste script, salienta-se a necessidade de apagar os repositórios, roles e policies anteriormente referidos.
-
-Após a criação dos repositórios e o push das imagens para os mesmos, será pedido para mudar os credenciais IAM para os que se encontram no ficheiro \textbf{credenciais\_mongo.txt} para realizar o pull da imagem da base de dados.
-
-Depois de realizar o pull irá ser pedido para mudar os credenciais de novo para a conta pessoal de AWS para a criação do repositório da base de dados e o push da imagem.
-
-\subsection{deploy4.sh}
-Antes da execução do 4 ficheiro de deployment, as seguintes mudanças terão de ser realizadas nos ficheiros \textbf{ingress/ingress-rbac.yaml} e \textbf{ingress/alb-ingress-controller.yaml}.
-
-\subsubsection{ingress/ingress-rbac.yaml}
-Neste ficheiro é necessário inserir manualmente os dados relativos ao role criado no ficheiro na seguinte linha:
-\begin{itemize}
-	\item \textbf{eks.amazonaws.com/role-arn:}
-\end{itemize}
-Para aceder ao valor do ARN do role criado, basta inserir na linha de comandos o seguinte comando:
-\begin{itemize}
-	\item \textbf{aws iam get-role \texttt{-{}-}role-name eksServiceRole}
-\end{itemize}
-
-\subsubsection{ingress/alb-ingress-controller.yaml}
-Neste ficheiro é necessário inserir a informação relativa ao cluster criado para que o Ingress utilize os recursos corretos. Para tal é necessário alterar no ficheiro, na linha: 
-\begin{itemize}
-	\item \textbf{- \texttt{-{}-}cluster-name=CLUSTER\_NAME}
-\end{itemize}
-alterando \textbf{CLUSTER\_NAME} pelo nome do cluster dado nos argumentos dos scripts anteriores.
-
-Na linha:
-\begin{itemize}
-	\item \textbf{- \texttt{-{}-}aws-vpc-id=VPC\_ID}
-\end{itemize}
-alterar \textbf{VPC\_ID} pelo ID do VPC gerado na criação da Stack. Este ID pode ser verificado correndo o script \textbf{get-vpc-id.sh} com os seguintes parametros de entrada:
-\begin{itemize}
-	\item A região onde a Stack foi criada
-	\item O nome da Stack dado na criação
-\end{itemize}
-Exemplo de execução: \textbf{./get-vpc-id.sh eu-west-1 stack}
-
-Após a execução destes 2 passos, executa-se o quarto e último script, \textbf{deploy4.sh} sem parâmetros de entrada.
+A execução inicial do script irá demorar cerca de 10 a 15 minutos até que passe para a fase de preparar as imagens a correr no cluster. Após esta fase inicial de criação do cluster no EKS, inicia-se o processo de preparação das imagens que irão ser usadas para ser corridas em containers e que compõem o sistema. Para este processo vai ser necessário que insira as credenciais de IAM que darão acesso aos repositórios por nós criados. Esses credenciais encontram-se no ficheiro \textbf{credenciais.txt} juntamente com a região onde os repositórios se encontram. Depois de realizar o pull das imagens, irá ser pedido para introduzir de novo as credenciais IAM mas desta vez para a conta de AWS pessoal de modo a poder criar os repositórios e fazer push das imagens.
+Depois da seguinte fase todo o processo não irá requerer qualquer input da parte do utilizador até o fim de execução do script.
 
 \subsection{Acesso aos serviços}
-Após a aplicação dos ficheiros yaml do Ingress, é possível aceder ao sistema executando o comando:
+Após a execução do script de deployment, é possível aceder ao sistema executando o comando:
 \begin{itemize}
-	\item \textbf{kubectl get ingress}
+	\item \textbf{kubectl get ingress -n kube-system}
 \end{itemize}
 Deste comando retira-se o endereço que se encontra em \textit{Address} e adiciona-se os paths para os serviços disponibilizados (ex.: <address>/api/products/ listCategories).
 
-Deparamos com um problema no load balancing na kubernetes, que também foi verificado no caso da implementação com o ELB da AWS na fase anterior à entrega das kubernetes, especificamente no serviço /api/events/ratio. Porém tal como na dita fase, não conseguimos depurar o deployment de modo a determinar o possível erro que causa os timeouts. Executando kubectl expose sobre o deployment do serviço do ratio, as queries retornam normalmente. Acreditamos que o problema se encontre no load balancer do Ingress.
+Deparámo-nos com um problema no load balancing na kubernetes, que também foi verificado no caso da implementação com o ELB da AWS na fase anterior à entrega das kubernetes. Executando kubectl expose sobre os deployments events e products, as queries retornam normalmente. Acreditamos que o problema se encontre no load balancer do Ingress.
 
 \subsection{Desconstrução do deployment}
 Para remover a montagem do sistema, seguem-se os seguintes passos:
 \begin{enumerate}
-	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/eks/home?region=eu-west-1#/clusters}{EKS}, dependendo da região escolhida, selecionar o cluster e apagar o node group correspondente. Após dos node groups terem sido eliminados, proceder com a eliminação do cluster.
 	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#LoadBalancers}{EC2}, eliminar os load balancers criados. Na mesma consola navegar para os target groups e apagar aqueles que estejam relacionados com o VPC criado.
-	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#NatGateways}{VPC}, eliminar as NATs criadas. Após a eliminação, navegar para a secção dos VPCs e eliminar as VPCs correspondentes que contém o nome dado à stack.
+	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#NatGateways}{VPC}, eliminar as NATs criadas. Após a eliminação, navegar para a secção dos VPCs e eliminar as VPCs correspondentes.
 	\item Na consola de \href{https://console.aws.amazon.com/ecr/repositories?region=us-east-1}{ECR}, eliminar os seguintes repositórios: \textit{database}, \textit{events} e \textit{products}.
-	\item Na consola de \href{https://console.aws.amazon.com/iam/home?#/policies}{IAM Policies}, eliminar a policy com o seguinte nome: \textbf{ALBIngressControllerIAMPolicyEcommerce}. Após a eliminação, navegar para a secção dos Roles, e apagar o role com o seguinte nome: \textbf{eksServiceRole}.
-	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1#/stacks}{CloudFormation}, eliminar a stack criada com o nome dado nos scripts anteriores.
+	\item Na consola de \href{https://console.aws.amazon.com/iam/home?#/policies}{IAM Policies}, eliminar a policy com o seguinte nome: \textbf{ALBIngressControllerIAMPolicyEcommerce}. Após a eliminação, navegar para a secção dos Roles, e apagar os roles associados à criação do cluster e respetivos componentes.
+	\item Executar o comando \textbf{eksctl delete cluster -{}-name=<cluster-name>} que será responsável por desmantelar os restantes componentes do sistema. Este comando irá apagar assincronamente, significando que irá terminar o comando mas ainda estará a decorrer o processo de eliminação na parte da consola da AWS.
 \end{enumerate}
 
 \section{Cenários de Validação}
