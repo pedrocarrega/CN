@@ -204,7 +204,7 @@ Para realizar o deployment do sistema é usado apenas um script de forma a torna
 Antes da execução do script é necessário verificar a existência dos seguintes repositórios, roles e policies e caso existam, precisam de ser \textbf{eliminados}:
 \begin{enumerate}
 	\item Repositórios com nomes \textit{products} e \textit{events}
-	\item AWS Role com nome eksServiceRole
+	\item AWS Role com o prefixo eksctl-cluster
 	\item AWS Policy com nome ALBIngressControllerIAMPolicyEcommerce
 \end{enumerate}
 
@@ -240,7 +240,7 @@ Para remover a montagem do sistema, seguem-se os seguintes passos:
 	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#LoadBalancers}{EC2}, eliminar os load balancers criados. Na mesma consola navegar para os target groups e apagar aqueles que estejam relacionados com o VPC criado.
 	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#NatGateways}{VPC}, eliminar as NATs criadas. Após a eliminação, navegar para a secção dos VPCs e eliminar as VPCs correspondentes.
 	\item Na consola de \href{https://console.aws.amazon.com/ecr/repositories?region=us-east-1}{ECR}, eliminar os seguintes repositórios: \textit{database}, \textit{events} e \textit{products}.
-	\item Na consola de \href{https://console.aws.amazon.com/iam/home?#/policies}{IAM Policies}, eliminar a policy com o seguinte nome: \textbf{ALBIngressControllerIAMPolicyEcommerce}. Após a eliminação, navegar para a secção dos Roles, e apagar os roles associados à criação do cluster e respetivos componentes.
+	\item Na consola de \href{https://console.aws.amazon.com/iam/home?#/policies}{IAM Policies}, eliminar a policy com o seguinte nome: \textbf{ALBIngressControllerIAMPolicyEcommerce}. Após a eliminação, navegar para a secção dos Roles, e apagar os roles com o prefixo eksctl-cluster.
 	\item Executar o comando \textbf{eksctl delete cluster -{}-name=<cluster-name>} que será responsável por desmantelar os restantes componentes do sistema. Este comando irá apagar assincronamente, significando que irá terminar o comando mas ainda estará a decorrer o processo de eliminação na parte da consola da AWS.
 \end{enumerate}
 
