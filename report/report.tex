@@ -46,6 +46,7 @@ Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 
 \renewcommand*\contentsname{Indíce}
 \tableofcontents
+\newpage
 
 \section{Motivação para Dataset e Serviços}
 
@@ -237,11 +238,13 @@ Deparámo-nos com um problema no load balancing na kubernetes, que também foi v
 \subsection{Desconstrução do deployment}
 Para remover a montagem do sistema, seguem-se os seguintes passos:
 \begin{enumerate}
+	\item Usar o seguinte comando que listará os comandos que irão ser usado nos próximos comandos. \textbf{kubectl get svc --all-namespaces}
+	\item Apagar todos os serviços listados pelo comando anterior com o seguinte comando, \textbf{kubectl delete svc <service-name>}
 	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#LoadBalancers}{EC2}, eliminar os load balancers criados. Na mesma consola navegar para os target groups e apagar aqueles que estejam relacionados com o VPC criado.
-	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/vpc/home?region=eu-west-1#NatGateways}{VPC}, eliminar as NATs criadas. Após a eliminação, navegar para a secção dos VPCs e eliminar as VPCs correspondentes.
+	\item Executar o comando \textbf{eksctl delete cluster -{}-name=<cluster-name>} que será responsável por desmantelar os componentes criados no início do script.
 	\item Na consola de \href{https://console.aws.amazon.com/ecr/repositories?region=us-east-1}{ECR}, eliminar os seguintes repositórios: \textit{database}, \textit{events} e \textit{products}.
 	\item Na consola de \href{https://console.aws.amazon.com/iam/home?#/policies}{IAM Policies}, eliminar a policy com o seguinte nome: \textbf{ALBIngressControllerIAMPolicyEcommerce}. Após a eliminação, navegar para a secção dos Roles, e apagar os roles com o prefixo eksctl-cluster.
-	\item Executar o comando \textbf{eksctl delete cluster -{}-name=<cluster-name>} que será responsável por desmantelar os restantes componentes do sistema. Este comando irá apagar assincronamente, significando que irá terminar o comando mas ainda estará a decorrer o processo de eliminação na parte da consola da AWS.
+	
 \end{enumerate}
 
 \section{Cenários de Validação}
