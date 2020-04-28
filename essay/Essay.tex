@@ -171,7 +171,7 @@ In the following image we are able to see the current "verticals" at Otto, with 
 
 \begin{figure}[H]
 	\centering
-	  \includegraphics[scale=0.5]{vertical_decomposition.png}
+	  \includegraphics[scale=0.75]{vertical_decomposition.png}
 	\caption{Vertical Decomposition at \textit{otto.de}}
   \end{figure}
 
@@ -179,24 +179,20 @@ A vertical represents a single context in the business domain within the platfor
 
 Nothing is shared between verticals, each using each own databases and resources. Using cookies to share the client-side state between different systems. This grants the system excellent horizontal scalability and fault tolerance.
 
-%preciso de por 1 frase a introduzir esta parte
-
-\begin{itemize}
-	\item \subsubsection{Intergating Verticals at \textit{otto.de}} 
+	\subsubsection{Integrating Verticals at \textit{otto.de}} 
 	Each vertical contains fragments from other verticals so that the client experiences a full product despite the decomposition at the backend.
-	\item \subsubsection{Communication among Verticals at \textit{otto.de}}
+	\subsubsection{Communication among Verticals at \textit{otto.de}}
 	All verticals have redundant data using pull-based data replication, allowing a vertical to deliver content without having to request other verticals.
-	\item \subsubsection{Scaling Delivery Pipelines at \textit{otto.de}} 
+	\subsubsection{Scaling Delivery Pipelines at \textit{otto.de}} 
 	The system is updated very frequently using pipelines. All commits follow the same cycle: first it's checked out, then compiled and packaged, then deployed and tested. Using run load and integration tests so that the product owners approve the stories. The last step the service is tested against other live services to check compatibility.
-	\item \subsubsection{Agility and Reliability at \textit{otto.de}} 
+	\subsubsection{Agility and Reliability at \textit{otto.de}} 
 	Using the DevOps movement, every push is automatically deployed. This deployment system lead to a reduction of incidents throughout the years, even with the significant increase of deployments.
-	\item \subsubsection{Monitoring Microservices at \textit{otto.de}}
+	\subsubsection{Monitoring Microservices at \textit{otto.de}}
 	Every team receives real time graphs and metrics for all microservices and verticals. With the increasing number of active microservices, it is planned to develop solutions so that anomalies can be automatically detected.
-	\item \subsubsection{Dynamic Scaling of Microservices at \textit{otto.de}}
+	\subsubsection{Dynamic Scaling of Microservices at \textit{otto.de}}
 	By monitoring CPU utilization and the number of incoming requests, the system is capable of automatically replicate it's features.
-	\item \subsubsection{Code Sharing and Reuse at \textit{otto.de}}
+	\subsubsection{Code Sharing and Reuse at \textit{otto.de}}
 	No code is shared among microservices in order to have low coupling between microservices, only the framework of the code can be reused. The only exceptions to this rule is code determined to be loosely coupled and highly coherent. This code is made open source and all teams are free to use it.
-\end{itemize}
 
 \subsection{Conclusion}
 
