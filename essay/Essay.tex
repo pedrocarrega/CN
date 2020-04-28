@@ -126,6 +126,80 @@ The goal is not to say that micro-services is always the way to go, but when app
 
 To understand more of the evaluation done in the course selection system, visit the following link to read the paper: \url{https://dl.acm.org/doi/abs/10.1145/3335484.3335546}
 
+\section{Microservice Architectures for Scalability, Agility and Reliability in E-Commerce}
 
+\subsection{Introduction}
+
+The focus of this paper is to present different properties of microservice architectures using the platform \textit{otto.de} as example. Traditional systems usually operate on a monolithic architecture, using an integrated databases, however this greatly limits the horizontal scalability of said databases. A microservice architecture tries to overcome that limitation, providing an architecture composed of multiple smaller microservices where typically there is no central control. Microservices are built around business capabilities and take a full-stack implementation of software. To comprehend the rest of the paper the following topics must be understood.
+
+\subsubsection{Vertical Decomposition for Microservices}
+
+When using many small microservices the correct level of granularity must be taken into account. The author proposes using an vertical decomposition into self contained systems along business services. This provides the system with scalability, an appropriate modular structure that supports program comprehension, resilience and autonomous teams with good knowledge of their vertical domain.
+
+\subsubsection{Loose Coupling and Eventual Consistency}
+
+Where monolithic systems use transactions when updating their systems, do to the low coupling usually found on microservices, implementing the same update system is very difficult. And as such, microservice architectures emphasize transaction-less between services and that most problems must be resolved with compensation operations.
+
+\subsubsection{Microservices for Scalability and Fault Tolerance}
+
+Microservices must be designed so that they can tolerate the failure of individual systems. It's important to be able to detect failures quickly, and if possible, restore services automatically. Emphasizing real-time monitoring, using both technical metrics and business metrics, we are able to receive early warnings of possible problems along a faster follow up time by the development team. Microservices can be dynamically replicated when the system is under heavy load, providing an high level of elasticity and scalability.
+
+\subsubsection{Microservices and DevOps}
+
+With the goal of improving communication between developers (Dev) and IT operations (OPS), the DevOps movement uses automation to build systems, execute unit tests and deployment in test and production environments.
+
+\subsubsection{Scalable Microservice Deployment}
+
+Containerization complements very well microservices, due to it's low overhead when compared with virtualization. A cluster infrastructure schedule containers onto nodes in a cluster and manage load balancing among containers.
+
+\subsubsection{Scalable Microservices Deployment}
+
+Microservices reinforce a modular structure, making the decoupling of teams as important as the decoupling of software modules.
+
+\subsection{Microservices at \textit{otto.de}}
+
+Otto started a complete re-implementation of their e-commerce software in 2011. This decision was driven by the need of a more scalable and fault tolerant system. This would not only apply to the system in question but to the teams surrounding it as well, with the practice of DevOps in the forefront.
+The development of a vertically decomposed system was initiated by four teams, with each team assign to one of the four initial applications:
+\begin{itemize}
+	\item Product
+	\item Order
+	\item Promotion
+	\item Search/Navigation
+\end{itemize}
+
+In the following image we are able to see the current "verticals" at Otto, with 18 teams working on 45 applications.
+
+\begin{figure}[H]
+	\centering
+	  \includegraphics[scale=0.5]{vertical_decomposition.png}
+	\caption{Vertical Decomposition at \textit{otto.de}}
+  \end{figure}
+
+A vertical represents a single context in the business domain within the platform. While they can be as small as a microservice, usually they are more coarse grained. Communication between verticals is only allowed by using the REST API, protecting working applications from a possible snowball effect from unavailable applications.
+
+Nothing is shared between verticals, each using each own databases and resources. Using cookies to share the client-side state between different systems. This grants the system excellent horizontal scalability and fault tolerance.
+
+%preciso de por 1 frase a introduzir esta parte
+
+\begin{itemize}
+	\item \subsubsection{Intergating Verticals at \textit{otto.de}} 
+	Each vertical contains fragments from other verticals so that the client experiences a full product despite the decomposition at the backend.
+	\item \subsubsection{Communication among Verticals at \textit{otto.de}}
+	All verticals have redundant data using pull-based data replication, allowing a vertical to deliver content without having to request other verticals.
+	\item \subsubsection{Scaling Delivery Pipelines at \textit{otto.de}} 
+	The system is updated very frequently using pipelines. All commits follow the same cycle: first it's checked out, then compiled and packaged, then deployed and tested. Using run load and integration tests so that the product owners approve the stories. The last step the service is tested against other live services to check compatibility.
+	\item \subsubsection{Agility and Reliability at \textit{otto.de}} 
+	Using the DevOps movement, every push is automatically deployed. This deployment system lead to a reduction of incidents throughout the years, even with the significant increase of deployments.
+	\item \subsubsection{Monitoring Microservices at \textit{otto.de}}
+	Every team receives real time graphs and metrics for all microservices and verticals. With the increasing number of active microservices, it is planned to develop solutions so that anomalies can be automatically detected.
+	\item \subsubsection{Dynamic Scaling of Microservices at \textit{otto.de}}
+	By monitoring CPU utilization and the number of incoming requests, the system is capable of automatically replicate it's features.
+	\item \subsubsection{Code Sharing and Reuse at \textit{otto.de}}
+	No code is shared among microservices in order to have low coupling between microservices, only the framework of the code can be reused. The only exceptions to this rule is code determined to be loosely coupled and highly coherent. This code is made open source and all teams are free to use it.
+\end{itemize}
+
+\subsection{Conclusion}
+
+Microservices architectures creates scalable, agile and reliable software systems. Using a vertical decomposition it provides the basis of highly scalable and reliable system. By following this ideals the team at \textit{otto.de} managed not only to create a scalable system but also a scalable deployment. That doesn't mean the microservices are perfect. It comes with a high learning and maintenance cost due to it's constant need of consistency, monitoring, alarming and fault tolerance. Making it, albeit an ideal system for most scenarios, a complex system to implement and maintain.
 
 \end{document}
