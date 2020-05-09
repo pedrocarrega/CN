@@ -12,3 +12,5 @@ app.listen(port, err => {
 });
 
 app.use("/api/events", events)
+
+app.get('/', (req, res) => res.status(200).send('Hello World!'))

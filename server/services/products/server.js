@@ -12,3 +12,5 @@ app.listen(port, err => {
 });
 
 app.use("/api/products", products);
+
+app.get('/', (req, res) => res.status(200).send('Hello World!'))

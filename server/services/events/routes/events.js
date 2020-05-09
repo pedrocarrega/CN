@@ -8,7 +8,7 @@ module.exports = router;
 router
     .route("/")
     .get((req, res) => {
-        res.send("Events service available: \n - /api/events/ratio \n")
+        res.status(200).send("Events service available: \n - /api/events/ratio \n")
     });
 
 router
@@ -55,7 +55,7 @@ router
                         }
                     ]);
                     console.log(result);
-                    res.send(result);
+                    res.status(200).send(result);
                 }else{
                     events[docs._id] = docs.count;
                 }

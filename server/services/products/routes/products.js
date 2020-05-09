@@ -8,7 +8,7 @@ module.exports = router;
 router
     .route("/")
     .get((req, res) => {
-        res.send("Products service available: \n - /api/products/ \n")
+        res.status(200).send("Products service available: \n - /api/products/ \n")
     });
 
 router
@@ -26,7 +26,7 @@ router
                 result.results.push({"name": results[i]})
             }
 
-            res.send(result);            
+            res.status(200).send(result);            
         });
     });
 
@@ -48,7 +48,7 @@ router
                 
                 if(docs == null) {
                   db.close();
-                  res.send(result);
+                  res.status(200).send(result);
                   console.log(result);
                 }else{
                     result.results.push({"brandName": docs._id, "popularity":docs.count, "sales": 0});
@@ -76,7 +76,7 @@ router
                 
                 if(docs == null) {
                     db.close();
-                    res.send(result);
+                    res.status(200).send(result);
                     console.log(result);
                 }else{
                     result.results.push({"brand":{"brandName":docs._id,"popularity":0, "sales":0},"price":docs.sum/docs.total, "category":{"name": ""}});
@@ -102,7 +102,7 @@ router
                 
                 if(docs == null) {
                     db.close();
-                    res.send(result);
+                    res.status(200).send(result);
                     console.log(result);
                 }else{
                     result.results.push({"brandName": docs._id, "popularity":0, "sales": docs.count});
