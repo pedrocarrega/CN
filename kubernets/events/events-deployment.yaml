@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: events
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      run: events
+  template:
+    metadata:
+      labels:
+        run: events
+    spec:
+      containers:
+      - image: gcr.io/cn-project-test/events:v1
+        imagePullPolicy: IfNotPresent
+        name: events
+        ports:
+        - containerPort: 3000
+          protocol: TCP

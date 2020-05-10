@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: products
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      run: products
+  template:
+    metadata:
+      labels:
+        run: products
+    spec:
+      containers:
+      - image: gcr.io/cn-project-test/products:v1
+        imagePullPolicy: IfNotPresent
+        name: products
+        ports:
+        - containerPort: 3000
+          protocol: TCP
