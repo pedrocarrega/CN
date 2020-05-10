@@ -169,7 +169,7 @@ spec:
     run: database
   type: NodePort" > database-kubernetes/database-service.yaml
   
-kubectl apply -f ingress-kubernetes//fanout-ingress.yaml
+kubectl apply -f ingress-kubernetes/fanout-ingress.yaml
 
 kubectl apply -f events-kubernetes/events-service.yml
 kubectl apply -f events-kubernetes/events-deployment.yml
