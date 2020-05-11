@@ -1,4 +1,5 @@
-PROJECT_NAME="cn-project-ecommerce-1920"
+PROJECT_NAME="cn-project-ecommerce-19203"
+BILLING_ACCOUNT_ID=$1
 
 #Authenticates user
 gcloud auth login
@@ -7,6 +8,8 @@ gcloud projects create $PROJECT_NAME
 #Define which project to work on
 gcloud config set project $PROJECT_NAME
 
+gcloud beta billing projects link $PROJECT_NAME --billing-account=$BILLING_ACCOUNT_ID
+
 #Hardcoded zone (can be given by input but minimizes errors)
 gcloud config set compute/zone europe-west1
 
@@ -14,11 +17,13 @@ gcloud config set compute/zone europe-west1
 gcloud services enable container.googleapis.com
 
 #create cluster
-gcloud container clusters create ecommerce-cluster --num-nodes=2
+gcloud container clusters create ecommerce-cluster --num-nodes=1
+gcloud config set container/cluster ecommerce-cluster
+gcloud container clusters get-credentials ecommerce-cluster
 
-gsutil cp gs://cn-products-container/events.zip .
-gsutil cp gs://cn-products-container/products.zip .
-gsutil cp gs://cn-products-container/database.zip .
+gsutil cp gs://cn-ecommerce-container/events.zip .
+gsutil cp gs://cn-ecommerce-container/products.zip .
+gsutil cp gs://cn-ecommerce-container/database.zip .
 
 unzip events.zip
 unzip products.zip
@@ -37,8 +42,6 @@ gcloud auth configure-docker
 docker push gcr.io/$PROJECT_NAME/events:v1
 docker push gcr.io/$PROJECT_NAME/products:v1
 docker push gcr.io/$PROJECT_NAME/database:v1
-
-gcloud container clusters create ecommerce-cluster --num-nodes=2
 
 mkdir events-kubernetes
 mkdir products-kubernetes
