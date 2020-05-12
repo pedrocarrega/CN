@@ -1,4 +1,4 @@
-PROJECT_NAME="ecommerce-teste4"
+PROJECT_NAME="ecommerce-teste8"
 BILLING_ACCOUNT_ID=$1
 
 #Authenticates user
@@ -29,6 +29,10 @@ unzip events.zip
 unzip products.zip
 unzip database.zip
 
+rm -f events.zip
+rm -f products.zip
+rm -f database.zip
+
 cd events
 sudo docker build -t gcr.io/$PROJECT_NAME/events:v1 .
 cd ../products
@@ -37,7 +41,9 @@ cd ../database
 sudo docker build -t gcr.io/$PROJECT_NAME/database:v1 .
 cd ..
 
-gcloud auth configure-docker
+rm -rf events products database
+
+sudo gcloud auth configure-docker
 
 sudo docker push gcr.io/$PROJECT_NAME/events:v1
 sudo docker push gcr.io/$PROJECT_NAME/products:v1
