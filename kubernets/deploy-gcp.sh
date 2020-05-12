@@ -1,4 +1,4 @@
-PROJECT_NAME="cn-project-ecommerce-19203"
+PROJECT_NAME="ecommerce-teste4"
 BILLING_ACCOUNT_ID=$1
 
 #Authenticates user
@@ -17,7 +17,7 @@ gcloud config set compute/zone europe-west1
 gcloud services enable container.googleapis.com
 
 #create cluster
-gcloud container clusters create ecommerce-cluster --num-nodes=1
+gcloud container clusters create ecommerce-cluster --num-nodes=1 #--scopes=storage-rw
 gcloud config set container/cluster ecommerce-cluster
 gcloud container clusters get-credentials ecommerce-cluster
 
@@ -30,18 +30,18 @@ unzip products.zip
 unzip database.zip
 
 cd events
-docker build -t gcr.io/$PROJECT_NAME/events:v1 .
+sudo docker build -t gcr.io/$PROJECT_NAME/events:v1 .
 cd ../products
-docker build -t gcr.io/$PROJECT_NAME/products:v1 .
+sudo docker build -t gcr.io/$PROJECT_NAME/products:v1 .
 cd ../database
-docker build -t gcr.io/$PROJECT_NAME/database:v1 .
+sudo docker build -t gcr.io/$PROJECT_NAME/database:v1 .
 cd ..
 
 gcloud auth configure-docker
 
-docker push gcr.io/$PROJECT_NAME/events:v1
-docker push gcr.io/$PROJECT_NAME/products:v1
-docker push gcr.io/$PROJECT_NAME/database:v1
+sudo docker push gcr.io/$PROJECT_NAME/events:v1
+sudo docker push gcr.io/$PROJECT_NAME/products:v1
+sudo docker push gcr.io/$PROJECT_NAME/database:v1
 
 mkdir events-kubernetes
 mkdir products-kubernetes
@@ -174,11 +174,11 @@ spec:
   
 kubectl apply -f ingress-kubernetes/fanout-ingress.yaml
 
-kubectl apply -f events-kubernetes/events-service.yml
-kubectl apply -f events-kubernetes/events-deployment.yml
+kubectl apply -f events-kubernetes/events-service.yaml
+kubectl apply -f events-kubernetes/events-deployment.yaml
 
-kubectl apply -f products-kubernetes/products-service.yml
-kubectl apply -f products-kubernetes/products-deployment.yml
+kubectl apply -f products-kubernetes/products-service.yaml
+kubectl apply -f products-kubernetes/products-deployment.yaml
 
 kubectl apply -f database-kubernetes/database-deployment.yaml
 kubectl apply -f database-kubernetes/database-service.yaml
