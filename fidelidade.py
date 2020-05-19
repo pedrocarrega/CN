@@ -15,7 +15,7 @@ spark = SparkSession \
 	.getOrCreate()
 
 #IMPORTANT: TENS DE FAZER DOWNLOAD DO CSV
-# GOAL: Numero medio de views ate uma compra
+# GOAL: Media de fidelidade a uma marca dentro de uma categoria, para cada user
 df = spark \
 	.read \
 	.option("header", "false") \
