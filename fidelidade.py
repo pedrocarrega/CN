@@ -15,16 +15,17 @@ spark = SparkSession \
 	.getOrCreate()
 
 #IMPORTANT: TENS DE FAZER DOWNLOAD DO CSV
-# GOAL: Media de fidelidade a uma marca dentro de uma categoria, para cada user
+# GOAL: Numero medio de views ate uma compra
 df = spark \
 	.read \
 	.option("header", "false") \
 	.csv("database/smallerLargeFile_3.csv")
 
-max_by_brand = df \
-		.select(col("_c3").alias("category_id"),col("_c4").alias("category_code"), col("_c5").alias("brand"), col("_c7").alias("user_id")) \
-		.filter(col("brand").isNotNull()) \
-		.groupBy("user_id", "category_id", "brand") \
+avg_by_view = df \
+		.select(col("_c1").alias("event_type"), col("_c8").alias("user_session") \
+		.filter(col("user_session").isNotNull()) \
+		.filter(col("event_type = purchase" or col("event_type = view"))) \
+		.groupBy("user_session", "event_type") \
 		.count() \
 		.groupBy("user_id", "category_id") \
 		.agg(max("count").alias("max"), sum("count").alias("total")) \
