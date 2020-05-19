@@ -22,14 +22,15 @@ df = spark \
 	.csv("database/smallerLargeFile_3.csv")
 
 avg_by_view = df \
-		.select(col("_c1").alias("event_type"), col("_c8").alias("user_session") \
+		.select(col("_c8").alias("user_session"), col("_c1").alias("event_type"), col("_c0").alias("event_time")) \
 		.filter(col("user_session").isNotNull()) \
-		.filter(col("event_type = purchase" | col("event_type = view"))) \
-		.groupBy("user_session", "event_type") \
-		.count() \
-		.agg(max("count").alias("max"), sum("count").alias("total")) \
-		.agg(avg(col("max") / col("total"))).show()
+		.filter(col("event_type").contains('purchase')) \
+		.join(df.foreach(getViews())).count()
+		#.show()
 		
+print(avg_by_view)
+
 spark.stop()
 
-
+def getViews(row):
+	
