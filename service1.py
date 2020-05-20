@@ -21,16 +21,30 @@ df = spark \
 	.option("header", "false") \
 	.csv("database/smallerLargeFile_3.csv")
 
-avg_by_view = df \
-		.select(col("_c8").alias("user_session"), col("_c1").alias("event_type"), col("_c0").alias("event_time")) \
+purchases = df \
+		.select(col("_c8").alias("user_session"), col("_c1").alias("event_type")) \
 		.filter(col("user_session").isNotNull()) \
 		.filter(col("event_type").contains('purchase')) \
-		.join(df.foreach(getViews())).count()
+		.drop("event_type")
 		#.show()
 		
-print(avg_by_view)
+p = purchases.count()
+
+temp = [list(row) for row in purchases.distinct().collect()]
+tests = [item for sublist in temp for item in sublist]
+print("imma get views")
+
+view = df \
+		.select(col("_c1").alias("event_type"), col("_c8").alias("user_session")) \
+		.filter(col("user_session").isNotNull()) \
+		.filter(col("event_type").contains('view'))
+
+views = view \
+		.where(col("user_session").isin(tests)) \
+		.count()
+
+print(p)
+print(views)
+#print(tests)
 
 spark.stop()
-
-def getViews(row):
-	
