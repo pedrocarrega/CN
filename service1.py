@@ -21,6 +21,18 @@ df = spark \
 	.option("header", "false") \
 	.csv("database/smallerLargeFile_3.csv")
 
+
+test = df \
+		.select(col("_c8").alias("user_session"), col("_c1").alias("event_type")) \
+		.filter(col("user_session").isNotNull()) \
+		.filter(col("event_type").contains('purchase') | col("event_type").contains('view')) \
+		.groupby(col("user_session"), col("event_type")) \
+		.count()
+		#.show()
+
+
+
+"""
 purchases = df \
 		.select(col("_c8").alias("user_session"), col("_c1").alias("event_type")) \
 		.filter(col("user_session").isNotNull()) \
@@ -29,6 +41,7 @@ purchases = df \
 		#.show()
 		
 p = purchases.count()
+
 
 temp = [list(row) for row in purchases.distinct().collect()]
 tests = [item for sublist in temp for item in sublist]
@@ -42,9 +55,11 @@ view = df \
 views = view \
 		.where(col("user_session").isin(tests)) \
 		.count()
+"""
 
-print(p)
-print(views)
+print(test)
+#print(p)
+#print(views)
 #print(tests)
 
 spark.stop()
