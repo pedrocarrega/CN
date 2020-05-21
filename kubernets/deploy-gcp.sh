@@ -1,5 +1,6 @@
 PROJECT_NAME="ecommerce-teste8"
 BILLING_ACCOUNT_ID=$1
+ACCOUNT_NAME="ecomm-account"
 
 #Authenticates user
 gcloud auth login
@@ -15,6 +16,15 @@ gcloud config set compute/zone europe-west1
 
 #Enable the kubernetes API
 gcloud services enable container.googleapis.com
+gcloud services enable dataproc.googleapis.com
+
+#creates a new owner account and the respective keyfile for authorization purposes
+gcloud iam service-accounts create $ACCOUNT_NAME
+gcloud projects add-iam-policy-binding $PROJECT_NAME--member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
+gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
+
+#TODO: create bucket
+#TODO: push pyspark queries to bucket
 
 #create cluster
 gcloud container clusters create ecommerce-cluster --num-nodes=1 #--scopes=storage-rw
