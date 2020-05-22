@@ -23,8 +23,13 @@ gcloud iam service-accounts create $ACCOUNT_NAME
 gcloud projects add-iam-policy-binding $PROJECT_NAME--member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
 gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
 
-#TODO: create bucket
-#TODO: push pyspark queries to bucket
+#create bucket
+gsutil mb -p ${PROJECT_NAME} -l europe-west1 gs://spark-queries/
+#push pyspark queries to bucket
+#Change the name of the files
+gsutil cp ./querie1.py gs://spark-queries/
+gsutil cp ./querie2.py gs://spark-queries/
+
 
 #create cluster
 gcloud container clusters create ecommerce-cluster --num-nodes=1 #--scopes=storage-rw
