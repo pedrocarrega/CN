@@ -3,7 +3,7 @@ ACCOUNT_NAME="test-account"
 BUCKET_NAME="cn-ecomm-test"
 
 #Authenticates user
-#gcloud auth login
+gcloud auth login
 
 #Define which project to work on
 gcloud config set project $PROJECT_NAME
@@ -70,7 +70,7 @@ sudo docker build -t gcr.io/$PROJECT_NAME/products:v1 .
 cd ../database
 sudo docker build -t gcr.io/$PROJECT_NAME/database:v1 .
 cd ../spark-svc2 
-sudo docker build -t gcr.io/$PROJECT_NAME/spark-svc2:v1
+sudo docker build -t gcr.io/$PROJECT_NAME/spark-svc2:v1 .
 cd ..
 rm -rf events products database spark-svc2
 
