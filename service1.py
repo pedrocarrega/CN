@@ -22,44 +22,29 @@ df = spark \
 	.csv("database/smallerLargeFile_3.csv")
 
 
-test = df \
+views = df \
 		.select(col("_c8").alias("user_session"), col("_c1").alias("event_type")) \
 		.filter(col("user_session").isNotNull()) \
-		.filter(col("event_type").contains('purchase') | col("event_type").contains('view')) \
+		.filter(col("event_type").contains('view')) \
 		.groupby(col("user_session"), col("event_type")) \
 		.count()
 		#.show()
 
 
-
-"""
 purchases = df \
 		.select(col("_c8").alias("user_session"), col("_c1").alias("event_type")) \
 		.filter(col("user_session").isNotNull()) \
-		.filter(col("event_type").contains('purchase')) \
-		.drop("event_type")
+		.filter(col("event_type").contains('purchase'))
+		#.drop("event_type") \
 		#.show()
-		
-p = purchases.count()
 
+result = views.join(purchases, purchases.user_session == views.user_session) \
+			  .agg(max("count").alias("max"), sum("count").alias("total")) \
+			  .agg(avg(col("max") / col("total")))
 
-temp = [list(row) for row in purchases.distinct().collect()]
-tests = [item for sublist in temp for item in sublist]
-print("imma get views")
-
-view = df \
-		.select(col("_c1").alias("event_type"), col("_c8").alias("user_session")) \
-		.filter(col("user_session").isNotNull()) \
-		.filter(col("event_type").contains('view'))
-
-views = view \
-		.where(col("user_session").isin(tests)) \
-		.count()
-"""
-
-print(test)
-#print(p)
-#print(views)
-#print(tests)
+#print(views.show())
+#print(purchases.show())
+#print(views.join(purchases, purchases.user_session == views.user_session).drop("user_session", "event_type")).show())
+print(result.show())
 
 spark.stop()
