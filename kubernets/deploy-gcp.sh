@@ -4,7 +4,6 @@ BUCKET_NAME="cn-ecomm-test"
 
 #Authenticates user
 gcloud auth login
-
 #Define which project to work on
 gcloud config set project $PROJECT_NAME
 
@@ -17,6 +16,7 @@ gcloud config set compute/zone europe-west1-b
 #Enable the kubernetes API
 gcloud services enable container.googleapis.com
 gcloud services enable dataproc.googleapis.com
+gcloud services enbale cloudbuild.googleapis.com
 
 #TODO UNCOMMENT THIS AFTER TESTING
 #creates a new owner account and the respective keyfile for authorization purposes
@@ -54,6 +54,7 @@ unzip spark-svc2.zip
 #cp creds.json spark-svc2
 #cp creds.json spark-svc1
 #cp creds.json spark-svc3
+#rm -f creds.json
 
 rm -f events.zip
 rm -f products.zip
@@ -64,17 +65,21 @@ rm -f spark-svc2.zip
 
 #TODO adicionar ficheiros relativos aos restantes serviços
 cd events
-sudo docker build -t gcr.io/$PROJECT_NAME/events:v1 .
+#sudo docker build -t gcr.io/$PROJECT_NAME/events:v1 .
+docker build -t gcr.io/$PROJECT_NAME/events:v1 .
 cd ../products
-sudo docker build -t gcr.io/$PROJECT_NAME/products:v1 .
+#sudo docker build -t gcr.io/$PROJECT_NAME/products:v1 .
+docker build -t gcr.io/$PROJECT_NAME/products:v1 .
 cd ../database
-sudo docker build -t gcr.io/$PROJECT_NAME/database:v1 .
+#sudo docker build -t gcr.io/$PROJECT_NAME/database:v1 .
+docker build -t gcr.io/$PROJECT_NAME/database:v1 .
 cd ../spark-svc2 
-sudo docker build -t gcr.io/$PROJECT_NAME/spark-svc2:v1 .
+#sudo docker build -t gcr.io/$PROJECT_NAME/spark-svc2:v1 .
+docker build -t gcr.io/$PROJECT_NAME/spark-svc2:v1 .
 cd ..
 rm -rf events products database spark-svc2
 
-sudo gcloud auth configure-docker
+gcloud auth configure-docker
 
 #TODO Sudo nao funciona com o usermod (falta de perms)
 #sudo docker push gcr.io/$PROJECT_NAME/events:v1
@@ -111,7 +116,7 @@ spec:
         run: svc2
     spec:
       containers:
-      - image: gcr.io/$PROJECT_NAME/svc2:v1
+      - image: gcr.io/$PROJECT_NAME/spark-svc2:v1
         imagePullPolicy: IfNotPresent
         name: svc2
         ports:
