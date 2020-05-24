@@ -1,13 +1,36 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import DateType
-from pyspark.sql.types import DoubleType
+from pyspark.sql.types import IntegerType
+from pyspark.sql.types import StringType
 from pyspark.sql.functions import asc
+from pyspark.sql.functions import desc
 from pyspark.sql.functions import sum
 from pyspark.sql.functions import date_format
 from pyspark.sql.functions import avg
 from pyspark.sql.functions import col
 from pyspark.sql.functions import max
+from pyspark.sql.functions import min
 from pyspark.sql.functions import count
+from pyspark.sql.functions import to_timestamp
+from pyspark.sql.functions import udf
+from pyspark.sql.functions import round
+import math
+
+range = 60.0
+
+def range_interval(duration):
+	temp = range
+	while(True):
+		if duration < temp:
+			return '<' + str(temp)
+		temp+=range
+
+def divide(cart, purchase):
+	return int(math.ceil(cart/purchase))
+
+
+udf_divide = udf(divide, IntegerType())
+udf_intervals = udf(range_interval, StringType())
 
 spark = SparkSession \
 	.builder \
@@ -15,36 +38,54 @@ spark = SparkSession \
 	.getOrCreate()
 
 #IMPORTANT: TENS DE FAZER DOWNLOAD DO CSV
-# GOAL: Numero medio de views ate uma compra
+# GOAL: Calcular a duração de cada sessão arredondando aos minutos e calcular nessa sessão o ratio de purchase/cart, de seguida agrupar por intervalos da duração de sessão(por ex de 10 em 10 min) e calcular para cada grupo a média do ratio anteriormente calculado
 df = spark \
 	.read \
 	.option("header", "false") \
 	.csv("database/smallerLargeFile_3.csv")
 
 
-views = df \
-		.select(col("_c8").alias("user_session"), col("_c1").alias("event_type")) \
-		.filter(col("user_session").isNotNull()) \
-		.filter(col("event_type").contains('view')) \
-		.groupby(col("user_session"), col("event_type")) \
-		.count()
-		#.show()
+		  
+cart = df \
+		.select(col("_c1").alias("event_type"), col("_c8").alias("sessions")) \
+		.filter(col("event_type").isNotNull() & col("sessions").isNotNull()) \
+		.filter(col("event_type").contains("cart")) \
+		.groupby(col("event_type"), col("sessions")) \
+		.count().withColumnRenamed("count", "#cart") \
 
 
 purchases = df \
-		.select(col("_c8").alias("user_session"), col("_c1").alias("event_type")) \
-		.filter(col("user_session").isNotNull()) \
-		.filter(col("event_type").contains('purchase'))
-		#.drop("event_type") \
-		#.show()
+		.select(col("_c1").alias("event_type"), col("_c8").alias("session")) \
+		.filter(col("event_type").isNotNull() & col("session").isNotNull()) \
+		.filter(col("event_type").contains("purchase")) \
+		.groupby(col("event_type"), col("session")) \
+		.count().withColumnRenamed("count", "#purchases")
 
-result = views.join(purchases, purchases.user_session == views.user_session) \
-			  .agg(max("count").alias("max"), sum("count").alias("total")) \
-			  .agg(avg(col("max") / col("total")))
+ratio = cart \
+		.join(purchases, cart.sessions == purchases.session) \
+		.withColumn("ratio", udf_divide("#cart", "#purchases")) \
+		.drop("session", "event_type", "#cart", "#purchases")
 
-#print(views.show())
-#print(purchases.show())
-#print(views.join(purchases, purchases.user_session == views.user_session).drop("user_session", "event_type")).show())
+session = df \
+		  .select(to_timestamp(col("_c0"), 'yyyy-MM-dd HH:mm:ss').alias("time"), col("_c1").alias("event_type"), col("_c8").alias("session")) \
+		  .filter(col("event_type").isNotNull() & col("session").isNotNull()) \
+		  .groupby(col("session")) \
+		  .agg(max(col("time")).alias("end_time"), min(col("time")).alias("start_time")) \
+		  .withColumn("duration", round(((col("end_time").cast("long") - col("start_time").cast("long"))/60), 1)) \
+		  .drop("start_time", "end_time") \
+		  .filter("duration > 0.0 AND duration < 600.0") \
+		  .withColumn("intervals", udf_intervals("duration"))
+		  
+
+result = ratio \
+		 .join(session, session.session == ratio.sessions) \
+		 .groupby("intervals", "ratio").count() \
+		 .orderBy(desc("intervals"))
+		 #.withColumn("ratio", avg(col("ratio"))) \
+		 #.agg(avg(col("duration"))) #7.82
+
 print(result.show())
+#print(ratio.show())
+
 
 spark.stop()
