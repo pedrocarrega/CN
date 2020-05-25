@@ -80,12 +80,9 @@ session = df \
 		  
 
 result = ratio \
-		 .join(session, session.session == ratio.sessions) #\
-		 #.groupby("intervals").count() \
-		 #.orderBy(desc("intervals")) \
-		 #.agg(avg(col("duration"))) #7.82
+		 .join(session, session.session == ratio.sessions)
 
-temp = spark.createDataFrame([('test', 0)], ['interval', 'ratio'])
+temp = spark.createDataFrame([('<0.0', 0)], ['interval', 'ratio'])
 
 for i in range(int(interval), int(interval)*10+1, int(interval)):
 	i = float(i)
@@ -98,14 +95,12 @@ for i in range(int(interval), int(interval)*10+1, int(interval)):
 	value = int(math.ceil(value))
 	
 	temp.union(spark.createDataFrame([(x, value)], ['interval', 'ratio']))
+	temp.createOrReplaceTempView("temp")
 
-"""
-temp = ratio \
-		 .join(session, session.session == ratio.sessions) \
-		 .filter(col("intervals").contains("<60")) \
-		 .agg(avg(col("ratio"))) \
-		 .withColumn("intervals", "<60")
-"""
+
+print(temp.show())
+print(result.groupby("intervals").count().show())
+
 
 result = result \
 			.groupby("intervals").count() \
@@ -116,7 +111,6 @@ result = result \
 print(result.show())		 
 #print(temp.show())
 #print(ratio.show())
-#print(temp.show())
 
 
 spark.stop()
