@@ -86,20 +86,12 @@ temp = spark.createDataFrame([('<0.0', 0)], ['interval', 'ratio'])
 
 for i in range(int(interval), int(interval)*10+1, int(interval)):
 	i = float(i)
-	x = ('<' + str(i))
 	
-	value = result.filter(col("intervals").contains(x)).agg(avg(col("ratio"))).collect()[0]["avg(ratio)"]
+	value = result.filter(col("intervals").contains(('<' + str(i)))).agg(avg(col("ratio"))).collect()[0]["avg(ratio)"]
 	if value == None:
 		value = 0
-
-	value = int(math.ceil(value))
 	
-	temp.union(spark.createDataFrame([(x, value)], ['interval', 'ratio']))
-	temp.createOrReplaceTempView("temp")
-
-
-print(temp.show())
-print(result.groupby("intervals").count().show())
+	temp = temp.union(spark.createDataFrame([(('<' + str(i)), int(math.ceil(value)))], ['interval', 'ratio']))
 
 
 result = result \
@@ -108,9 +100,6 @@ result = result \
 			.join(temp, temp.interval == result.intervals) \
 			.drop("interval")
 
-print(result.show())		 
-#print(temp.show())
-#print(ratio.show())
-
+print(result.show())
 
 spark.stop()
