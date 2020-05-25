@@ -14,16 +14,18 @@ from pyspark.sql.functions import count
 from pyspark.sql.functions import to_timestamp
 from pyspark.sql.functions import udf
 from pyspark.sql.functions import round
+from pyspark.sql.functions import lit
+from pyspark.sql.functions import when
 import math
 
-range = 60.0
+interval = 60.0
 
 def range_interval(duration):
-	temp = range
+	temp = interval
 	while(True):
 		if duration < temp:
 			return '<' + str(temp)
-		temp+=range
+		temp+=interval
 
 def divide(cart, purchase):
 	return int(math.ceil(cart/purchase))
@@ -67,8 +69,8 @@ ratio = cart \
 		.drop("session", "event_type", "#cart", "#purchases")
 
 session = df \
-		  .select(to_timestamp(col("_c0"), 'yyyy-MM-dd HH:mm:ss').alias("time"), col("_c1").alias("event_type"), col("_c8").alias("session")) \
-		  .filter(col("event_type").isNotNull() & col("session").isNotNull()) \
+		  .select(to_timestamp(col("_c0"), 'yyyy-MM-dd HH:mm:ss').alias("time"), col("_c8").alias("session")) \
+		  .filter(col("session").isNotNull()) \
 		  .groupby(col("session")) \
 		  .agg(max(col("time")).alias("end_time"), min(col("time")).alias("start_time")) \
 		  .withColumn("duration", round(((col("end_time").cast("long") - col("start_time").cast("long"))/60), 1)) \
@@ -78,14 +80,43 @@ session = df \
 		  
 
 result = ratio \
-		 .join(session, session.session == ratio.sessions) \
-		 .groupby("intervals", "ratio").count() \
-		 .orderBy(desc("intervals"))
-		 #.withColumn("ratio", avg(col("ratio"))) \
+		 .join(session, session.session == ratio.sessions) #\
+		 #.groupby("intervals").count() \
+		 #.orderBy(desc("intervals")) \
 		 #.agg(avg(col("duration"))) #7.82
 
-print(result.show())
+temp = spark.createDataFrame([('test', 0)], ['interval', 'ratio'])
+
+for i in range(int(interval), int(interval)*10+1, int(interval)):
+	i = float(i)
+	x = ('<' + str(i))
+	
+	value = result.filter(col("intervals").contains(x)).agg(avg(col("ratio"))).collect()[0]["avg(ratio)"]
+	if value == None:
+		value = 0
+
+	value = int(math.ceil(value))
+	
+	temp.union(spark.createDataFrame([(x, value)], ['interval', 'ratio']))
+
+"""
+temp = ratio \
+		 .join(session, session.session == ratio.sessions) \
+		 .filter(col("intervals").contains("<60")) \
+		 .agg(avg(col("ratio"))) \
+		 .withColumn("intervals", "<60")
+"""
+
+result = result \
+			.groupby("intervals").count() \
+			.orderBy(desc("intervals")) \
+			.join(temp, temp.interval == result.intervals) \
+			.drop("interval")
+
+print(result.show())		 
+#print(temp.show())
 #print(ratio.show())
+#print(temp.show())
 
 
 spark.stop()
