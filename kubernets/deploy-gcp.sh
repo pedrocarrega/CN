@@ -7,9 +7,6 @@ gcloud auth login
 #Define which project to work on
 gcloud config set project $PROJECT_NAME
 
-#Shouldnt be needed as project will be created manually
-#gcloud beta billing projects link $PROJECT_NAME --billing-account=$BILLING_ACCOUNT_ID
-
 #Hardcoded zone (can be given by input but minimizes errors)
 gcloud config set compute/zone europe-west1-b
 
@@ -18,125 +15,116 @@ gcloud services enable container.googleapis.com
 gcloud services enable dataproc.googleapis.com
 gcloud services enbale cloudbuild.googleapis.com
 
-#TODO UNCOMMENT THIS AFTER TESTING
 #creates a new owner account and the respective keyfile for authorization purposes
-#gcloud iam service-accounts create $ACCOUNT_NAME
-#gcloud projects add-iam-policy-binding $PROJECT_NAME--member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
-#gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
-#TODO move creds.json inside every spark service folder
+gcloud iam service-accounts create $ACCOUNT_NAME
+gcloud projects add-iam-policy-binding $PROJECT_NAME--member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
+gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
 
 #create bucket
-#gsutil mb -p ${PROJECT_NAME} -l europe-west1 gs://$BUCKET_NAME/
-#push pyspark queries to bucket
-#Change the name of the files
-#gsutil cp ./query1.py gs://$BUCKET_NAME/
-#gsutil cp ./Query2.py gs://$BUCKET_NAME/
-#gsutil cp ./query3.py gs://$BUCKET_NAME/
+gsutil mb -p ${PROJECT_NAME} -l europe-west1 gs://$BUCKET_NAME/
 
+#These scripts generate the query files with the bucket name.
+#The file names will be Query1-3.py
+./write-spark2.sh $BUCKET_NAME
+./write-spark1.sh $BUCKET_NAME
+./write-spark3.sh $BUCKET_NAME
+
+#push pyspark queries to bucket
+gsutil cp ./Query1.py gs://$BUCKET_NAME/
+gsutil cp ./Query2.py gs://$BUCKET_NAME/
+gsutil cp ./Query3.py gs://$BUCKET_NAME/
 
 #create cluster
-#TODO change num nodes when quota is higher
 gcloud container clusters create ecommerce-cluster --num-nodes=1 --machine-type=n1-standard-1 #--scopes=storage-rw
 gcloud config set container/cluster ecommerce-cluster
 gcloud container clusters get-credentials ecommerce-cluster
 
+gsutil cp gs://cn-ecommerce-container/spark-svc.zip .
 gsutil cp gs://cn-ecommerce-container/events.zip .
 gsutil cp gs://cn-ecommerce-container/products.zip .
 gsutil cp gs://cn-ecommerce-container/database.zip .
-#TODO place the zip in the bucket
-gsutil cp gs://cn-ecommerce-container/spark-svc2.zip .
+gsutil cp  gs://cn-ecommerce-container/database.zip .
+gsutil cp  gs://cn-ecommerce-container/database.csv gs://$BUCKET_NAME/
 
-#TODO uncomment spark related lines
-unzip events.zip
-unzip products.zip
-unzip database.zip
-unzip spark-svc2.zip
-#cp creds.json spark-svc2
-#cp creds.json spark-svc1
-#cp creds.json spark-svc3
-#rm -f creds.json
+unzip spark-svc.zip
+cp creds.json spark-svc
+rm -f creds.json
 
-rm -f events.zip
-rm -f products.zip
-rm -f database.zip
-rm -f spark-svc2.zip
-#rm -f spark-svc1.zip
-#rm -f spark-svc3.zip
+rm -f spark-svc.zip
 
-#TODO adicionar ficheiros relativos aos restantes serviços
 cd events
-#sudo docker build -t gcr.io/$PROJECT_NAME/events:v1 .
 docker build -t gcr.io/$PROJECT_NAME/events:v1 .
 cd ../products
-#sudo docker build -t gcr.io/$PROJECT_NAME/products:v1 .
 docker build -t gcr.io/$PROJECT_NAME/products:v1 .
 cd ../database
-#sudo docker build -t gcr.io/$PROJECT_NAME/database:v1 .
 docker build -t gcr.io/$PROJECT_NAME/database:v1 .
-cd ../spark-svc2 
-#sudo docker build -t gcr.io/$PROJECT_NAME/spark-svc2:v1 .
-docker build -t gcr.io/$PROJECT_NAME/spark-svc2:v1 .
+cd ../spark-svc 
+docker build -t gcr.io/$PROJECT_NAME/spark-svc:v1 .
 cd ..
-rm -rf events products database spark-svc2
+rm -rf events products database spark-svc
 
 gcloud auth configure-docker
-
-#TODO Sudo nao funciona com o usermod (falta de perms)
-#sudo docker push gcr.io/$PROJECT_NAME/events:v1
-#sudo docker push gcr.io/$PROJECT_NAME/products:v1
-#sudo docker push gcr.io/$PROJECT_NAME/database:v1
-#sudo docker push gcr.io/$PROJECT_NAME/spark-svc2:v1
-
 
 docker push gcr.io/$PROJECT_NAME/events:v1
 docker push gcr.io/$PROJECT_NAME/products:v1
 docker push gcr.io/$PROJECT_NAME/database:v1
-docker push gcr.io/$PROJECT_NAME/spark-svc2:v1
+docker push gcr.io/$PROJECT_NAME/spark-svc:v1
 
 mkdir events-kubernetes
 mkdir products-kubernetes
 mkdir ingress-kubernetes
 mkdir database-kubernetes
-mkdir spark-svc1-kubernetes
-mkdir spark-svc2-kubernetes
-mkdir spark-svc3-kubernetes
+mkdir spark-svc-kubernetes
 
 echo "apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: svc2
+  name: svc
   namespace: default
 spec:
   selector:
     matchLabels:
-      run: svc2
+      run: svc
   template:
     metadata:
       labels:
-        run: svc2
+        run: svc
     spec:
       containers:
-      - image: gcr.io/$PROJECT_NAME/spark-svc2:v1
+      - image: gcr.io/$PROJECT_NAME/spark-svc:v1
         imagePullPolicy: IfNotPresent
-        name: svc2
+        name: svc
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
         ports:
         - containerPort: 3000
-          protocol: TCP" > spark-svc2-kubernetes/svc2-deployment.yaml
-
+          protocol: TCP" > spark-svc-kubernetes/svc-deployment.yaml
 
 echo "apiVersion: v1
 kind: Service
 metadata:
-  name: svc2
+  name: svc
   namespace: default
+  annotations:
+    beta.cloud.google.com/backend-config: '{\"ports\": {\"3000\":\"my-bsc-backendconfig\"}}'
 spec:
   ports:
   - protocol: TCP
     port: 3000
     targetPort: 3000
   selector:
-    run: svc2
-  type: NodePort" > spark-svc2-kubernetes/svc2-service.yaml
+    run: svc
+  type: NodePort" > spark-svc-kubernetes/svc-service.yaml
+
+echo "apiVersion: cloud.google.com/v1beta1
+kind: BackendConfig
+metadata:
+  name: my-bsc-backendconfig
+spec:
+  timeoutSec: 1200
+" > timeout-config.yaml
 
 
 echo "apiVersion: apps/v1
@@ -227,9 +215,9 @@ spec:
         backend:
           serviceName: products
           servicePort: 3000
-      - path: /api/spark/svc2/*
+      - path: /api/spark/*
         backend:
-          serviceName: svc2
+          serviceName: svc
           servicePort: 3000" > ingress-kubernetes/fanout-ingress.yaml
           
 echo "apiVersion: apps/v1
@@ -278,5 +266,6 @@ kubectl apply -f products-kubernetes/products-deployment.yaml
 kubectl apply -f database-kubernetes/database-deployment.yaml
 kubectl apply -f database-kubernetes/database-service.yaml
 
-kubectl apply -f spark-svc2-kubernetes/svc2-deployment.yaml
-kubectl apply -f spark-svc2-kubernetes/svc2-service.yaml
+kubectl apply -f timeout-config.yaml
+kubectl apply -f spark-svc-kubernetes/svc-deployment.yaml
+kubectl apply -f spark-svc-kubernetes/svc-service.yaml
