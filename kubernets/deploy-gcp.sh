@@ -19,6 +19,8 @@ gcloud services enbale cloudbuild.googleapis.com
 gcloud iam service-accounts create $ACCOUNT_NAME
 gcloud projects add-iam-policy-binding $PROJECT_NAME--member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
 gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
+#Variable used by terraform (inside terraform dir) to access the credentials
+export GOOGLE_APPLICATION_CREDENTIALS="../creds.json"
 
 #create bucket
 gsutil mb -p ${PROJECT_NAME} -l europe-west1 gs://$BUCKET_NAME/
@@ -35,7 +37,8 @@ gsutil cp ./Query2.py gs://$BUCKET_NAME/
 gsutil cp ./Query3.py gs://$BUCKET_NAME/
 
 #create cluster
-gcloud container clusters create ecommerce-cluster --num-nodes=1 --machine-type=n1-standard-1 #--scopes=storage-rw
+
+#gcloud container clusters create ecommerce-cluster --num-nodes=1 --machine-type=n1-standard-1
 gcloud config set container/cluster ecommerce-cluster
 gcloud container clusters get-credentials ecommerce-cluster
 
@@ -43,14 +46,23 @@ gsutil cp gs://cn-ecommerce-container/spark-svc.zip .
 gsutil cp gs://cn-ecommerce-container/events.zip .
 gsutil cp gs://cn-ecommerce-container/products.zip .
 gsutil cp gs://cn-ecommerce-container/database.zip .
-gsutil cp  gs://cn-ecommerce-container/database.zip .
 gsutil cp  gs://cn-ecommerce-container/database.csv gs://$BUCKET_NAME/
 
+unzip events.zip
+unzip products.zip
+unzip database.zip
 unzip spark-svc.zip
+
 cp creds.json spark-svc
-rm -f creds.json
 
 rm -f spark-svc.zip
+rm -f events.zip
+rm -f products.zip
+rm -f database.zip
+rm -f creds.json
+
+
+./write-backend.sh $PROJECT_NAME $BUCKET_NAME
 
 cd events
 docker build -t gcr.io/$PROJECT_NAME/events:v1 .
