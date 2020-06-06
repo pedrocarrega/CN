@@ -153,7 +153,7 @@ rm -f spark-svc.zip
 rm -f events.zip
 rm -f products.zip
 rm -f database.zip
-rm -f creds.json
+#rm -f creds.json
 
 
 ./write-backend.sh $PROJECT_NAME $BUCKET_NAME
