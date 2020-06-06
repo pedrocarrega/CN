@@ -37,3 +37,10 @@ resource "google_container_node_pool" "default" {
   }
 }
 
+resource "google_storage_bucket" "REGIONAL" {
+  name = "some-temporary-bucket-96547896"
+  storage_class = "REGIONAL"
+  force_destroy = true
+  project = var.project
+  location = var.location
+}
