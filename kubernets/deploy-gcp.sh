@@ -1,6 +1,10 @@
-PROJECT_NAME='new-test-project-277912'
-ACCOUNT_NAME="test-account"
-BUCKET_NAME="cn-ecomm-test"
+PROJECT_NAME='logical-codex-275717'
+ACCOUNT_NAME="terraform"
+BUCKET_NAME="cn-ecomm-test-06062020"
+INITIAL_NODES="1"
+CLUSTER_NAME="ecommerce-cluster"
+MACHINE_TYPE="n1-standard-1"
+NODE_POOL_COUNT="1"
 
 #Authenticates user
 gcloud auth login
@@ -13,23 +17,113 @@ gcloud config set compute/zone europe-west1-b
 #Enable the kubernetes API
 gcloud services enable container.googleapis.com
 gcloud services enable dataproc.googleapis.com
-gcloud services enbale cloudbuild.googleapis.com
+gcloud services enable cloudbuild.googleapis.com
 
 #creates a new owner account and the respective keyfile for authorization purposes
 gcloud iam service-accounts create $ACCOUNT_NAME
-gcloud projects add-iam-policy-binding $PROJECT_NAME--member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
+gcloud projects add-iam-policy-binding $PROJECT_NAME --member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
 gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
 #Variable used by terraform (inside terraform dir) to access the credentials
 export GOOGLE_APPLICATION_CREDENTIALS="../creds.json"
 
+mkdir terraform
+
+echo "resource \"google_container_cluster\" \"default\" {
+  name        = var.name
+  project     = var.project
+  description = \"Demo GKE Cluster\"
+  location    = var.location
+
+  remove_default_node_pool = true
+  initial_node_count       = var.initial_node_count
+  master_auth {
+    username = \"\"
+    password = \"\"
+    client_certificate_config {
+      issue_client_certificate = false
+    }
+  }
+}
+
+resource \"google_container_node_pool\" \"default\" {
+  name       = \"\${var.name}-node-pool\"
+  project    = var.project
+  location   = var.location
+  cluster    = google_container_cluster.default.name
+  node_count = ${NODE_POOL_COUNT}
+
+  node_config {
+    preemptible  = true
+    machine_type = var.machine_type
+
+    metadata = {
+      disable-legacy-endpoints = \"true\"
+    }
+
+    oauth_scopes = [
+      \"https://www.googleapis.com/auth/logging.write\",
+      \"https://www.googleapis.com/auth/monitoring\",
+    ]
+  }
+}
+
+resource \"google_storage_bucket\" \"REGIONAL\" {
+  name = \"${BUCKET_NAME}\"
+  storage_class = \"REGIONAL\"
+  force_destroy = true
+  project = var.project
+  location = var.location
+}" > terraform/main.tf
+
+
+echo "output \"endpoint\" {
+  value = google_container_cluster.default.endpoint
+}
+
+output \"master_version\" {
+  value = google_container_cluster.default.master_version
+}
+" > terraform/outputs.tf
+
+echo "variable \"name\" {
+  default = \"${CLUSTER_NAME}\"
+}
+
+variable \"project\" {
+  default = \"${PROJECT_NAME}\"
+}
+
+variable \"location\" {
+  default = \"europe-west2\"
+}
+
+variable \"initial_node_count\" {
+  default = ${INITIAL_NODES}
+}
+
+variable \"machine_type\" {
+  default = \"${MACHINE_TYPE}\"
+}" > terraform/variables.tf
+
+echo "terraform {
+  required_version = \">= 0.12\"
+}" > terraform/versions.tf
+
+cd terraform
+
+terraform init
+terraform apply
+
+cd ..
+
 #create bucket
-gsutil mb -p ${PROJECT_NAME} -l europe-west1 gs://$BUCKET_NAME/
+#gsutil mb -p ${PROJECT_NAME} -l europe-west1 gs://$BUCKET_NAME/
 
 #These scripts generate the query files with the bucket name.
 #The file names will be Query1-3.py
-./write-spark2.sh $BUCKET_NAME
-./write-spark1.sh $BUCKET_NAME
-./write-spark3.sh $BUCKET_NAME
+./spark-deploy/write-spark1.sh $BUCKET_NAME
+./spark-deploy/write-spark2.sh $BUCKET_NAME
+./spark-deploy/write-spark3.sh $BUCKET_NAME
 
 #push pyspark queries to bucket
 gsutil cp ./Query1.py gs://$BUCKET_NAME/
@@ -39,8 +133,8 @@ gsutil cp ./Query3.py gs://$BUCKET_NAME/
 #create cluster
 
 #gcloud container clusters create ecommerce-cluster --num-nodes=1 --machine-type=n1-standard-1
-gcloud config set container/cluster ecommerce-cluster
-gcloud container clusters get-credentials ecommerce-cluster
+gcloud config set container/cluster ${CLUSTER_NAME}
+gcloud container clusters get-credentials ${CLUSTER_NAME}
 
 gsutil cp gs://cn-ecommerce-container/spark-svc.zip .
 gsutil cp gs://cn-ecommerce-container/events.zip .
@@ -65,22 +159,22 @@ rm -f creds.json
 ./write-backend.sh $PROJECT_NAME $BUCKET_NAME
 
 cd events
-docker build -t gcr.io/$PROJECT_NAME/events:v1 .
+sudo docker build -t gcr.io/$PROJECT_NAME/events:v1 .
 cd ../products
-docker build -t gcr.io/$PROJECT_NAME/products:v1 .
+sudo docker build -t gcr.io/$PROJECT_NAME/products:v1 .
 cd ../database
-docker build -t gcr.io/$PROJECT_NAME/database:v1 .
+sudo docker build -t gcr.io/$PROJECT_NAME/database:v1 .
 cd ../spark-svc 
-docker build -t gcr.io/$PROJECT_NAME/spark-svc:v1 .
+sudo docker build -t gcr.io/$PROJECT_NAME/spark-svc:v1 .
 cd ..
 rm -rf events products database spark-svc
 
-gcloud auth configure-docker
+sudo gcloud auth configure-docker
 
-docker push gcr.io/$PROJECT_NAME/events:v1
-docker push gcr.io/$PROJECT_NAME/products:v1
-docker push gcr.io/$PROJECT_NAME/database:v1
-docker push gcr.io/$PROJECT_NAME/spark-svc:v1
+sudo docker push gcr.io/$PROJECT_NAME/events:v1
+sudo docker push gcr.io/$PROJECT_NAME/products:v1
+sudo docker push gcr.io/$PROJECT_NAME/database:v1
+sudo docker push gcr.io/$PROJECT_NAME/spark-svc:v1
 
 mkdir events-kubernetes
 mkdir products-kubernetes
