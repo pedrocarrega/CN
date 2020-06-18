@@ -5,19 +5,14 @@
 \BOOKMARK [2][-]{subsection.4.1}{Load Balancer}{section.4}% 5
 \BOOKMARK [2][-]{subsection.4.2}{Servidores NodeJS}{section.4}% 6
 \BOOKMARK [2][-]{subsection.4.3}{Base de dados}{section.4}% 7
-\BOOKMARK [1][-]{section.5}{Arquitetura t\351cnica}{}% 8
-\BOOKMARK [1][-]{section.6}{Implementa\347\343o}{}% 9
-\BOOKMARK [2][-]{subsection.6.1}{Base de dados}{section.6}% 10
-\BOOKMARK [2][-]{subsection.6.2}{Web Server}{section.6}% 11
-\BOOKMARK [2][-]{subsection.6.3}{Load Balancer}{section.6}% 12
-\BOOKMARK [1][-]{section.7}{Lan\347amento em Kubernetes}{}% 13
-\BOOKMARK [2][-]{subsection.7.1}{deploy1.sh}{section.7}% 14
-\BOOKMARK [2][-]{subsection.7.2}{deploy2.sh}{section.7}% 15
-\BOOKMARK [2][-]{subsection.7.3}{deploy3.sh}{section.7}% 16
-\BOOKMARK [2][-]{subsection.7.4}{deploy4.sh}{section.7}% 17
-\BOOKMARK [3][-]{subsubsection.7.4.1}{ingress/ingress-rbac.yaml}{subsection.7.4}% 18
-\BOOKMARK [3][-]{subsubsection.7.4.2}{ingress/alb-ingress-controller.yaml}{subsection.7.4}% 19
-\BOOKMARK [2][-]{subsection.7.5}{Acesso aos servi\347os}{section.7}% 20
-\BOOKMARK [2][-]{subsection.7.6}{Desconstru\347\343o do deployment}{section.7}% 21
-\BOOKMARK [1][-]{section.8}{Cen\341rios de Valida\347\343o}{}% 22
-\BOOKMARK [1][-]{section.9}{Discuss\343o e Conclus\365es}{}% 23
+\BOOKMARK [2][-]{subsection.4.4}{Servi\347os Spark}{section.4}% 8
+\BOOKMARK [1][-]{section.5}{Arquitetura t\351cnica}{}% 9
+\BOOKMARK [1][-]{section.6}{Implementa\347\343o}{}% 10
+\BOOKMARK [2][-]{subsection.6.1}{Migra\347\343o de AWS para GCP}{section.6}% 11
+\BOOKMARK [2][-]{subsection.6.2}{Base de dados}{section.6}% 12
+\BOOKMARK [2][-]{subsection.6.3}{Web Server}{section.6}% 13
+\BOOKMARK [3][-]{subsubsection.6.3.1}{Servi\347os REST}{subsection.6.3}% 14
+\BOOKMARK [3][-]{subsubsection.6.3.2}{Servi\347os Spark}{subsection.6.3}% 15
+\BOOKMARK [2][-]{subsection.6.4}{Terraform}{section.6}% 16
+\BOOKMARK [1][-]{section.7}{Cen\341rios de Valida\347\343o}{}% 17
+\BOOKMARK [1][-]{section.8}{Discuss\343o e Conclus\365es}{}% 18

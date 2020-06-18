@@ -117,23 +117,21 @@ Após a definição da API na fase anterior, foi implementado de raiz um servido
 \subsection{Load Balancer}
 Foi implementado um Load Balancer utilizando o Ingress que distribui os pedidos HTTP recebidos dos clientes browser e que reencaminha para os respetivos serviços.
 
-
 \subsection{Servidores NodeJS}
 Os servidores irão receber os pedidos a partir do Load Balancer, e processá-los de acordo com a funcionalidade pretendida. A lógica de negócio é aqui tratada, realizando as queries necessárias para a base de dados. Ao receber os dados, processa-os de acordo com a funcionalidade, e encaminha o resultado para o Load Balancer.
 %\newline %removam isto se nao gostarem do espaço k adiciona
 
 \subsection{Base de dados}
-A base de dados irá conter o conteúdo dos ficheiros .csv do nosso dataset, que são acedidos pelo servidor de modo a poder efetuar as leituras necessárias para produzir uma resposta para o cliente. 
-\newpage
+A base de dados está contida num containder de MongoDB dentro do qual se encontra todo o conteúdo do ficheiro .csv da base de dados anteriormente escolhida.
+
+\subsection{Serviços Spark}
+Os serviços spark também são executados no kubernetes, porém estes usam uma série de APIs e serviços diferentes fornecidos pelo GCP que irão ser apresentados mais à frente.
 
 \section{Arquitetura técnica}
-%Digam-me o que acham
-
-%Não sei o que dizer da Portabilidade
 Para garantir os requisitos não funcionais mencionados a cima devemos ter em atenção os serviços da cloud escolhidos, pois proporcionam vários aspetos fundamentais dos requisitos.
 \newline
 
-A utilização dos serviços disponibilizados pela AWS permite cumprir alguns dos requisitos não funcionais mencionados, nomeadamente a Escalabilidade e a Elasticidade. Já o Load Balancer implementado com o Ingress permite que este serviço da cloud trate automaticamente da separação dos diferentes tipos de pedidos HTTP recebidos para os respetivos serviços. A base de dados utilizada consiste numa imagem Docker baseada na imagem Mongo que como o nome sugere é uma imagem de MongoDB. Foi escolhida esta alternativa de forma a não estar dependente dos serviços de Bases de Dados de um fornecedor específico, sendo que com esta opção a imagem pode ser implementada numa instância em qualquer fornecedor cloud. Quanto à escalabilidade a imagem poderia ser replicada por diversas réplicas de forma a distribuir os pedidos feitos.
+A utilização dos serviços disponibilizados pelo GCP permite cumprir alguns dos requisitos não funcionais mencionados, nomeadamente a Escalabilidade e a Elasticidade. Já o Load Balancer implementado com o Ingress permite que este serviço da cloud trate automaticamente da separação dos diferentes tipos de pedidos HTTP recebidos para os respetivos serviços. A base de dados utilizada consiste numa imagem Docker baseada na imagem Mongo que como o nome sugere é uma imagem de MongoDB. Foi escolhida esta alternativa de forma a não estar dependente dos serviços de Bases de Dados de um fornecedor específico, sendo que com esta opção a imagem pode ser implementada numa instância em qualquer fornecedor cloud. Quanto à escalabilidade a imagem poderia ser replicada por diversas réplicas de forma a distribuir os pedidos feitos.
 \newline
 
 A Confiabilidade do sistema também é melhorada com a instalação em serviços na cloud, visto estas terem deteções automáticas de falhas de servidores, possibilitando a migração do sistema virtualizado para outro servidor funcional.
@@ -150,102 +148,41 @@ A utilização do Docker permite-nos facilmente fazer deploy de um serviço, em 
 
 \section{Implementação}
 
+\subsection{Migração de AWS para GCP}
+Tal como anteriormente referido o desenvolvimento dos serviços em bases portáveis tornou o processo de migração da nossa implementação prévia em AWS para GCP menos demorado, ajudando no cumprimento do deadline estipulado. As bases entre ambos os fornecedores são semelhantes, mudando apenas no caso da definição de projetos (algo que não existe no AWS) e buckets na criação de buckets de armazenamento.
+
 \subsection{Base de dados}
-Uma das maiores dificuldades que tivemos foi a passagem dos dados em formato CSV para uma tabela na DynamoDB. Começamos primeiro com a criação de scripts em Python, com a utilização de bibliotecas disponibilizadas pela AWS. Isto mostrou-se não fazível devido às limitações do tamanho do heap e da memória consumida, visto o ficheiro CSV ser de grandes dimensões.
+A base de dados utilizadas pela aplicação básica (serviços REST) não sofreu alterações na implementação desta fase. Porém o acesso aos dados da base de dados tornou-se diferente no caso dos serviços Spark.
 
-Passamos para a implementação do mesmo script mas através do AWS Lambda mas deparamo-nos com o mesmo problema, sem sucesso na escrita para a DynamoDB.
-
-Finalmente utilizamos a ferramenta do Data Pipeline, que por sua vez originou vários novos obstáculos:
-\begin{enumerate}
-	\item Deparamo-nos com vários erros na passagem do CSV para a DynamoDB. Estes erros originaram do facto da DynamoDB ter um formato específico de JSON que contém não só o nome de cada coluna, como o tipo da coluna. Esta informação não se encontrava explicitamente documentada, logo para obter a estrutura tivemos que escrever uma linha manualmente numa tabela criada, exportar usando o Data Pipeline para um bucket S3 e daí conseguimos observar a estrutura. De seguida criamos um parser que percorria o dataset, eliminando espaços vazios que não são aceitadas pela DynamoDB, tornando cada linha no formato JSON que a DynamoDB conseguisse interpretar.
-	
-	\item No início da utilização do Data Pipeline, o tempo de escrita para a tabela aparentava ser muito elevado, rondando os 15 minutos para um ficheiro de 8MB. Isto deve-se ao facto das tabelas da DynamoDB terem um controlo da taxa de transferência, que caso for demasiado elevada, consumia para além do que o free tier da AWS fornecia, consumindo recursos monetários em elevadas quantidades na nossa experiência.
-	
-	\item Na implementação das queries para a DynamoDB, reparamos numa limitação dos resultados obtidos com o despoletar de uma query. Isto deve-se ao facto da DynamoDB limitar os resultados de cada query a "páginas" de 1MB, sendo que uma página é um conjuntos das entradas filtradas pela query. Tivemos então que lidar com a paginação, que provou ser pouco eficiente, baseando-se na utilização da última entrada da página anterior, e despolentando uma nova query a partir dessa entrada, logo necessitando de \textit{TAMANHO\_DATASET}/1MB queries.
-	
-	\item As queries da DynamoDB são de 2 tipos: \textbf{Scan} e \textbf{Query}. Inicialmente usamos Scans para alguns serviços disponibilizados, porém, estes eram muito ineficientes em comparação com as queries dado que necessitavam de percorrer a tabela inteira. Recriamos então a tabela, de modo a fornecer uma Primary Key comum a todas as entradas e com uma coluna \textbf{event\_id} que era denominada como Sorting Key, distinguindo todas as entradas. Isto possibilitou a utilização de queries da DynamoDB que aumentou o desempenho para certos serviços. 
-	
-	\item Porém, existiam outros serviços (como o caso do \textit{/api/events/ratio}) que necessitavam de percorrer a base de dados na sua totalidade para mostrar as estatísticas pretendidas, pelo que não se verificou um aumento de desempenho significante entre a utilização de Queries ou Scans. Estas queries demoravam em média 10 a 15 minutos por cada pedido realizado, não sendo um tempo de execução aceitável.
-	
-	\item Foi concluído que a DynamoDB não era uma base de dados adequada para a realização de análise de dados. Daí, mudamos a implementação para uma imagem Docker de Mongo.
-\end{enumerate}
-
-Ao apercebemo-nos de que DynamoDB não seria a melhor escolha para a base de dados tendo em conta os serviços definidos e o dataset usado, decidimos mudar para uma base de dados Mongo em que manteríamos uma base de dados NoSQL, já que nos permite uma escalabilidade horizontal que se adequa aos serviços fornecidos.
-
-Verificamos que utilizar o serviço fornecido pelo MongoDB Atlas tinha custos dos quais não poderíamos suportar, optámos então por utilizar a imagem Mongo disponibilizada online. Mas isto não seria suficiente, pois queríamos que o processo fosse simples, tal como montar qualquer outro container, mas para isso queríamos que a imagem contivesse os dados do dataset para popular a base de dados com o respetivo ficheiro. 
-
-Para conseguir obter esta simplicidade, recorremos a um Dockerfile que usa como imagem base a imagem de Mongo mas para tal necessitaríamos de acrescentar um novo conjunto de operações. Portanto adicionamos a funcionalidade de, ao dar build, copiar o ficheiro CSV com os dados do dataset para a imagem a construir. De seguida necessitámos de definir um shell script que fosse executado depois de correr a imagem. Definimos um simples script que trataria de executar a base de dados e consequentemente importasse os dados contidos no ficheiro CSV presente na imagem, sendo o ficheiro apagado no fim do import de modo a não ocupar espaço de armazenamento. Ao definir o seguinte script, o mesmo foi acrescentado como entrypoint no Dockerfile para que fosse executado assim que a imagem fosse instalada. Foi também acrescentada a cópia do script para o container tal como foi feito anteriormente com o ficheiro CSV.
-
-Depois de definir toda esta estrutura construimos a imagem e fizemos push para um repositório da AWS para que ficasse acessível. Assim conseguimos obter uma imagem de uma Base de Dados Mongo que é facilmente montada em qualquer máquina devido à utilização do Docker. Bastando puxar a imagem do repositório e correr como qualquer outra imagem.
-
-Após de realizar os passos referidos tivemos de converter todas as queries anteriormente definidas para cada serviço. A principal vantagem nesta nova base de dados seria o uso do distinct, sendo que o Mongo apesar de tal como a Dynamo  ser também NoSQL, permite uma mais fácil implementação de queries mais complexas, melhorando consideravelmente o desempenho dos serviços disponibilizados. 
-
-Deparamo-nos então com um problema semelhante à paginação da Dynamo mas agora em Mongo, neste caso uma query ao devolver demasiados resultados devolve um cursor que tem de ser iterado para devolver passo a passo, todos os dados resultantes da query. Inicialmente deparamo-nos com alguma dificuldade na utilização do cursor não conseguindo encontrar documentação muito clara e completa. Depois de alguma insistência da parte do grupo, conseguimos através de várias tentativas, compreender como iterar sobre um cursor e assim tirar proveito das queries. 
-
-Após ultrapassada esta dificuldade, todas as queries foram facilmente implementadas, sendo que foi usada principalmente a operação de aggregate que permite uma maior complexidade das queries permitindo assim filtrar ao máximo a resposta da base de dados, reduzindo a latência de resposta.
-
-Com esta implementação das queries de forma mais detalhada, conseguimos um aumento de performance muito significativo relativamente à Dynamo, provando que a mudança de Base de dados apesar de ter sido demoroso para efetuar, foi a escolha certa a fazer tornando os nossos serviços mais eficientes, passando a ter respostas da parte da base de dados na ordem de poucos segundos ao contrário dos anterior minutos necessários para devolver uma resposta.
+Dado as limitações do PySpark em conectar e ler através de um MongoDB docker container, optamos pela leitura direta do ficheiro \textbf{.csv} dentro de um bucket privado. Para tal foi necessário através do script de inicialização a criação de um novo bucket num projeto do utilizador, dentro do qual é importado o ficheiro da base de dados, acedido através de um bucket publicamente disponível. Assim todas as leituras e escritas dos serviços Spark serão feitas de e para este novo bucket criado. Isto implica a necessidade de certas permissões para que um dado serviço num container consiga aceder ao bucket. Estas permissões são geradas no correr do script de inicialização, que cria uma nova conta admin e exporta o ficheiro dos credenciais para ser utilizado nos vários serviços.
 
 \subsection{Web Server}
+\subsubsection{Serviços REST}
 O Web Server foi inicialmente implementado em NodeJS com um router Koa. Porém a documentação relativa ao router era escassa em comparação a outras alternativas, razão pela qual mudamos para um router Express que se encontrava com melhor documentação.
 
 As queries para a base de dados na DynamoDB foram implementadas em NodeJS, onde foi necessário tratar da paginação. A documentação relativa à paginação das queries encontrava-se disponível sendo a implementação relativamente simples, excluindo as tentativas de melhorar o desempenho.
 
 Mudando a implementação da base de dados para uma de MongoDB, deparamo-nos com pequenos problemas de implementação das queries, mas que foram eventualmente resolvidos, observando-se um aumento de desempenho a várias ordens de magnitude em comparação com a implementação na DynamoDB (queries que demoravam 10-15 minutos na Dynamo não excediam os 20 segundos no mongo).
 
-\subsection{Load Balancer}
-Para o balanceamento da carga no deployment em Kubernetes, utilizamos um controlador de Ingress, o NGINX. Este controlador encaminha os vários pedidos para os serviços correspondentes. No nosso caso concretamente, os pedidos com o URL \textit{/api/events*} e \textit{/api/products*} são encaminhados para os seus respetivos serviços que estão deployed nas Kubernetes. Os serviços por sua vez fazem o balanceamento de carga automaticamente pelos vários pods por nós lançados que contém a implementação do Web Server.
+\subsubsection{Serviços Spark}
+Para os serviços Spark, foi feita a leitura direta ao ficheiro que contém os dados do dataset como anteriormente referido. Esta implementação foi adotada pois assumimos que os serviços Spark sendo mais computacionalmente intensivo, e pela natureza dos serviços em si (estudo de dados) não irão ser executados regularmente ao contrário dos serviços REST. Assim podemos limitar as velocidades de acesso à base de dados mas mantendo o poder computacional.
 
-Na implementação do Ingress controller deparamo-nos com problemas no deployment do Ingress em si, pois este não mostrava o endereço necessário para realizar o load balancing, não conseguimos antes da primeira entrega encontrar o problema no nosso deployment, pelo que tivemos que fazer expose dos 2 serviços individualmente para ter um sistema que responda a queries.
+Cada serviço Spark utiliza os APIs e bibliotecas NodeJS fornecidas pelo GCP, sendo necessário os credenciais corretos para qualquer mudança sobre um projeto GCP. De seguida encontra-se um diagrama da execução de um serviço spark:
 
-Já na segunda entrega fizemos uma nova implementação do controlador Ingress, desta vez dando as permissões necessárias e acrescentado os dados corretos no ficheiros YAML relacionados com o Ingress, resultand num deployment correto do load balancer.
-\section{Lançamento em Kubernetes}
-Para realizar o deployment do sistema é usado apenas um script de forma a tornar todo o processo mais prático, automatizando todo o deployment.
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.32]{spark_ex.png}
+  \caption{Execução dos serviços Spark}
+\end{figure}
 
-Antes da execução do script é necessário verificar a existência dos seguintes repositórios, roles e policies e caso existam, precisam de ser \textbf{eliminados}:
-\begin{enumerate}
-	\item Repositórios com nomes \textit{products} e \textit{events}
-	\item AWS Role com o prefixo eksctl-cluster
-	\item AWS Policy com nome ALBIngressControllerIAMPolicyEcommerce
-\end{enumerate}
+Os serviços no backend sempre que invocados utilizam a biblioteca de NodeJS do GCP para a criação de um cluster de Dataproc, ao qual irá ser submetido o \textit{job} correspondente a cada um dos serviços. Estes \textit{jobs} acedem diretamente ao ficheiro \textbf{.csv} dentro do \textit{storage bucket} criado pelo script a partir do qual fazem as leituras e o processamento necessário. 
 
-Para a execução do script é necessário ter a ferramenta eksctl.
+Após a finalização da computação, os dados são escritos para o mesmo \textit{storage bucket} que são finalmente lidos pelo serviço NodeJS utilizando uma API de acesso ao \textit{storage} da Google Cloud.
 
-A região a escolher para o lançamento poderá ser qualquer um, porém recomendamos a região eu-west-1. 
+\subsection{Terraform}
+Para a entrega da fase de consolidação, decidimos tornar o processo de execução e \textit{tear-down} mais automatizada. Para tal incorporamos no script de deployment a utilização do Terraform.
 
-Com a utilização do Ingress, reparámos que existe a possibilidade deste poder usar VPCs antigas, para prevenir que tal ocorra, sugerimos apagar Target Groups que não estejam a ser utilizados.
-
-\subsection{deploy.sh}
-O script de deployment recebe 2 argumentos na seguinte ordem:
-\begin{enumerate}
-	\item A região onde a Stack e o Cluster vão ser lançados (ex.: \textbf{eu-west-1})
-	\item O nome do Cluster que também terá de ser único (ex.: \textbf{ecommerce-cluster})
-	\item Exemplo de execução: \textit{./deploy.sh eu-west-1 e-cluster}
-\end{enumerate}
-
-A execução inicial do script irá demorar cerca de 10 a 15 minutos até que passe para a fase de preparar as imagens a correr no cluster. Após esta fase inicial de criação do cluster no EKS, inicia-se o processo de preparação das imagens que irão ser usadas para ser corridas em containers e que compõem o sistema. Para este processo vai ser necessário que insira as credenciais de IAM que darão acesso aos repositórios por nós criados. Esses credenciais encontram-se no ficheiro \textbf{credenciais.txt} juntamente com a região onde os repositórios se encontram. Depois de realizar o pull das imagens, irá ser pedido para introduzir de novo as credenciais IAM mas desta vez para a conta de AWS pessoal de modo a poder criar os repositórios e fazer push das imagens.
-Depois da seguinte fase todo o processo não irá requerer qualquer input da parte do utilizador até o fim de execução do script.
-
-\subsection{Acesso aos serviços}
-Após a execução do script de deployment, é possível aceder ao sistema executando o comando:
-\begin{itemize}
-	\item \textbf{kubectl get ingress -n kube-system}
-\end{itemize}
-Deste comando retira-se o endereço que se encontra em \textit{Address} e adiciona-se os paths para os serviços disponibilizados (ex.: <address>/api/products/ listCategories).
-
-Deparámo-nos com um problema no load balancing na kubernetes, que também foi verificado no caso da implementação com o ELB da AWS na fase anterior à entrega das kubernetes. Executando kubectl expose sobre os deployments events e products, as queries retornam normalmente. Acreditamos que o problema se encontre no load balancer do Ingress.
-
-\subsection{Desconstrução do deployment}
-Para remover a montagem do sistema, seguem-se os seguintes passos:
-\begin{enumerate}
-	\item Usar o seguinte comando que listará os comandos que irão ser usado nos próximos comandos. \textbf{kubectl get svc --all-namespaces}
-	\item Apagar todos os serviços listados pelo comando anterior com o seguinte comando, \textbf{kubectl delete svc <service-name>}
-	\item Na consola de \href{https://eu-west-1.console.aws.amazon.com/ec2/v2/home?region=eu-west-1#LoadBalancers}{EC2}, eliminar os load balancers criados. Na mesma consola navegar para os target groups e apagar aqueles que estejam relacionados com o VPC criado.
-	\item Executar o comando \textbf{eksctl delete cluster -{}-name=<cluster-name>} que será responsável por desmantelar os componentes criados no início do script.
-	\item Na consola de \href{https://console.aws.amazon.com/ecr/repositories?region=us-east-1}{ECR}, eliminar os seguintes repositórios: \textit{database}, \textit{events} e \textit{products}.
-	\item Na consola de \href{https://console.aws.amazon.com/iam/home?#/policies}{IAM Policies}, eliminar a policy com o seguinte nome: \textbf{ALBIngressControllerIAMPolicyEcommerce}. Após a eliminação, navegar para a secção dos Roles, e apagar os roles com o prefixo eksctl-cluster.
-	
-\end{enumerate}
+O Terraform possibilitou-nos a criação e destruição automática dos recursos criados no projeto GCP de forma a que o processo seja mais automatizado e facilitado. Comandos como \textbf{terraform init} e \textbf{terraform destroy} permitem a criação e destruição de recursos por nós definidos dando as credenciais de GCP certas. Tal é possível devido ao suporte de serviços Google por parte do Terraform que permite aceder a vários recursos da GCP e a criação dos mesmo.
 
 \section{Cenários de Validação}
 
