@@ -154,7 +154,7 @@ Tal como anteriormente referido o desenvolvimento dos serviços em bases portáv
 \subsection{Base de dados}
 A base de dados utilizadas pela aplicação básica (serviços REST) não sofreu alterações na implementação desta fase. Porém o acesso aos dados da base de dados tornou-se diferente no caso dos serviços Spark.
 
-Dado as limitações do PySpark em conectar e ler através de um MongoDB docker container, optamos pela leitura direta do ficheiro \textbf{.csv} dentro de um bucket privado. Para tal foi necessário através do script de inicialização a criação de um novo bucket num projeto do utilizador, dentro do qual é importado o ficheiro da base de dados, acedido através de um bucket publicamente disponível. Assim todas as leituras e escritas dos serviços Spark serão feitas de e para este novo bucket criado. Isto implica a necessidade de certas permissões para que um dado serviço num container consiga aceder ao bucket. Estas permissões são geradas no correr do script de inicialização, que cria uma nova conta admin e exporta o ficheiro dos credenciais para ser utilizado nos vários serviços.
+Dado as limitações do PySpark em conectar e ler através de um MongoDB docker container, optamos pela leitura direta do ficheiro \textbf{.csv} dentro de um bucket privado. Para tal foi necessário através do \textit{script} de inicialização a criação de um novo bucket num projeto do utilizador, dentro do qual é importado o ficheiro da base de dados, acedido através de um bucket publicamente disponível. Assim todas as leituras e escritas dos serviços Spark serão feitas de e para este novo bucket criado. Isto implica a necessidade de certas permissões para que um dado serviço num container consiga aceder ao bucket. Estas permissões são geradas no correr do \textit{script} de inicialização, que cria uma nova conta admin e exporta o ficheiro dos credenciais para ser utilizado nos vários serviços.
 
 \subsection{Web Server}
 \subsubsection{Serviços REST}
@@ -175,17 +175,68 @@ Cada serviço Spark utiliza os APIs e bibliotecas NodeJS fornecidas pelo GCP, se
   \caption{Execução dos serviços Spark}
 \end{figure}
 
-Os serviços no backend sempre que invocados utilizam a biblioteca de NodeJS do GCP para a criação de um cluster de Dataproc, ao qual irá ser submetido o \textit{job} correspondente a cada um dos serviços. Estes \textit{jobs} acedem diretamente ao ficheiro \textbf{.csv} dentro do \textit{storage bucket} criado pelo script a partir do qual fazem as leituras e o processamento necessário. 
+Os serviços no backend sempre que invocados utilizam a biblioteca de NodeJS do GCP para a criação de um cluster de Dataproc, ao qual irá ser submetido o \textit{job} correspondente a cada um dos serviços. Estes \textit{jobs} acedem diretamente ao ficheiro \textbf{.csv} dentro do \textit{storage bucket} criado pelo \textit{script} a partir do qual fazem as leituras e o processamento necessário. 
 
 Após a finalização da computação, os dados são escritos para o mesmo \textit{storage bucket} que são finalmente lidos pelo serviço NodeJS utilizando uma API de acesso ao \textit{storage} da Google Cloud.
 
+\subsection{Limitações do GCP}
+Durante a implementação do sistema, deparamo-nos com uma limitação nos recursos dos projetos do GCP, os quais que não estão em nosso controlo. Os recursos dados por defeito eram demasiado limitantes e os serviços de suporte da Google não permitiam o aumento dos limites devido a falta de dados de utilização visto as contas utilizadas serem recentes.
+
+Para possibilitar o lançamento e o teste dos serviços tivemos que conglomerar os 3 serviços sparks num só o que limita a escalabilidade do sistema. Esta decisão teve de ser tomada pois não havia outra alternativa (mesmo com instâncias de tamanho mínimo dentro de um cluster) que permitisse o lançamento dos serviços REST juntamente com os serviços Spark (visto que cada serviço Spark cria um cluster \textbf{Dataproc} chegando rapidamente aos limites de IPs \textit{in-use} e número de instâncias).
+
+\section{Consolidação do projeto}
 \subsection{Terraform}
-Para a entrega da fase de consolidação, decidimos tornar o processo de execução e \textit{tear-down} mais automatizada. Para tal incorporamos no script de deployment a utilização do Terraform.
+Para a entrega da fase de consolidação, decidimos tornar o processo de execução e \textit{tear-down} mais automatizada. Para tal incorporamos no \textit{script} de deployment a utilização do Terraform.
 
 O Terraform possibilitou-nos a criação e destruição automática dos recursos criados no projeto GCP de forma a que o processo seja mais automatizado e facilitado. Comandos como \textbf{terraform init} e \textbf{terraform destroy} permitem a criação e destruição de recursos por nós definidos dando as credenciais de GCP certas. Tal é possível devido ao suporte de serviços Google por parte do Terraform que permite aceder a vários recursos da GCP e a criação dos mesmo.
 
-\section{Cenários de Validação}
+\section{Execução do \textit{script}}
+\subsection{Requerimentos}
+Para a execução do \textit{script} assume-se que a máquina local tem as seguintes ferramentas instaladas:
+\begin{itemize}
+	\item Docker
+	\item gcloud CLI
+	\item NodeJS
+	\item (Opcional para testar localmente) PySpark
+	\item Terraform
+\end{itemize}
 
+\subsection{Pré-preparação}
+Antes da execução do \textit{script} de deployment é necessário a criação de um projeto na conta pessoal do GCP e ativar o billing.
+
+Dado que os dados de pagamento são confidenciais, não é possível automatizar a criação de um projeto com a validação do billing.
+
+Após criado o projeto, guardar o \textbf{project-id} atribuído.
+
+Após criado o projeto no GCP, navegar para o ficheiro \textbf{deploy-gcp.sh} e abrir o ficheiro. Editar apenas as seguintes variáveis de ambiente definidas no ficheiros: \textbf{PROJECT\_NAME} (com o id anteriormente atribuido), \textbf{BUCKET \_NAME} (um nome para um \textit{storage bucket} único) e \textbf{CLUSTER\_NAME}.
+
+\subsection{Deployment do sistema}
+Para executar o script basta inserir no terminal: \textbf{./deploy-gcp} e seguir os passos de autenticação que irão ser pedidos.
+
+O script irá tratar da escrita dos ficheiros de inicialização de recursos usando o Terraform, a criação e exportação dos credenciais necessários para acesso aos serviços da GCP, a escrita, montagem e deployment em containers do código fonte da camada de negócio e finalmente a criação dos pods que irão conter todos os serviços e o load balancer no cluster de Kubernetes criado.
+
+\subsection{Acesso ao serviço}
+Após a finalização do script de deployment, haverá um tempo de espera de cerca de \textbf{5 minutos} até que o load balancer criado acabe de realizar todos os health checks necessários. O estado dos health checks pode ser verificado com o seguinte comando:
+\begin{itemize}
+	\item \textbf{kubectl describe ingress}
+\end{itemize}
+
+Após a terminção dos health checks (mensagem OK) é possível aceder aos serviços utilizando o IP gerado. O IP pode ser retirado utilizando o comando anterior, ou alternativamente através do seguinte comando:
+\begin{itemize}
+	\item \textbf{kubectl get ingress}
+\end{itemize}
+
+Para aceder um serviço basta colocar o endereço IP num navegador web ou no Postman com pedido GET e completando com os URLs definidos no nosso API (ex.: <ip-add>/api/spark/svc1).
+
+\subsection{Desconstrução do deployment}
+Para apagar os recursos criados basta seguir os seguintes passos:
+\begin{itemize}
+	\item Navegar para a diretoria do terraform criada pelo script e correr no terminal: \textbf{terraform destroy}, esperar pelo fim da execução
+	\item Navegar para a \href{http://console.cloud.google.com/}{consola} do gcp e apagar o projeto inicialmente criado
+	\item Eliminar as imagens docker locais executando \textbf{docker images} para obter os IDs de todas as imagens e \textbf{docker image rm <ID1 ID2 ... IDN>} para remover todas as imagens. 
+\end{itemize}
+
+\section{Cenários de Validação}	
 \begin{itemize}
 	\item Listar Categorias:
 	\begin{enumerate}
@@ -230,7 +281,7 @@ Os docker containers tornam os sistema muito portável dado que é uma ferrament
 \end{itemize}
 
 \section{Discussão e Conclusões}
-Durante o desenvolvimento do projeto foram encontrados bastantes obstáculos, seja na implementação dos serviços, na escolhe e consequente aplicação da base de dados ou na automatização dos scripts de implementação dos serviços desenvolvidos. Todos estes problemas resultaram em muitas horas de trabalho extra por parte do grupo, mas serviram também de aprendizagem, seja em como trabalhar com fornecedores de serviços na nuvem, ou como desenvolver scripts de automatização de implementação. Apesar de todos os problemas, o grupo foi capaz de os solucionar de forma eficiente como mencionados na secção da Arquitetura técnica.
+Durante o desenvolvimento do projeto foram encontrados bastantes obstáculos, seja na implementação dos serviços, na escolhe e consequente aplicação da base de dados ou na automatização dos \textit{scripts} de implementação dos serviços desenvolvidos. Todos estes problemas resultaram em muitas horas de trabalho extra por parte do grupo, mas serviram também de aprendizagem, seja em como trabalhar com fornecedores de serviços na nuvem, ou como desenvolver \textit{scripts} de automatização de implementação. Apesar de todos os problemas, o grupo foi capaz de os solucionar de forma eficiente como mencionados na secção da Arquitetura técnica.
 
 O DynamoDB aparenta ser uma boa solução para fazer hosting de bases de dados onde a procura seja limitada a um conjunto de valores limitados. Isto torna-o pouco útil para a nossa implementação, porém, continua a ser uma boa ferramenta para os casos mencionados se a base de dados for de dimensões elevadas, sendo difícil fazer o hosting local da mesma.
 

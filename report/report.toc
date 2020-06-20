@@ -1,19 +1,27 @@
 \babel@toc {portuguese}{}
-\contentsline {section}{\numberline {1}Motivação para Dataset e Serviços}{2}{section.1}%
-\contentsline {section}{\numberline {2}Diagrama de Casos de Uso}{3}{section.2}%
-\contentsline {section}{\numberline {3}Requisitos}{3}{section.3}%
-\contentsline {section}{\numberline {4}Arquitetura da aplicação}{5}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Load Balancer}{5}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Servidores NodeJS}{5}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Base de dados}{5}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}Serviços Spark}{6}{subsection.4.4}%
-\contentsline {section}{\numberline {5}Arquitetura técnica}{6}{section.5}%
-\contentsline {section}{\numberline {6}Implementação}{7}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Migração de AWS para GCP}{7}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Base de dados}{7}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}Web Server}{7}{subsection.6.3}%
-\contentsline {subsubsection}{\numberline {6.3.1}Serviços REST}{7}{subsubsection.6.3.1}%
-\contentsline {subsubsection}{\numberline {6.3.2}Serviços Spark}{8}{subsubsection.6.3.2}%
-\contentsline {subsection}{\numberline {6.4}Terraform}{9}{subsection.6.4}%
-\contentsline {section}{\numberline {7}Cenários de Validação}{9}{section.7}%
-\contentsline {section}{\numberline {8}Discussão e Conclusões}{10}{section.8}%
+\contentsline {section}{\numberline {1}Motivação para Dataset e Serviços}{3}{section.1}%
+\contentsline {section}{\numberline {2}Diagrama de Casos de Uso}{4}{section.2}%
+\contentsline {section}{\numberline {3}Requisitos}{4}{section.3}%
+\contentsline {section}{\numberline {4}Arquitetura da aplicação}{6}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Load Balancer}{6}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Servidores NodeJS}{6}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Base de dados}{6}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Serviços Spark}{7}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Arquitetura técnica}{7}{section.5}%
+\contentsline {section}{\numberline {6}Implementação}{8}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Migração de AWS para GCP}{8}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Base de dados}{8}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Web Server}{8}{subsection.6.3}%
+\contentsline {subsubsection}{\numberline {6.3.1}Serviços REST}{8}{subsubsection.6.3.1}%
+\contentsline {subsubsection}{\numberline {6.3.2}Serviços Spark}{9}{subsubsection.6.3.2}%
+\contentsline {subsection}{\numberline {6.4}Limitações do GCP}{10}{subsection.6.4}%
+\contentsline {section}{\numberline {7}Consolidação do projeto}{10}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Terraform}{10}{subsection.7.1}%
+\contentsline {section}{\numberline {8}Execução do \textit {script}}{10}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Requerimentos}{10}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Pré-preparação}{11}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Deployment do sistema}{11}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Acesso ao serviço}{11}{subsection.8.4}%
+\contentsline {subsection}{\numberline {8.5}Desconstrução do deployment}{11}{subsection.8.5}%
+\contentsline {section}{\numberline {9}Cenários de Validação}{12}{section.9}%
+\contentsline {section}{\numberline {10}Discussão e Conclusões}{13}{section.10}%

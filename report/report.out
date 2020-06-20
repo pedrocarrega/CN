@@ -13,6 +13,14 @@
 \BOOKMARK [2][-]{subsection.6.3}{Web Server}{section.6}% 13
 \BOOKMARK [3][-]{subsubsection.6.3.1}{Servi\347os REST}{subsection.6.3}% 14
 \BOOKMARK [3][-]{subsubsection.6.3.2}{Servi\347os Spark}{subsection.6.3}% 15
-\BOOKMARK [2][-]{subsection.6.4}{Terraform}{section.6}% 16
-\BOOKMARK [1][-]{section.7}{Cen\341rios de Valida\347\343o}{}% 17
-\BOOKMARK [1][-]{section.8}{Discuss\343o e Conclus\365es}{}% 18
+\BOOKMARK [2][-]{subsection.6.4}{Limita\347\365es do GCP}{section.6}% 16
+\BOOKMARK [1][-]{section.7}{Consolida\347\343o do projeto}{}% 17
+\BOOKMARK [2][-]{subsection.7.1}{Terraform}{section.7}% 18
+\BOOKMARK [1][-]{section.8}{Execu\347\343o do script}{}% 19
+\BOOKMARK [2][-]{subsection.8.1}{Requerimentos}{section.8}% 20
+\BOOKMARK [2][-]{subsection.8.2}{Pr\351-prepara\347\343o}{section.8}% 21
+\BOOKMARK [2][-]{subsection.8.3}{Deployment do sistema}{section.8}% 22
+\BOOKMARK [2][-]{subsection.8.4}{Acesso ao servi\347o}{section.8}% 23
+\BOOKMARK [2][-]{subsection.8.5}{Desconstru\347\343o do deployment}{section.8}% 24
+\BOOKMARK [1][-]{section.9}{Cen\341rios de Valida\347\343o}{}% 25
+\BOOKMARK [1][-]{section.10}{Discuss\343o e Conclus\365es}{}% 26
