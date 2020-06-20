@@ -58,19 +58,19 @@ O dataset Ecommerce foi escolhido pelo grupo devido ao grande número de eventos
   \item api/products/salesByBrand: Lista o numero de vendas de cada marca
   \item api/products/salePrice: Calcula o valor médio de venda de uma determinada marca
   \item api/events/ratio: Apresenta a distribuição relativa de cada tipo de evento, havendo os possíveis valores: view, cart e purchase
+  \item api/spark/svc1: Apresenta o rácio médio de tipos de evento para cada intervalo predefinido de sessão
+  \item api/spark/svc2: Calcula a média de visualizações feitas até os clientes realizarem uma compra
+  \item api/spark/svc3: Obtém a taxa de fidelidade média dos clientes, ou seja, a probabilidade de os clientes comprarem, adicionarem ao carrinho ou visualizarem da sua marca mais comum nessa mesma categoria
 \end{itemize}
 
-Os serviços foram escolhidos de forma a que consigam fazer diferentes tipos de operações sobre os dados, desde serviços mais específicos e por isso com menos carga na base de dados, a serviços mais abrangentes e consequente aumento de carga. Foram também escolhidos pois todos os serviços fornecem dados úteis para serem explorados no contexto de lojas de ecommerce.
-
+Os serviços foram escolhidos de forma a que consigam fazer diferentes tipos de operações sobre os dados, desde serviços mais específicos e por isso com menos carga na base de dados, a serviços mais abrangentes e consequente aumento de carga. Foram também escolhidos pois todos os serviços fornecem dados úteis para serem explorados no contexto de lojas de ecommerce. 
 \section{Diagrama de Casos de Uso}
 \begin{figure}[H]
   \centering
-    \includegraphics[scale=0.38]{Use_Cases.png}
+    \includegraphics[scale=0.50]{UseCasesNew.png}
   \caption{Diagrama de casos de uso}
 \end{figure}
-
 \section{Requisitos}
-
 \begin{table}[H]
 	\begin{center}
 		\begin{tabular}{|p{3.8cm}|p{8.2cm}|}
@@ -81,6 +81,11 @@ Os serviços foram escolhidos de forma a que consigam fazer diferentes tipos de 
 			Visualizar\newline Número de Vendas\newline Individuais & Fornece o numero total de vendas de cada marca\\ \hline
 			Visualizar\newline Preço Médio de Venda & Fornece o preço médio dos produtos vendidos de uma determinada marca \\ \hline
 			Visualizar\newline Rácio de Tipo\newline de Eventos & Fornece a percentagem de cada tipo de evento \\ \hline
+			Rácio por período de sessão & Calcula a duração de cada sessão e qual o rácio de tipos de evento colocando a sessão com o respetivo rácio associado a um determinado intervalo de período de sessão, no fim calculando a média dos rácios para cada intervalo \\ \hline 
+			
+			Visualizações necessários para compra & Calcular o valor médio de visualizações necessárias até um cliente efetuar uma compra\\ \hline
+			
+			Taxa Média de Preferência de Marca & Calcula a taxa de lealdade dos clientes para a sua marca mais comprada para uma determinada categoria, calculando para todos clientes e categoria. No fim devolvendo a taxa de lealdade média\\ \hline
 	\end{tabular}
 	\label{tab2}
 	\end{center}
@@ -165,7 +170,7 @@ As queries para a base de dados na DynamoDB foram implementadas em NodeJS, onde 
 Mudando a implementação da base de dados para uma de MongoDB, deparamo-nos com pequenos problemas de implementação das queries, mas que foram eventualmente resolvidos, observando-se um aumento de desempenho a várias ordens de magnitude em comparação com a implementação na DynamoDB (queries que demoravam 10-15 minutos na Dynamo não excediam os 20 segundos no mongo).
 
 \subsubsection{Serviços Spark}
-Para os serviços Spark, foi feita a leitura direta ao ficheiro que contém os dados do dataset como anteriormente referido. Esta implementação foi adotada pois assumimos que os serviços Spark sendo mais computacionalmente intensivo, e pela natureza dos serviços em si (estudo de dados) não irão ser executados regularmente ao contrário dos serviços REST. Assim podemos limitar as velocidades de acesso à base de dados mas mantendo o poder computacional.
+Para os serviços Spark, foi feita a leitura direta ao ficheiro que contém os dados do dataset como anteriormente referido. Esta implementação foi adotada pois assumimos que os serviços Spark sendo mais computacionalmente intensivos e pela natureza dos serviços em si (estudo de dados) não irão ser executados regularmente ao contrário dos serviços REST. Assim podemos limitar as velocidades de acesso à base de dados mas mantendo o poder computacional.
 
 Cada serviço Spark utiliza os APIs e bibliotecas NodeJS fornecidas pelo GCP, sendo necessário os credenciais corretos para qualquer mudança sobre um projeto GCP. De seguida encontra-se um diagrama da execução de um serviço spark:
 
