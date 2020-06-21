@@ -24,4 +24,5 @@
 \contentsline {subsection}{\numberline {8.4}Acesso ao serviço}{12}{subsection.8.4}%
 \contentsline {subsection}{\numberline {8.5}Desconstrução do deployment}{12}{subsection.8.5}%
 \contentsline {section}{\numberline {9}Cenários de Validação}{13}{section.9}%
-\contentsline {section}{\numberline {10}Discussão e Conclusões}{14}{section.10}%
+\contentsline {section}{\numberline {10}Análise de custo}{14}{section.10}%
+\contentsline {section}{\numberline {11}Discussão e Conclusões}{15}{section.11}%

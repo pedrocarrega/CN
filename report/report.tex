@@ -34,7 +34,7 @@
 
 \begin{document}
 
-\title{Relatório Preliminar}
+\title{Relatório Final}
 \author{Pedro Carrega, nº49480 \and
 Vasco Ferreira, nº49470 \and Ye Yang, nº 49521
 }
@@ -285,10 +285,59 @@ Os docker containers tornam os sistema muito portável dado que é uma ferrament
 	\end{enumerate}
 \end{itemize}
 
-\section{Discussão e Conclusões}
-Durante o desenvolvimento do projeto foram encontrados bastantes obstáculos, seja na implementação dos serviços, na escolha e consequente aplicação da base de dados ou na automatização dos \textit{scripts} de implementação dos serviços desenvolvidos. Todos estes problemas resultaram em muitas horas de trabalho extra por parte do grupo, mas serviram também de aprendizagem, seja em como trabalhar com fornecedores de serviços na nuvem, ou como desenvolver \textit{scripts} de automatização de implementação. Apesar de todos os problemas, o grupo foi capaz de os solucionar de forma eficiente como mencionados na secção da Arquitetura técnica.
+\section{Análise de custo}
+Utilizando a \href{https://cloud.google.com/products/calculator}{ferramenta} disponibilizada pela Google para análise de custo obtivemos os seguintes valores:
 
-Seguindo a sugestão efetuada no relatório anterior, o grupo efetuou uma migração de AWS para GCP dado o facto de GCP ter uma documentação mais rica que facilitou não só o \textit{deployment} mas também a implementação de atuais e futuros serviços. De notar que o próprio GCP ofereceu várias limitações que não foram encontradas na utilização de AWS que obrigou o grupo a implementar soluções alternativas, contudo estas limitações devem-se ao facto das contas utilizadas pelo grupo serem "novas" pelos standards profissionais, além que acreditamos que contactar o suporte da Google resolviria estes problemas. %vejam se querem manter a parte do "alem" para a frente
+\textbf{Compute Engine:}
+\begin{itemize}
+	\item \textbf{Instâncias normais}:
+	\begin{itemize}
+		\item Número de instâncias: 8
+		\item Tempo total de utilização: 5840 horas por mês (ligados 24 horas por dia)
+		\item Tipo de instância: n1-standard-1
+		\item Custo: 194.39€ por mês
+	\end{itemize}
+	\item \textbf{Dataproc Master Node}:
+		\begin{itemize}
+		\item Número de instâncias: 1
+		\item Tempo total de utilização: 60 horas por mês
+		\item Tipo de instância: n1-standard-1
+		\item Custo: 2.59€ por mês
+	\end{itemize}
+	\item \textbf{Dataproc worker Node}:
+		\begin{itemize}
+		\item Número de instâncias: 1
+		\item Tempo total de utilização: 60 horas por mês
+		\item Tipo de instância: n1-standard-1
+		\item Custo: 2.59€ por mês
+	\end{itemize}
+\end{itemize}
+
+\textbf{Kubernetes Engine:}
+\begin{itemize}
+	\item Tempo total de utilização: 730 horas por mês
+	\item Tipo de instância: n1-standard-1
+	\item Custo: 24.30€ por mês
+\end{itemize}
+
+\textbf{Dataproc:}
+\begin{itemize}
+	\item Tamanho do cluster: 2 vCPUs
+	\item Tempo total de utilização: 60 horas por mês
+	\item Custo: 1.09€ por mês
+\end{itemize}
+
+As instâncias no compute engine são as instâncias utilizadas pelo Kubernetes cluster para lançar os nossos serviços. Assumimos que estes serviços irão estar disponíveis a qualquer momento.
+
+As instâncias relativas ao Dataproc têm apenas 60 horas de uso mensal. Este valor é consideravelmente mais baixo dado a natureza dos serviços spark, como são utilizados para estudar os dados mais profundamente, serão acedidos com menos frequência. Mais especificamente: $$(8 m * 5 vezes * 3 svcs *30 dias) / 60 m = 60 h$$ Os 8 minutos equivalem ao tempo médio de execução dos 3 serviços e é assumido q no total são utilizados 5 vezes por dia.
+
+O cluster de dataproc foi definido como temos no deployment corrente. Decidimos usar estes valores reduzidos para ser uma estimativa mais realista dos verdadeiros gastos. Num caso ideal, com menos limitações na conta de GCP, o cluster de dataproc teria dimensões muito superiores o que iria diminuir o tempo de execução dos serviços mas com aumento no custo.
+
+O mesmo também se aplica ao cluster de Kubernetes, que para evitar o excesso dos limites, utilizamos os valores mínimos possíveis para prevenir erros de criação de recursos (nomeadamente a criação de clusters Dataproc por cada serviço Spark).
+\section{Discussão e Conclusões}
+Durante o desenvolvimento do projeto foram encontrados bastantes obstáculos, seja na implementação dos serviços, na escolha e consequente aplicação da base de dados ou na automatização dos \textit{scripts} de implementação dos serviços desenvolvidos. Todos estes problemas resultaram em muitas horas de trabalho extra por parte do grupo, mas serviram também de aprendizagem, seja em como trabalhar com fornecedores de serviços na núvem, ou como desenvolver \textit{scripts} de automatização de implementação. Apesar de todos os problemas, o grupo foi capaz de os solucionar de forma eficiente como mencionados na secção da Arquitetura técnica.
+
+Seguindo a sugestão efetuada no relatório anterior, o grupo efetuou uma migração de AWS para GCP dado o facto de GCP ter uma documentação mais rica que facilitou não só o \textit{deployment} mas também a implementação de atuais e futuros serviços. De notar que o próprio GCP ofereceu várias limitações que não foram encontradas na utilização de AWS que obrigou o grupo a implementar soluções alternativas, contudo estas limitações devem-se ao facto das contas utilizadas pelo grupo serem "novas"  pelos standards profissionais, além que acreditamos que contactar o suporte da Google resolviria estes problemas. %vejam se querem manter a parte do "alem" para a frente
 Foi também abandonada a utilização de DynamoDB visto que não oferecia as funcionalidades que o projeto requeria. Utilizando MongoDB como alternativa, observamos uma melhoria significativa de desempenho nos serviços que requeriam acesso à base de dados. 
 
 Nesta ultima parte do projeto foram implementados serviços Spark e a utilização de Terraform nos nossos \textit{scripts} de \textit{deployment}. Para optimizar os serviços Spark implementados foi criada uma cópia do ficheiro csv de aonde foi importada a base de dados num \textit{storage bucket}, isto foi possível visto que os serviços Spark implementados não são regularmente utilizados. A utilização de Terraform nos nossos scripts de \textit{deployment} permitiu a automatização da criação e destruição de recursos, simplificando a criação e o \textit{tear-down} dos nossos serviços.
