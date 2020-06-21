@@ -127,7 +127,7 @@ Os servidores irão receber os pedidos a partir do Load Balancer, e processá-lo
 %\newline %removam isto se nao gostarem do espaço k adiciona
 
 \subsection{Base de dados}
-A base de dados está contida num containder de MongoDB dentro do qual se encontra todo o conteúdo do ficheiro .csv da base de dados anteriormente escolhida.
+A base de dados está contida num containder de MongoDB na qual se encontra todo o conteúdo do ficheiro .csv da base de dados anteriormente escolhida.
 
 \subsection{Serviços Spark}
 Os serviços spark também são executados no kubernetes, porém estes usam uma série de APIs e serviços diferentes fornecidos pelo GCP que irão ser apresentados mais à frente.
@@ -286,11 +286,12 @@ Os docker containers tornam os sistema muito portável dado que é uma ferrament
 \end{itemize}
 
 \section{Discussão e Conclusões}
-Durante o desenvolvimento do projeto foram encontrados bastantes obstáculos, seja na implementação dos serviços, na escolhe e consequente aplicação da base de dados ou na automatização dos \textit{scripts} de implementação dos serviços desenvolvidos. Todos estes problemas resultaram em muitas horas de trabalho extra por parte do grupo, mas serviram também de aprendizagem, seja em como trabalhar com fornecedores de serviços na nuvem, ou como desenvolver \textit{scripts} de automatização de implementação. Apesar de todos os problemas, o grupo foi capaz de os solucionar de forma eficiente como mencionados na secção da Arquitetura técnica.
+Durante o desenvolvimento do projeto foram encontrados bastantes obstáculos, seja na implementação dos serviços, na escolha e consequente aplicação da base de dados ou na automatização dos \textit{scripts} de implementação dos serviços desenvolvidos. Todos estes problemas resultaram em muitas horas de trabalho extra por parte do grupo, mas serviram também de aprendizagem, seja em como trabalhar com fornecedores de serviços na nuvem, ou como desenvolver \textit{scripts} de automatização de implementação. Apesar de todos os problemas, o grupo foi capaz de os solucionar de forma eficiente como mencionados na secção da Arquitetura técnica.
 
-O DynamoDB aparenta ser uma boa solução para fazer hosting de bases de dados onde a procura seja limitada a um conjunto de valores limitados. Isto torna-o pouco útil para a nossa implementação, porém, continua a ser uma boa ferramenta para os casos mencionados se a base de dados for de dimensões elevadas, sendo difícil fazer o hosting local da mesma.
+Seguindo a sugestão efetuada no relatório anterior, o grupo efetuou uma migração de AWS para GCP dado o facto de GCP ter uma documentação mais rica que facilitou não só o \textit{deployment} mas também a implementação de atuais e futuros serviços. De notar que o próprio GCP ofereceu várias limitações que não foram encontradas na utilização de AWS que obrigou o grupo a implementar soluções alternativas, contudo estas limitações devem-se ao facto das contas utilizadas pelo grupo serem "novas" pelos standards profissionais, além que acreditamos que contactar o suporte da Google resolviria estes problemas. %vejam se querem manter a parte do "alem" para a frente
+Foi também abandonada a utilização de DynamoDB visto que não oferecia as funcionalidades que o projeto requeria. Utilizando MongoDB como alternativa, observamos uma melhoria significativa de desempenho nos serviços que requeriam acesso à base de dados. 
+
+Nesta ultima parte do projeto foram implementados serviços Spark e a utilização de Terraform nos nossos scripts de \textit{deployment}. Para optimizar os serviços Spark implementados foi criada uma cópia local do ficheiro csv de aonde foi importada a base de dados, isto foi possível visto que os serviços Spark implementados não são regularmente utilizados. A utilização de Terraform nos nossos scripts de \textit{deployment} permitiu a automatização da criação e destruição de recursos, simplificando a criação e o \textit{tear-down} dos nossos serviços.
 
 Os serviços da cloud no geral, se utilizadas de forma correta, aparentam ser poderosas em sentido computacional, tendo uma grande variedade de ferramentas que possibilita a implementação de aplicações, serviços ou outra qualquer funcionalidade.
-
-Na nossa experiência pessoal, a documentação da AWS foi mais escassa em comparação ao GCP. Dado a escolha entre ambas recomendaríamos fortemente a utilização do GCP para futuras implementações.
 \end{document}
