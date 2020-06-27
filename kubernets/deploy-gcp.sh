@@ -1,6 +1,6 @@
-PROJECT_NAME='logical-codex-275717'
+PROJECT_NAME='cn-deploy'
 ACCOUNT_NAME="terraform"
-BUCKET_NAME="cn-ecomm-test-27062020"
+BUCKET_NAME="cn-bucket-test-20202020"
 INITIAL_NODES="1"
 CLUSTER_NAME="ecommerce-cluster27"
 MACHINE_TYPE="n1-standard-1"
