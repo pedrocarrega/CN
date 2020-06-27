@@ -94,7 +94,7 @@ variable \"project\" {
 }
 
 variable \"location\" {
-  default = \"europe-west2\"
+  default = \"europe-west1\"
 }
 
 variable \"initial_node_count\" {
