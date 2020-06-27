@@ -1,10 +1,11 @@
 PROJECT_NAME='cn-deploy'
-ACCOUNT_NAME="terraform"
+ACCOUNT_NAME="test-account"
 BUCKET_NAME="cn-bucket-test-20202020"
 INITIAL_NODES="1"
 CLUSTER_NAME="ecommerce-cluster"
 MACHINE_TYPE="n1-standard-1"
 NODE_POOL_COUNT="1"
+COMPUTE_ZONE="europe-west1-b"
 
 #Authenticates user
 gcloud auth login
@@ -12,7 +13,7 @@ gcloud auth login
 gcloud config set project $PROJECT_NAME
 
 #Hardcoded zone (can be given by input but minimizes errors)
-gcloud config set compute/zone europe-west1-b
+gcloud config set compute/zone $COMPUTE_ZONE
 
 #Enable the kubernetes API
 gcloud services enable container.googleapis.com
@@ -20,9 +21,9 @@ gcloud services enable dataproc.googleapis.com
 gcloud services enable cloudbuild.googleapis.com
 
 #creates a new owner account and the respective keyfile for authorization purposes
-gcloud iam service-accounts create $ACCOUNT_NAME
-gcloud projects add-iam-policy-binding $PROJECT_NAME --member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
-gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
+#gcloud iam service-accounts create $ACCOUNT_NAME
+#gcloud projects add-iam-policy-binding $PROJECT_NAME --member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
+#gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
 #Variable used by terraform (inside terraform dir) to access the credentials
 export GOOGLE_APPLICATION_CREDENTIALS="../creds.json"
 
@@ -55,7 +56,7 @@ resource \"google_container_node_pool\" \"default\" {
   node_config {
     preemptible  = true
     machine_type = var.machine_type
-
+    service_account = \"${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com\"
     metadata = {
       disable-legacy-endpoints = \"true\"
     }
@@ -63,6 +64,8 @@ resource \"google_container_node_pool\" \"default\" {
     oauth_scopes = [
       \"https://www.googleapis.com/auth/logging.write\",
       \"https://www.googleapis.com/auth/monitoring\",
+      \"https://www.googleapis.com/auth/compute\",
+      \"https://www.googleapis.com/auth/devstorage.read_only\"
     ]
   }
 }
@@ -72,7 +75,7 @@ resource \"google_storage_bucket\" \"REGIONAL\" {
   storage_class = \"REGIONAL\"
   force_destroy = true
   project = var.project
-  location = var.location
+  location = var.bucket_location
 }" > terraform/main.tf
 
 
@@ -94,6 +97,10 @@ variable \"project\" {
 }
 
 variable \"location\" {
+  default = \"${COMPUTE_ZONE}\"
+}
+
+variable \"bucket_location\" {
   default = \"europe-west1\"
 }
 
@@ -153,28 +160,26 @@ rm -f spark-svc.zip
 rm -f events.zip
 rm -f products.zip
 rm -f database.zip
-#rm -f creds.json
-
 
 ./write-backend.sh $PROJECT_NAME $BUCKET_NAME
 
 cd events
-sudo docker build -t gcr.io/$PROJECT_NAME/events:v1 .
+docker build -t gcr.io/$PROJECT_NAME/events:v1 .
 cd ../products
-sudo docker build -t gcr.io/$PROJECT_NAME/products:v1 .
+docker build -t gcr.io/$PROJECT_NAME/products:v1 .
 cd ../database
-sudo docker build -t gcr.io/$PROJECT_NAME/database:v1 .
+docker build -t gcr.io/$PROJECT_NAME/database:v1 .
 cd ../spark-svc 
-sudo docker build -t gcr.io/$PROJECT_NAME/spark-svc:v1 .
+docker build -t gcr.io/$PROJECT_NAME/spark-svc:v1 .
 cd ..
 rm -rf events products database spark-svc
 
-sudo gcloud auth configure-docker
+gcloud auth configure-docker
 
-sudo docker push gcr.io/$PROJECT_NAME/events:v1
-sudo docker push gcr.io/$PROJECT_NAME/products:v1
-sudo docker push gcr.io/$PROJECT_NAME/database:v1
-sudo docker push gcr.io/$PROJECT_NAME/spark-svc:v1
+docker push gcr.io/$PROJECT_NAME/events:v1
+docker push gcr.io/$PROJECT_NAME/products:v1
+docker push gcr.io/$PROJECT_NAME/database:v1
+docker push gcr.io/$PROJECT_NAME/spark-svc:v1
 
 mkdir events-kubernetes
 mkdir products-kubernetes
@@ -186,7 +191,6 @@ echo "apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: svc
-  namespace: default
 spec:
   selector:
     matchLabels:
@@ -212,7 +216,6 @@ echo "apiVersion: v1
 kind: Service
 metadata:
   name: svc
-  namespace: default
   annotations:
     beta.cloud.google.com/backend-config: '{\"ports\": {\"3000\":\"my-bsc-backendconfig\"}}'
 spec:
@@ -237,7 +240,6 @@ echo "apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: events
-  namespace: default
 spec:
   selector:
     matchLabels:
@@ -259,7 +261,6 @@ echo "apiVersion: v1
 kind: Service
 metadata:
   name: events
-  namespace: default
 spec:
   ports:
   - protocol: TCP
@@ -273,7 +274,6 @@ echo "apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: products
-  namespace: default
 spec:
   selector:
     matchLabels:
@@ -295,7 +295,6 @@ echo "apiVersion: v1
 kind: Service
 metadata:
   name: products
-  namespace: default
 spec:
   ports:
   - protocol: TCP
@@ -313,14 +312,6 @@ spec:
   rules:
   - http:
       paths:
-      - path: /api/events/*
-        backend:
-          serviceName: events
-          servicePort: 3000
-      - path: /api/products/*
-        backend:
-          serviceName: products
-          servicePort: 3000
       - path: /api/spark/*
         backend:
           serviceName: svc
@@ -330,7 +321,6 @@ echo "apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: database
-  namespace: default
 spec:
   selector:
     matchLabels:
@@ -351,7 +341,6 @@ echo "apiVersion: v1
 kind: Service
 metadata:
   name: database
-  namespace: default
 spec:
   ports:
   - protocol: TCP
@@ -360,18 +349,24 @@ spec:
   selector:
     run: database
   type: NodePort" > database-kubernetes/database-service.yaml
-  
-kubectl apply -f ingress-kubernetes/fanout-ingress.yaml
 
-kubectl apply -f events-kubernetes/events-service.yaml
-kubectl apply -f events-kubernetes/events-deployment.yaml
+#kubectl apply -f events-kubernetes/events-service.yaml
+#kubectl apply -f events-kubernetes/events-deployment.yaml
 
-kubectl apply -f products-kubernetes/products-service.yaml
-kubectl apply -f products-kubernetes/products-deployment.yaml
+#kubectl apply -f products-kubernetes/products-service.yaml
+#kubectl apply -f products-kubernetes/products-deployment.yaml
 
-kubectl apply -f database-kubernetes/database-deployment.yaml
-kubectl apply -f database-kubernetes/database-service.yaml
+#kubectl apply -f database-kubernetes/database-deployment.yaml
+#kubectl apply -f database-kubernetes/database-service.yaml
 
 kubectl apply -f timeout-config.yaml
 kubectl apply -f spark-svc-kubernetes/svc-deployment.yaml
 kubectl apply -f spark-svc-kubernetes/svc-service.yaml
+
+kubectl apply -f ingress-kubernetes/fanout-ingress.yaml
+
+rm -f Query1.py
+rm -f Query2.py
+rm -f Query3.py
+rm -f timeout-config.yaml
+rm -rf ingress-kubernetes events-kubernetes products-kubernetes database-kubernetes spark-svc-kubernetes

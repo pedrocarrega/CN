@@ -49,7 +49,7 @@ router
 						},
 						workerConfig: {
 							numInstances: 2,
-							machineTypeUri: 'n1-standard-1',
+							machineTypeUri: 'n1-standard-2',
 						},
 					},
 				},
@@ -120,27 +120,33 @@ router
 				.bucket('$BUCKET_NAME')
 				.getFiles({prefix: 'output'});
 
-			function deleteFiles(){
+			/*function deleteFiles(){
 				test.forEach(async file => {
 					await file.delete();
 				});
-			}
+			}*/
 
-			async function getResult(callback){
+			async function getResult(){
+				var i;
+				for(i = 0; i < test.length; i++){
+					console.log(\"FILE \" + i + \"VALUE IS: \" + test[i]);
+				}
 				await storage.bucket('$BUCKET_NAME')
 					.file(test[2].name)
 					.download({destination: 'OUTPUT.txt'});
 				
 				fs.readFile('OUTPUT.txt', function read(err, data){
 					if(err){
+						res.status(400).send(err);
 						throw err;
+					}else{
+						res.status(200).send(data);
+						//callback();
 					}
-					res.status(200).send(data);
-					callback();
 				});
 			}
 
-			getResult(deleteFiles);
+			getResult();
 
 			// Output a success message.
 			console.log(
@@ -194,7 +200,7 @@ router
 						},
 						workerConfig: {
 							numInstances: 2,
-							machineTypeUri: 'n1-standard-1',
+							machineTypeUri: 'n1-standard-2',
 						},
 					},
 				},
@@ -265,27 +271,33 @@ router
 				.bucket('$BUCKET_NAME')
 				.getFiles({prefix: 'output'});
 
-			function deleteFiles(){
+			/*function deleteFiles(){
 				test.forEach(async file => {
 					await file.delete();
 				});
-			}
+			}*/
 
-			async function getResult(callback){
+			async function getResult(){
+				var i;
+				for(i = 0; i < test.length; i++){
+					console.log(\"FILE \" + i + \"VALUE IS: \" + test[i]);
+				}
 				await storage.bucket('$BUCKET_NAME')
 					.file(test[2].name)
 					.download({destination: 'OUTPUT.txt'});
 				
 				fs.readFile('OUTPUT.txt', function read(err, data){
 					if(err){
+						res.status(400).send(err);
 						throw err;
+					}else{
+						res.status(200).send(data);
+						//callback();
 					}
-					res.status(200).send(data);
-					callback();
 				});
 			}
 
-			getResult(deleteFiles);
+			getResult();
 
 			// Output a success message.
 			console.log(
@@ -339,7 +351,7 @@ router
 						},
 						workerConfig: {
 							numInstances: 2,
-							machineTypeUri: 'n1-standard-1',
+							machineTypeUri: 'n1-standard-2',
 						},
 					},
 				},
@@ -410,27 +422,34 @@ router
 				.bucket('$BUCKET_NAME')
 				.getFiles({prefix: 'output'});
 
-			function deleteFiles(){
+			/*function deleteFiles(){
 				test.forEach(async file => {
 					await file.delete();
 				});
-			}
+			}*/
 
-			async function getResult(callback){
+			async function getResult(){
+				var i;
+				for(i = 0; i < test.length; i++){
+					console.log(\"FILE \" + i + \"VALUE IS: \" + test[i]);
+				}
+
 				await storage.bucket('$BUCKET_NAME')
 					.file(test[2].name)
 					.download({destination: 'OUTPUT.txt'});
 				
 				fs.readFile('OUTPUT.txt', function read(err, data){
 					if(err){
+						res.status(400).send(err);
 						throw err;
+					}else{
+						res.status(200).send(data);
+						//callback();
 					}
-					res.status(200).send(data);
-					callback();
 				});
 			}
 
-			getResult(deleteFiles);
+			getResult();
 
 			// Output a success message.
 			console.log(
