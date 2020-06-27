@@ -2,7 +2,7 @@ PROJECT_NAME='cn-deploy'
 ACCOUNT_NAME="test-account"
 BUCKET_NAME="cn-bucket-test-20202020"
 INITIAL_NODES="1"
-CLUSTER_NAME="ecommerce-cluster"
+CLUSTER_NAME="ecommerce-cluster27"
 MACHINE_TYPE="n1-standard-1"
 NODE_POOL_COUNT="1"
 COMPUTE_ZONE="europe-west1-b"
@@ -27,9 +27,19 @@ gcloud services enable cloudbuild.googleapis.com
 #Variable used by terraform (inside terraform dir) to access the credentials
 export GOOGLE_APPLICATION_CREDENTIALS="../creds.json"
 
+
+
 mkdir terraform
 
-echo "resource \"google_container_cluster\" \"default\" {
+echo "resource \"google_storage_bucket\" \"REGIONAL\" {
+  name = \"${BUCKET_NAME}\"
+  storage_class = \"REGIONAL\"
+  force_destroy = true
+  project = var.project
+  location = var.location
+}
+
+resource \"google_container_cluster\" \"default\" {
   name        = var.name
   project     = var.project
   description = \"Demo GKE Cluster\"
@@ -168,18 +178,24 @@ docker build -t gcr.io/$PROJECT_NAME/events:v1 .
 cd ../products
 docker build -t gcr.io/$PROJECT_NAME/products:v1 .
 cd ../database
+
+sudo docker push gcr.io/$PROJECT_NAME/events:v1
+sudo docker push gcr.io/$PROJECT_NAME/products:v1
+sudo docker rmi gcr.io/$PROJECT_NAME/events:v1
+sudo docker rmi gcr.io/$PROJECT_NAME/products:v1
+
 docker build -t gcr.io/$PROJECT_NAME/database:v1 .
+sudo docker push gcr.io/$PROJECT_NAME/database:v1
+sudo docker rmi gcr.io/$PROJECT_NAME/database:v1
 cd ../spark-svc 
+rm -rf events products database
 docker build -t gcr.io/$PROJECT_NAME/spark-svc:v1 .
+sudo docker push gcr.io/$PROJECT_NAME/spark-svc:v1
+sudo docker rmi gcr.io/$PROJECT_NAME/spark-svc:v1
 cd ..
-rm -rf events products database spark-svc
+rm -rf spark-svc
 
-gcloud auth configure-docker
-
-docker push gcr.io/$PROJECT_NAME/events:v1
-docker push gcr.io/$PROJECT_NAME/products:v1
-docker push gcr.io/$PROJECT_NAME/database:v1
-docker push gcr.io/$PROJECT_NAME/spark-svc:v1
+sudo gcloud auth configure-docker
 
 mkdir events-kubernetes
 mkdir products-kubernetes

@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: svc
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      run: svc
+  template:
+    metadata:
+      labels:
+        run: svc
+    spec:
+      containers:
+      - image: gcr.io/logical-codex-275717/spark-svc:v1
+        imagePullPolicy: IfNotPresent
+        name: svc
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+        ports:
+        - containerPort: 3000
+          protocol: TCP
