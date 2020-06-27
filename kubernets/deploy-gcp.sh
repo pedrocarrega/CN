@@ -1,6 +1,6 @@
-PROJECT_NAME='logical-codex-275717'
+PROJECT_NAME='cn-deploy'
 ACCOUNT_NAME="terraform"
-BUCKET_NAME="cn-ecomm-test-06062020"
+BUCKET_NAME="cn-bucket-test-20202020"
 INITIAL_NODES="1"
 CLUSTER_NAME="ecommerce-cluster"
 MACHINE_TYPE="n1-standard-1"
@@ -140,7 +140,7 @@ gsutil cp gs://cn-ecommerce-container/spark-svc.zip .
 gsutil cp gs://cn-ecommerce-container/events.zip .
 gsutil cp gs://cn-ecommerce-container/products.zip .
 gsutil cp gs://cn-ecommerce-container/database.zip .
-gsutil cp  gs://cn-ecommerce-container/database.csv gs://$BUCKET_NAME/
+gsutil cp  gs://cn-ecommerce-container/dataset.csv gs://$BUCKET_NAME/
 
 unzip events.zip
 unzip products.zip
