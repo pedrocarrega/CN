@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      run: database
+  template:
+    metadata:
+      labels:
+        run: database
+    spec:
+      containers:
+      - image: gcr.io/logical-codex-275717/database:v1
+        imagePullPolicy: IfNotPresent
+        name: database
+        ports:
+        - containerPort: 27017

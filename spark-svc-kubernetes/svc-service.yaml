@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc
+  namespace: default
+  annotations:
+    beta.cloud.google.com/backend-config: '{"ports": {"3000":"my-bsc-backendconfig"}}'
+spec:
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
+  selector:
+    run: svc
+  type: NodePort

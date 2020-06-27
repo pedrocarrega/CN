@@ -1,8 +1,8 @@
 PROJECT_NAME='logical-codex-275717'
 ACCOUNT_NAME="terraform"
-BUCKET_NAME="cn-ecomm-test-06062020"
+BUCKET_NAME="cn-ecomm-test-27062020"
 INITIAL_NODES="1"
-CLUSTER_NAME="ecommerce-cluster"
+CLUSTER_NAME="ecommerce-cluster27"
 MACHINE_TYPE="n1-standard-1"
 NODE_POOL_COUNT="1"
 
@@ -12,7 +12,7 @@ gcloud auth login
 gcloud config set project $PROJECT_NAME
 
 #Hardcoded zone (can be given by input but minimizes errors)
-gcloud config set compute/zone europe-west1-b
+gcloud config set compute/zone europe-west1
 
 #Enable the kubernetes API
 gcloud services enable container.googleapis.com
@@ -26,9 +26,19 @@ gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$
 #Variable used by terraform (inside terraform dir) to access the credentials
 export GOOGLE_APPLICATION_CREDENTIALS="../creds.json"
 
+
+
 mkdir terraform
 
-echo "resource \"google_container_cluster\" \"default\" {
+echo "resource \"google_storage_bucket\" \"REGIONAL\" {
+  name = \"${BUCKET_NAME}\"
+  storage_class = \"REGIONAL\"
+  force_destroy = true
+  project = var.project
+  location = var.location
+}
+
+resource \"google_container_cluster\" \"default\" {
   name        = var.name
   project     = var.project
   description = \"Demo GKE Cluster\"
@@ -66,14 +76,7 @@ resource \"google_container_node_pool\" \"default\" {
     ]
   }
 }
-
-resource \"google_storage_bucket\" \"REGIONAL\" {
-  name = \"${BUCKET_NAME}\"
-  storage_class = \"REGIONAL\"
-  force_destroy = true
-  project = var.project
-  location = var.location
-}" > terraform/main.tf
+" > terraform/main.tf
 
 
 echo "output \"endpoint\" {
@@ -94,7 +97,7 @@ variable \"project\" {
 }
 
 variable \"location\" {
-  default = \"europe-west2\"
+  default = \"europe-west1\"
 }
 
 variable \"initial_node_count\" {
@@ -140,7 +143,7 @@ gsutil cp gs://cn-ecommerce-container/spark-svc.zip .
 gsutil cp gs://cn-ecommerce-container/events.zip .
 gsutil cp gs://cn-ecommerce-container/products.zip .
 gsutil cp gs://cn-ecommerce-container/database.zip .
-gsutil cp  gs://cn-ecommerce-container/database.csv gs://$BUCKET_NAME/
+gsutil cp  gs://cn-ecommerce-container/dataset.csv gs://$BUCKET_NAME/
 
 unzip events.zip
 unzip products.zip
@@ -159,22 +162,28 @@ rm -f database.zip
 ./write-backend.sh $PROJECT_NAME $BUCKET_NAME
 
 cd events
-sudo docker build -t gcr.io/$PROJECT_NAME/events:v1 .
+docker build -t gcr.io/$PROJECT_NAME/events:v1 .
 cd ../products
-sudo docker build -t gcr.io/$PROJECT_NAME/products:v1 .
+docker build -t gcr.io/$PROJECT_NAME/products:v1 .
 cd ../database
-sudo docker build -t gcr.io/$PROJECT_NAME/database:v1 .
-cd ../spark-svc 
-sudo docker build -t gcr.io/$PROJECT_NAME/spark-svc:v1 .
-cd ..
-rm -rf events products database spark-svc
-
-sudo gcloud auth configure-docker
 
 sudo docker push gcr.io/$PROJECT_NAME/events:v1
 sudo docker push gcr.io/$PROJECT_NAME/products:v1
+sudo docker rmi gcr.io/$PROJECT_NAME/events:v1
+sudo docker rmi gcr.io/$PROJECT_NAME/products:v1
+
+docker build -t gcr.io/$PROJECT_NAME/database:v1 .
 sudo docker push gcr.io/$PROJECT_NAME/database:v1
+sudo docker rmi gcr.io/$PROJECT_NAME/database:v1
+cd ../spark-svc 
+rm -rf events products database
+docker build -t gcr.io/$PROJECT_NAME/spark-svc:v1 .
 sudo docker push gcr.io/$PROJECT_NAME/spark-svc:v1
+sudo docker rmi gcr.io/$PROJECT_NAME/spark-svc:v1
+cd ..
+rm -rf spark-svc
+
+sudo gcloud auth configure-docker
 
 mkdir events-kubernetes
 mkdir products-kubernetes
