@@ -180,7 +180,7 @@ docker build -t gcr.io/$PROJECT_NAME/database:v1 .
 sudo docker push gcr.io/$PROJECT_NAME/database:v1
 sudo docker rmi gcr.io/$PROJECT_NAME/database:v1
 cd ../spark-svc 
-rm -rf events products database
+rm -rf ../events ../products ../database
 docker build -t gcr.io/$PROJECT_NAME/spark-svc:v1 .
 sudo docker push gcr.io/$PROJECT_NAME/spark-svc:v1
 sudo docker rmi gcr.io/$PROJECT_NAME/spark-svc:v1
