@@ -6,6 +6,8 @@ export GOOGLE_APPLICATION_CREDENTIALS="../creds.json"
 terraform destroy
 cd ..
 
+rm -rf terraform creds
+
 gcloud iam service-accounts delete $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
 gcloud container images delete gcr.io/$PROJECT_NAME/events:v1
 gcloud container images delete gcr.io/$PROJECT_NAME/products:v1
