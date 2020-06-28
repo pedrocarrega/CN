@@ -1,5 +1,5 @@
-PROJECT_NAME='vasco-pls'
-ACCOUNT_NAME="test-account"
+PROJECT_NAME='projeto-cn-2806'
+ACCOUNT_NAME="terraform"
 BUCKET_NAME="cn-bucket-test"
 INITIAL_NODES="1"
 CLUSTER_NAME="ecommerce-cluster"
@@ -126,7 +126,7 @@ terraform apply
 cd ..
 
 #create bucket
-gsutil mb -p ${PROJECT_NAME} -l europe-west1 gs://$BUCKET_NAME/
+#gsutil mb -p ${PROJECT_NAME} -l europe-west1 gs://$BUCKET_NAME/
 
 #These scripts generate the query files with the bucket name.
 #The file names will be Query1-3.py

@@ -284,7 +284,7 @@ router
 					console.log(\"FILE \" + i + \"VALUE IS: \" + test[i]);
 				}
 				await storage.bucket('$BUCKET_NAME')
-					.file(test[2].name)
+					.file(test[4].name)
 					.download({destination: 'OUTPUT.txt'});
 				
 				fs.readFile('OUTPUT.txt', function read(err, data){
