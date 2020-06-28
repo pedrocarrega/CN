@@ -234,7 +234,7 @@ router
 
 			// Create a timeout such that the job gets cancelled if not
 			// in a termimal state after a fixed period of time.
-			const timeout = 600000;
+			const timeout = 12000000;
 			const start = new Date();
 
 			// Wait for the job to finish.
@@ -279,6 +279,7 @@ router
 
 			async function getResult(){
 				var i;
+				console.log(test.length);
 				for(i = 0; i < test.length; i++){
 					console.log(\"FILE \" + i + \"VALUE IS: \" + test[i]);
 				}
@@ -385,7 +386,7 @@ router
 
 			// Create a timeout such that the job gets cancelled if not
 			// in a termimal state after a fixed period of time.
-			const timeout = 600000;
+			const timeout = 1200000;
 			const start = new Date();
 
 			// Wait for the job to finish.
@@ -430,6 +431,7 @@ router
 
 			async function getResult(){
 				var i;
+				console.log(test.length);
 				for(i = 0; i < test.length; i++){
 					console.log(\"FILE \" + i + \"VALUE IS: \" + test[i]);
 				}

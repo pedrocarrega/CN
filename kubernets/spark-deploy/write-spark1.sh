@@ -42,7 +42,7 @@ spark = SparkSession \\
 	.getOrCreate()
 
 #IMPORTANT: TENS DE FAZER DOWNLOAD DO CSV
-# GOAL: Calcular a duração de cada sessão arredondando aos minutos e calcular nessa sessão o ratio de purchase/cart, de seguida agrupar por intervalos da duração de sessão(por ex de 10 em 10 min) e calcular para cada grupo a média do ratio anteriormente calculado
+#GOAL: Calcular a duracao de cada sessao arredondando aos minutos e calcular nessa sessao o ratio de purchase/cart, de seguida agrupar por intervalos da duracao de sessao(por ex de 10 em 10 min) e calcular para cada grupo a media do ratio anteriormente calculado
 df = spark \\
 	.read \\
 	.option(\"header\", \"false\") \\
@@ -102,6 +102,6 @@ result = result \\
 			.join(temp, temp.interval == result.intervals) \\
 			.drop(\"interval\")
 
-gdf.write.format('csv').save(\"gs://$BUCKET_NAME/output\")
+result.write.format('csv').save(\"gs://$BUCKET_NAME/output\")
 
 spark.stop()" > Query1.py

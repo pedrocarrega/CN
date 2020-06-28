@@ -1,8 +1,8 @@
-PROJECT_NAME='cn-deploy'
+PROJECT_NAME='vasco-pls'
 ACCOUNT_NAME="test-account"
-BUCKET_NAME="cn-bucket-test-20202020"
+BUCKET_NAME="cn-bucket-test"
 INITIAL_NODES="1"
-CLUSTER_NAME="ecommerce-cluster27"
+CLUSTER_NAME="ecommerce-cluster"
 MACHINE_TYPE="n1-standard-1"
 NODE_POOL_COUNT="1"
 COMPUTE_ZONE="europe-west1-b"
@@ -21,9 +21,9 @@ gcloud services enable dataproc.googleapis.com
 gcloud services enable cloudbuild.googleapis.com
 
 #creates a new owner account and the respective keyfile for authorization purposes
-#gcloud iam service-accounts create $ACCOUNT_NAME
-#gcloud projects add-iam-policy-binding $PROJECT_NAME --member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
-#gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
+gcloud iam service-accounts create $ACCOUNT_NAME
+gcloud projects add-iam-policy-binding $PROJECT_NAME --member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
+gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
 #Variable used by terraform (inside terraform dir) to access the credentials
 export GOOGLE_APPLICATION_CREDENTIALS="../creds.json"
 
@@ -31,15 +31,7 @@ export GOOGLE_APPLICATION_CREDENTIALS="../creds.json"
 
 mkdir terraform
 
-echo "resource \"google_storage_bucket\" \"REGIONAL\" {
-  name = \"${BUCKET_NAME}\"
-  storage_class = \"REGIONAL\"
-  force_destroy = true
-  project = var.project
-  location = var.location
-}
-
-resource \"google_container_cluster\" \"default\" {
+echo "resource \"google_container_cluster\" \"default\" {
   name        = var.name
   project     = var.project
   description = \"Demo GKE Cluster\"
@@ -134,7 +126,7 @@ terraform apply
 cd ..
 
 #create bucket
-#gsutil mb -p ${PROJECT_NAME} -l europe-west1 gs://$BUCKET_NAME/
+gsutil mb -p ${PROJECT_NAME} -l europe-west1 gs://$BUCKET_NAME/
 
 #These scripts generate the query files with the bucket name.
 #The file names will be Query1-3.py
