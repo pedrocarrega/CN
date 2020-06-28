@@ -1,8 +1,8 @@
-PROJECT_NAME='cn-deploy'
-ACCOUNT_NAME="test-account"
-BUCKET_NAME="cn-bucket-test-20202020"
+PROJECT_NAME='logical-codex-275717'
+ACCOUNT_NAME="terraform"
+BUCKET_NAME="cn-ecomm-test-28062020"
 INITIAL_NODES="1"
-CLUSTER_NAME="ecommerce-cluster27"
+CLUSTER_NAME="ecommerce-cluster28"
 MACHINE_TYPE="n1-standard-1"
 NODE_POOL_COUNT="1"
 COMPUTE_ZONE="europe-west1-b"
@@ -21,9 +21,9 @@ gcloud services enable dataproc.googleapis.com
 gcloud services enable cloudbuild.googleapis.com
 
 #creates a new owner account and the respective keyfile for authorization purposes
-#gcloud iam service-accounts create $ACCOUNT_NAME
-#gcloud projects add-iam-policy-binding $PROJECT_NAME --member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
-#gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
+gcloud iam service-accounts create $ACCOUNT_NAME
+gcloud projects add-iam-policy-binding $PROJECT_NAME --member "serviceAccount:${ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com" --role "roles/owner"
+gcloud iam service-accounts keys create creds.json --iam-account $ACCOUNT_NAME@$PROJECT_NAME.iam.gserviceaccount.com
 #Variable used by terraform (inside terraform dir) to access the credentials
 export GOOGLE_APPLICATION_CREDENTIALS="../creds.json"
 
@@ -180,7 +180,7 @@ docker build -t gcr.io/$PROJECT_NAME/database:v1 .
 sudo docker push gcr.io/$PROJECT_NAME/database:v1
 sudo docker rmi gcr.io/$PROJECT_NAME/database:v1
 cd ../spark-svc 
-rm -rf events products database
+rm -rf ../events ../products ../database
 docker build -t gcr.io/$PROJECT_NAME/spark-svc:v1 .
 sudo docker push gcr.io/$PROJECT_NAME/spark-svc:v1
 sudo docker rmi gcr.io/$PROJECT_NAME/spark-svc:v1
