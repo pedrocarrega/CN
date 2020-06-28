@@ -21,7 +21,7 @@ spark = SparkSession \\
 df = spark \\
 	.read \\
 	.option(\"header\", \"false\") \\
-	.csv(\"gs://$BUCKET_NAME/database.csv\")
+	.csv(\"gs://$BUCKET_NAME/dataset.csv\")
 
 max_by_brand = df \\
 		.select(col(\"_c3\").alias(\"category_id\"),col(\"_c4\").alias(\"category_code\"), col(\"_c5\").alias(\"brand\"), col(\"_c7\").alias(\"user_id\")) \\
