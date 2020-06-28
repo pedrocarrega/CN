@@ -31,15 +31,7 @@ export GOOGLE_APPLICATION_CREDENTIALS="../creds.json"
 
 mkdir terraform
 
-echo "resource \"google_storage_bucket\" \"REGIONAL\" {
-  name = \"${BUCKET_NAME}\"
-  storage_class = \"REGIONAL\"
-  force_destroy = true
-  project = var.project
-  location = var.location
-}
-
-resource \"google_container_cluster\" \"default\" {
+echo "resource \"google_container_cluster\" \"default\" {
   name        = var.name
   project     = var.project
   description = \"Demo GKE Cluster\"
